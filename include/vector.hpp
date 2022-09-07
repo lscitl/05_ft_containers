@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/07 22:57:16 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/07 23:40:41 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-// #include <iterator>
+#include <iterator>
 #include <utility>
 #include <memory>
 #include <climits>
@@ -149,15 +149,42 @@
 // };
 // };  // namespace ft
 
-// template <class _Tp>
-// struct iterator_traits<_Tp*> {
-// 	typedef ptrdiff_t difference_type;
-// 	typedef typename remove_cv<_Tp>::type value_type;
-// 	typedef _Tp* pointer;
-// 	typedef _Tp& reference;
-// 	typedef random_access_iterator_tag iterator_category;
-// };
+namespace ft {
 
+template <class Iter>
+struct iterator_traits {
+	typedef Iter::difference_type   difference_type;
+	typedef Iter::value_type        value_type;
+	typedef Iter::pointer           pointer;
+	typedef Iter::reference         reference;
+	typedef Iter::iterator_category iterator_category;
+};
+
+template <class _Tp>
+struct iterator_traits<_Tp*> {
+	typedef std::ptrdiff_t                  difference_type;
+	typedef _Tp                             value_type;
+	typedef const _Tp*                      pointer;
+	typedef const _Tp&                      reference;
+	typedef std::random_access_iterator_tag iterator_category;
+};
+
+template <class Iter>
+class __vector_iterator {
+   public:
+	typedef Iter                                         iterator_type;
+	typedef ft::iterator_traits<Iter>::iterator_category iterator_category;
+	typedef ft::iterator_traits<Iter>::value_type        value_type;
+	typedef ft::iterator_traits<Iter>::difference_type   difference_type;
+	typedef ft::iterator_traits<Iter>::pointer           pointer;
+	typedef ft::iterator_traits<Iter>::reference         reference;
+
+	__vector_iterator();
+	explicit __vector_iterator( iterator_type it );
+
+	template <class Iter>
+	__vector_iterator( const reverse_iterator<Iter>& rev_it );
+};
 namespace ft {
 template <class _T, _Allocator = std::allocator<T> >
 class vector {};
