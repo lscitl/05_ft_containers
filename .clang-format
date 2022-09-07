@@ -1,5 +1,6 @@
 ---
 BasedOnStyle: Google
+AlignConsecutiveDeclarations: 'true'
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 ConstructorInitializerIndentWidth: '4'
