@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/08 19:46:28 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/11 00:40:47 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-#include <iterator>
+// #include <iterator>
 #include <utility>
 #include <memory>
 #include <climits>
@@ -153,26 +153,98 @@
 namespace ft {
 
 template <class Iter>
-class __vector_iterator {
+class vector_iterator {
    public:
 	typedef Iter                                       iterator_type;
+	typedef ft::iterator_traits<Iter>::difference_type difference_type;
+	typedef ft::iterator_traits<Iter>::reference       reference;
+	typedef ft::iterator_traits<Iter>::pointer         pointer;
 	typedef ft::random_access_iterator_tag             iterator_category;
 	typedef ft::<Iter>::value_type                     value_type;
-	typedef ft::iterator_traits<Iter>::difference_type difference_type;
-	typedef ft::iterator_traits<Iter>::pointer         pointer;
-	typedef ft::iterator_traits<Iter>::reference       reference;
 
-	__vector_iterator( void );
-	explicit __vector_iterator( iterator_type it );
+	vector_iterator( void );
+	explicit vector_iterator( iterator_type it );
 
 	template <class Iter>
-	__vector_iterator( const reverse_iterator<Iter>& rev_it );
+	vector_iterator( const reverse_iterator<Iter>& rev_it );
 };
 };  // namespace ft
 
 namespace ft {
-template <class _T, _Allocator = std::allocator<T> >
-class vector {};
+
+template <class T, class Allocator = std::allocator<T> >
+class vector {
+   public:
+	typedef Allocator                          allocator_type;
+	typedef typename allocator_type::size_type size_type;
+
+   protected:
+	typedef T                                        value_type;
+	typedef value_type&                              reference;
+	typedef const value_type&                        const_reference;
+	typedef typename allocator_type::pointer         pointer;
+	typedef typename allocator_type::const_pointer   const_pointer;
+	typedef pointer                                  iterator;
+	typedef const_pointer                            const_iterator;
+	typedef ft::reverse_iterator<iterator>           reverse_iterator;
+	typedef ft::reverse_iterator<const_iterator>     const_reverse_iterator;
+	typedef typename allocator_type::difference_type difference_type;
+
+	pointer _begin;
+	pointer _end;
+	pointer _end_cap;
+
+	void vec_allocate( size_type n );
+
+   public:
+	explicit vector( void );
+	explicit vector( const allocator_type& alloc = allocator_type() );
+	explicit vector( size_type n, const value_type& val = value_type(),
+					 const allocator_type& alloc = allocator_type() );
+	template <class InputIterator>
+	vector( InputIterator first, InputIterator last,
+			const allocator_type& alloc = allocator_type() );
+	vector( const vector& x );
+
+	size_type max_size( void ) const {
+		return std::min( allocator_type().max_size(),
+						 std::numeric_limits<difference_type>::max() );
+	}
+	size_type size( void ) const {
+		return static_cast<size_type>( _end - _begin );
+	}
+	size_type capacity( void ) const {
+		return static_cast<size_type>( _end_cap - _begin );
+	}
+	bool empty() const {
+		return _end - _begin == 0;
+	}
+};
+
+template <class T, class Allocator>
+void vector<T, Allocator>::vec_allocate( size_type n ) {
+	if ( n > max_size() )
+		std::length_error( "vector" );
+	_begin = _end = allocator_type::allocate( alloc(), n );
+	_end_cap = _begin + n;
+}
+
+template <class T, class Allocator>
+vector<T, Allocator>::vector( void ) : _begin( NULL ), _end( NULL ) {
+}
+
+template <class T, class Allocator>
+vector<T, Allocator>::vector( const allocator_type& alloc = allocator_type() )
+	: _begin( NULL ), _end( NULL ) {
+}
+
+template <class T, class Allocator>
+vector<T, Allocator>::vector( size_type n, const value_type& val = value_type(),
+							  const allocator_type& alloc = allocator_type() )
+	: _begin( NULL ), _end( NULL ) {
+	vec_allocate( n );
+}
+
 };  // namespace ft
 
 #endif
