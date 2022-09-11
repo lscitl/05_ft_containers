@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/11 00:40:47 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/11 23:12:40 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,41 +23,7 @@
 #include <algorithm>
 #include "iterator.hpp"
 
-// public:
-// typedef _Allocator allocator_type;
-// typedef allocator_traits<allocator_type> __alloc_traits;
-// typedef typename __alloc_traits::size_type size_type;
-
-// protected:
-// typedef _Tp value_type;
-// typedef value_type& reference;
-// typedef const value_type& const_reference;
-// typedef typename __alloc_traits::difference_type difference_type;
-// typedef typename __alloc_traits::pointer pointer;
-// typedef typename __alloc_traits::const_pointer const_pointer;
-// typedef pointer iterator;
-// typedef const_pointer const_iterator;
-
 // namespace ft {
-
-// template <class T, class Allocator = std::allocator<T> >
-// // template <class _Tp, class _Allocator>
-// class vector {
-//    public:
-// 	typedef T value_type;
-// 	typedef Allocator allocator_type;
-
-// 	typedef typename allocator_type::reference reference;
-// 	typedef typename allocator_type::const_reference const_reference;
-// 	typedef typename allocator_type::size_type size_type;
-// 	typedef typename allocator_type::difference_type difference_type;
-// 	typedef typename allocator_type::pointer pointer;
-// 	typedef typename allocator_type::const_pointer const_pointer;
-// 	typedef pointer iterator;
-// 	typedef const_pointer const_iterator;
-
-// 	// typedef std::reverse_iterator<iterator> reverse_iterator;
-// 	// typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
 // 	vector()( is_nothrow_default_constructible<allocator_type>::value );
 // 	explicit vector( const allocator_type& );
@@ -190,9 +156,10 @@ class vector {
 	typedef ft::reverse_iterator<const_iterator>     const_reverse_iterator;
 	typedef typename allocator_type::difference_type difference_type;
 
-	pointer _begin;
-	pointer _end;
-	pointer _end_cap;
+	pointer        _begin;
+	pointer        _end;
+	pointer        _end_cap;
+	allocator_type _alloc;
 
 	void vec_allocate( size_type n );
 
@@ -206,6 +173,9 @@ class vector {
 			const allocator_type& alloc = allocator_type() );
 	vector( const vector& x );
 
+	// Capacity
+	void      resize( size_type n, value_type val = value_type() );
+	void      reserve( size_type n );
 	size_type max_size( void ) const {
 		return std::min( allocator_type().max_size(),
 						 std::numeric_limits<difference_type>::max() );
@@ -217,18 +187,162 @@ class vector {
 		return static_cast<size_type>( _end_cap - _begin );
 	}
 	bool empty() const {
-		return _end - _begin == 0;
+		return this->size() == size_type( 0 );
+	}
+
+	// Element access
+	reference       operator[]( size_type n );
+	const_reference operator[]( size_type n ) const;
+	reference       at( size_type n );
+	const_reference at( size_type n ) const;
+	reference       front();
+	const_reference front() const;
+	reference       back();
+	const_reference back() const;
+
+	// Allocator
+	allocator_type get_allocator() const {
+		return _alloc;
+	}
+
+	// Iterators
+	iterator begin() {
+		return _begin;
+	}
+	const_iterator begin() const {
+		return _begin;
+	}
+	iterator end() {
+		return _end;
+	}
+	const_iterator end() const {
+		return _end;
+	}
+	reverse_iterator rbegin() {
+		return reverse_iterator( this->end() );
+	}
+	const_reverse_iterator rbegin() const {
+		return const_reverse_iterator( this->end() );
+	}
+	reverse_iterator rend() {
+		return reverse_iterator( this->begin() );
+	}
+	const_reverse_iterator rend() const {
+		return const_reverse_iterator( this->begin() );
 	}
 };
 
 template <class T, class Allocator>
 void vector<T, Allocator>::vec_allocate( size_type n ) {
 	if ( n > max_size() )
-		std::length_error( "vector" );
-	_begin = _end = allocator_type::allocate( alloc(), n );
+		throw std::length_error( "vector" );
+	_begin = _end = allocator_type::allocate( n );
 	_end_cap = _begin + n;
 }
 
+template <class T, class Allocator>
+void vector<T, Allocator>::resize( size_type  n,
+								   value_type val = value_type() ) {
+	if ( this->size() > n ) {
+		for ( ; _end != _begin + n; --_end ) {
+			allocator_type::destroy( _end );
+		}
+	} else if ( this->capacity() > n ) {
+		for ( ; _end != _begin + n; ++_end ) {
+			allocator_type::construct( _end, val );
+		}
+	} else {
+		pointer tmp_begin, tmp_end, tmp_end_cap;
+		if ( n > max_size() )
+			std::length_error( "vector" );
+		tmp_begin = tmp_end = allocator_type::allocate( n );
+		tmp_end_cap = tmp_begin + n;
+		for ( size_type i = 0; i < this->size(); ++i ) {
+			*tmp_end++ = _begin[i];
+			allocator_type::destroy( &_begin[i] );
+		}
+		for ( size_type i = 0; i < n - this->size(); ++i ) {
+			allocator_type::construct( tmp_end++, val );
+		}
+		allocator_type::deallocate( _begin, _end_cap - _begin );
+		_begin = tmp_begin;
+		_end = tmp_end;
+		_end_cap = tmp_end_cap;
+	}
+}
+
+template <class T, class Allocator>
+void vector<T, Allocator>::reserve( size_type n ) {
+	if ( n > this->max_size() ) {
+		throw std::length_error( "vector: length error" );
+	} else if ( this->capacity() < n ) {
+		pointer tmp_begin, tmp_end, tmp_end_cap;
+		if ( n > max_size() )
+			std::length_error( "vector: length error" );
+		tmp_begin = tmp_end = allocator_type::allocate( n );
+		tmp_end_cap = tmp_begin + n;
+		for ( size_type i = 0; i < this->size(); ++i ) {
+			*tmp_end++ = _begin[i];
+			allocator_type::destroy( &_begin[i] );
+		}
+		allocator_type::deallocate( _begin, _end_cap - _begin );
+		_begin = tmp_begin;
+		_end = tmp_end;
+		_end_cap = tmp_end_cap;
+	}
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::reference vector<T, Allocator>::operator[](
+	size_type n ) {
+	return _begin[n];
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_reference vector<T, Allocator>::operator[](
+	size_type n ) const {
+	return _begin[n];
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::reference vector<T, Allocator>::at(
+	size_type n ) {
+	if ( n >= this->size() )
+		throw std::out_of_range( "vector: out of range" );
+	return _begin[n];
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_reference vector<T, Allocator>::at(
+	size_type n ) const {
+	if ( n >= this->size() )
+		throw std::out_of_range( "vector: out of range" );
+	return _begin[n];
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::reference vector<T, Allocator>::front() {
+	return *_begin;
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_reference vector<T, Allocator>::front()
+	const {
+	return *_begin;
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::reference vector<T, Allocator>::back() {
+	return *( _end - 1 );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_reference vector<T, Allocator>::back()
+	const {
+	return *( _end - 1 );
+}
+
+// Constructor
 template <class T, class Allocator>
 vector<T, Allocator>::vector( void ) : _begin( NULL ), _end( NULL ) {
 }

@@ -124,25 +124,47 @@ int main() {
 	std::vector<int> foo;
 	sz = foo.capacity();
 	std::cout << sz << std::endl;
+	std::cout << &( *foo.begin() ) << std::endl;
 	std::cout << "making foo grow:\n";
-	for ( int i = 0; i < 100; ++i ) {
-		foo.push_back( i );
+	for ( int i = 0; i < 1; ++i ) {
+		foo.push_back( 10 );
 		if ( sz != foo.capacity() ) {
 			sz = foo.capacity();
 			std::cout << "capacity changed: " << sz << '\n';
 		}
 	}
+	foo.pop_back();
+	std::cout << "_end - _begin: " << foo.end() - foo.begin() << '\n';
+	std::cout << "begin: " << &( *foo.begin() ) << '\n';
+	std::cout << "end: " << &( *foo.end() ) << '\n';
+	std::cout << "front: " << &foo.front() << '\n';
+	std::cout << "back: " << &foo.back() << '\n';
 
-	std::vector<int> bar;
-	sz = bar.capacity();
-	bar.reserve( 100 );  // this is the only difference with foo above
-	std::cout << "making bar grow:\n";
-	for ( int i = 0; i < 100; ++i ) {
-		bar.push_back( i );
-		if ( sz != bar.capacity() ) {
-			sz = bar.capacity();
-			std::cout << "capacity changed: " << sz << '\n';
-		}
-	}
+	foo.back() = 5;
+	std::cout << "back: " << foo.back() << '\n';
+	std::cout << "back: " << &foo.back() << '\n';
+
+	// int *p = new int( 100 );
+
+	// std::cout << "end: " << &p[100] << '\n';
+	// std::cout << "begin: " << p << '\n';
+	// std::cout << "end - begin: " << static_cast<int>( &p[100] - p ) << '\n';
+
+	// std::vector<int> bar;
+	// sz = bar.capacity();
+	// std::cout << sz << std::endl;
+	// bar.reserve( 100 );  // this is the only difference with foo above
+	// sz = bar.capacity();
+	// std::cout << sz << std::endl;
+	// std::cout << "making bar grow:\n";
+	// for ( int i = 0; i < 100; ++i ) {
+	// 	// std::cout << "i: " << i << std::endl;
+	// 	bar.push_back( i );
+	// 	if ( sz != bar.capacity() ) {
+	// 		sz = bar.capacity();
+	// 		std::cout << "capacity changed: " << sz << '\n';
+	// 	}
+	// }
+
 	return 0;
 }
