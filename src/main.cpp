@@ -1,15 +1,15 @@
 #include <iostream>
 #include <string>
 #include <deque>
-#if 1  // CREATE A REAL STL EXAMPLE
+#if 0  // CREATE A REAL STL EXAMPLE
 #include <map>
 #include <stack>
 #include <vector>
 namespace ft = std;
 #else
-#include <map.hpp>
-#include <stack.hpp>
-#include <vector.hpp>
+// #include <map.hpp>
+// #include <stack.hpp>
+#include "../include/vector.hpp"
 #endif
 
 #include <stdlib.h>
@@ -115,56 +115,20 @@ namespace ft = std;
 // 	return (0);
 // }
 
-#include <iostream>
-#include <vector>
+// resizing vector
 
 int main() {
-	std::vector<int>::size_type sz;
+	ft::vector<int> myints;
+	std::cout << "0. size: " << myints.size() << '\n';
 
-	std::vector<int> foo;
-	sz = foo.capacity();
-	std::cout << sz << std::endl;
-	std::cout << &( *foo.begin() ) << std::endl;
-	std::cout << "making foo grow:\n";
-	for ( int i = 0; i < 1; ++i ) {
-		foo.push_back( 10 );
-		if ( sz != foo.capacity() ) {
-			sz = foo.capacity();
-			std::cout << "capacity changed: " << sz << '\n';
-		}
-	}
-	foo.pop_back();
-	std::cout << "_end - _begin: " << foo.end() - foo.begin() << '\n';
-	std::cout << "begin: " << &( *foo.begin() ) << '\n';
-	std::cout << "end: " << &( *foo.end() ) << '\n';
-	std::cout << "front: " << &foo.front() << '\n';
-	std::cout << "back: " << &foo.back() << '\n';
+	for ( int i = 0; i < 10; i++ ) myints.push_back( i );
+	std::cout << "1. size: " << myints.size() << '\n';
 
-	foo.back() = 5;
-	std::cout << "back: " << foo.back() << '\n';
-	std::cout << "back: " << &foo.back() << '\n';
+	myints.insert( myints.end(), 10, 100 );
+	std::cout << "2. size: " << myints.size() << '\n';
 
-	// int *p = new int( 100 );
-
-	// std::cout << "end: " << &p[100] << '\n';
-	// std::cout << "begin: " << p << '\n';
-	// std::cout << "end - begin: " << static_cast<int>( &p[100] - p ) << '\n';
-
-	// std::vector<int> bar;
-	// sz = bar.capacity();
-	// std::cout << sz << std::endl;
-	// bar.reserve( 100 );  // this is the only difference with foo above
-	// sz = bar.capacity();
-	// std::cout << sz << std::endl;
-	// std::cout << "making bar grow:\n";
-	// for ( int i = 0; i < 100; ++i ) {
-	// 	// std::cout << "i: " << i << std::endl;
-	// 	bar.push_back( i );
-	// 	if ( sz != bar.capacity() ) {
-	// 		sz = bar.capacity();
-	// 		std::cout << "capacity changed: " << sz << '\n';
-	// 	}
-	// }
+	myints.pop_back();
+	std::cout << "3. size: " << myints.size() << '\n';
 
 	return 0;
 }
