@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/13 01:12:13 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/14 01:09:07 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #define __VECTOR_H__
 
 // #include <iterator>
+#include <type_traits>
 #include <utility>
 #include <memory>
 #include <climits>
@@ -22,6 +23,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include "iterator.hpp"
+#include "type_traits.hpp"
 
 // namespace ft {
 
@@ -50,166 +52,144 @@
 // 	value_type* data();
 // 	const value_type* data() const;
 
-// 	void push_back( const value_type& x );
-// 	void push_back( value_type&& x );
-// 	template <class... Args>
-// 	void pop_back();
-
-// 	template <class... Args>
-// 	iterator emplace( const_iterator position, Args&&... args );
-// 	iterator insert( const_iterator position, const value_type& x );
-// 	iterator insert( const_iterator position, value_type&& x );
-// 	iterator insert( const_iterator position, size_type n,
-// 					 const value_type& x );
-
-// 	template <class InputIterator>
-// 	iterator insert( const_iterator position, InputIterator first,
-// 					 InputIterator last );
-// 	iterator insert( const_iterator position, initializer_list<value_type> il );
-
-// 	iterator erase( const_iterator position );
-// 	iterator erase( const_iterator first, const_iterator last );
-
-// 	void clear();
-
-// 	void resize( size_type sz );
-// 	void resize( size_type sz, const value_type& c );
-
 // 	void swap( vector& x );
 
-// 	bool __invariants() const;
 // };
-// };  // namespace ft
-
-// class vector_iterator {
-//    public:
-// 	typedef typename                     iterator_type;
-// 	typedef typename ft::vector::value_type                     value_type;
-// 	typedef typename ft::iterator_traits<Iter>::difference_type difference_type;
-// 	typedef typename ft::iterator_traits<Iter>::reference       reference;
-// 	typedef typename ft::iterator_traits<Iter>::pointer         pointer;
-// 	typedef ft::random_access_iterator_tag iterator_category;
-
-//    protected:
-// 	Iter _current;
-
-//    public:
-// 	typedef Iter                                            iterator_type;
-// 	typedef typename iterator_traits<Iter>::difference_type difference_type;
-// 	typedef typename iterator_traits<Iter>::reference       reference;
-// 	typedef typename iterator_traits<Iter>::pointer         pointer;
-
-// 	vector_iterator() : _current() {
-// 	}
-
-// 	explicit vector_iterator( Iter x ) : _current( x ) {
-// 	}
-
-// 	template <class U>
-// 	vector_iterator( const vector_iterator<U>& u ) : _current( u.base() ) {
-// 	}
-
-// 	template <class U>
-// 	vector_iterator& operator=( const vector_iterator<U>& u ) {
-// 		if ( this != u ) {
-// 			_current = u.base();
-// 		}
-// 		return *this;
-// 	}
-
-// 	Iter base() const {
-// 		return _current;
-// 	};
-
-// 	reference operator*() const {
-// 		return *_current;
-// 	}
-
-// 	pointer operator->() const {
-// 		return std::addressof( operator*() );
-// 	}
-
-// 	vector_iterator& operator++() {
-// 		return *++_current;
-// 	}
-
-// 	vector_iterator operator++( int ) {
-// 		vector_iterator ret( *this );
-// 		++_current;
-// 		return ret;
-// 	}
-
-// 	vector_iterator& operator--() {
-// 		return *--_current;
-// 	}
-
-// 	vector_iterator operator--( int ) {
-// 		vector_iterator ret( *this );
-// 		--_current;
-// 		return ret;
-// 	}
-
-// 	vector_iterator operator+( difference_type n ) const {
-// 		return _current + n;
-// 	}
-
-// 	vector_iterator& operator+=( difference_type n ) {
-// 		_current += n;
-// 		return *this;
-// 	}
-
-// 	vector_iterator operator-( difference_type n ) const {
-// 		return _current - n;
-// 	}
-
-// 	vector_iterator& operator-=( difference_type n ) {
-// 		_current -= n;
-// 		return *this;
-// 	}
-
-// 	reference operator[]( difference_type n ) const {
-// 		return base()[n - 1];
-// 	}
-// };
-
-// template <class Iterator1, class Iterator2>
-// bool operator==( const ft::vector_iterator<Iterator1>& lhs,
-// 				 const ft::vector_iterator<Iterator2>& rhs ) {
-// 	return lhs.base() == rhs.base();
-// }
-
-// template <class Iterator1, class Iterator2>
-// bool operator!=( const ft::vector_iterator<Iterator1>& lhs,
-// 				 const ft::vector_iterator<Iterator2>& rhs ) {
-// 	return lhs.base() != rhs.base();
-// }
-
-// template <class Iterator1, class Iterator2>
-// bool operator<( const ft::vector_iterator<Iterator1>& lhs,
-// 				const ft::vector_iterator<Iterator2>& rhs ) {
-// 	return lhs.base() < rhs.base();
-// }
-
-// template <class Iterator1, class Iterator2>
-// bool operator<=( const ft::vector_iterator<Iterator1>& lhs,
-// 				 const ft::vector_iterator<Iterator2>& rhs ) {
-// 	return lhs.base() <= rhs.base();
-// }
-
-// template <class Iterator1, class Iterator2>
-// bool operator>( const ft::vector_iterator<Iterator1>& lhs,
-// 				const ft::vector_iterator<Iterator2>& rhs ) {
-// 	return lhs.base() > rhs.base();
-// }
-
-// template <class Iterator1, class Iterator2>
-// bool operator>=( const ft::vector_iterator<Iterator1>& lhs,
-// 				 const ft::vector_iterator<Iterator2>& rhs ) {
-// 	return lhs.base() >= rhs.base();
-// }
 // };  // namespace ft
 
 namespace ft {
+
+// template <class Category, class T, class Distance = ptrdiff_t,
+// 		  class Pointer = T*, class Reference = T&>
+// struct iterator {
+// 	typedef T         value_type;
+// 	typedef Distance  difference_type;
+// 	typedef Pointer   pointer;
+// 	typedef Reference reference;
+// 	typedef Category  iterator_category;
+// };
+
+template <class T>
+class vector_iterator {
+   public:
+	typedef typename iterator_traits<T>::value_type      value_type;
+	typedef typename iterator_traits<T>::pointer         pointer;
+	typedef typename iterator_traits<T>::reference       reference;
+	typedef typename iterator_traits<T>::difference_type difference_type;
+	typedef random_access_iterator_tag                   iterator_category;
+
+   protected:
+	pointer _current;
+
+   public:
+	vector_iterator() : _current() {
+	}
+
+	explicit vector_iterator( pointer x ) : _current( x ) {
+	}
+
+	template <class U>
+	vector_iterator( const vector_iterator<U>& u ) : _current( u.base() ) {
+	}
+
+	template <class U>
+	vector_iterator& operator=( const vector_iterator<U>& u ) {
+		if ( this != u ) {
+			_current = u.base();
+		}
+		return *this;
+	}
+
+	pointer base() const {
+		return _current;
+	};
+
+	reference operator*() const {
+		return *_current;
+	}
+
+	pointer operator->() const {
+		return std::addressof( operator*() );
+	}
+
+	vector_iterator& operator++() {
+		return *++_current;
+	}
+
+	vector_iterator operator++( int ) {
+		vector_iterator ret( *this );
+		++_current;
+		return ret;
+	}
+
+	vector_iterator& operator--() {
+		return *--_current;
+	}
+
+	vector_iterator operator--( int ) {
+		vector_iterator ret( *this );
+		--_current;
+		return ret;
+	}
+
+	vector_iterator operator+( difference_type n ) const {
+		return _current + n;
+	}
+
+	vector_iterator& operator+=( difference_type n ) {
+		_current += n;
+		return *this;
+	}
+
+	vector_iterator operator-( difference_type n ) const {
+		return _current - n;
+	}
+
+	vector_iterator& operator-=( difference_type n ) {
+		_current -= n;
+		return *this;
+	}
+
+	reference operator[]( difference_type n ) const {
+		return base()[n - 1];
+	}
+};
+
+template <class Iterator1, class Iterator2>
+bool operator==( const ft::vector_iterator<Iterator1>& lhs,
+				 const ft::vector_iterator<Iterator2>& rhs ) {
+	return lhs.base() == rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator!=( const ft::vector_iterator<Iterator1>& lhs,
+				 const ft::vector_iterator<Iterator2>& rhs ) {
+	return lhs.base() != rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator<( const ft::vector_iterator<Iterator1>& lhs,
+				const ft::vector_iterator<Iterator2>& rhs ) {
+	return lhs.base() < rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator<=( const ft::vector_iterator<Iterator1>& lhs,
+				 const ft::vector_iterator<Iterator2>& rhs ) {
+	return lhs.base() <= rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator>( const ft::vector_iterator<Iterator1>& lhs,
+				const ft::vector_iterator<Iterator2>& rhs ) {
+	return lhs.base() > rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+bool operator>=( const ft::vector_iterator<Iterator1>& lhs,
+				 const ft::vector_iterator<Iterator2>& rhs ) {
+	return lhs.base() >= rhs.base();
+}
 
 template <class T, class Allocator = std::allocator<T> >
 class vector {
@@ -509,14 +489,14 @@ void vector<T, Allocator>::insert( iterator position, size_type n,
 
 template <class T, class Allocator>
 template <class InputIterator>
-void vector<T, Allocator>::insert( iterator position, InputIterator first,
-								   InputIterator last ) {
-	size_type input_len = last - first;
+typename ft::enable_if<ft::is_integral<InputIterator>, InputIterator>::type
+vector<T, Allocator>::insert( iterator position, InputIterator first,
+							  InputIterator last ) {
 	if ( this->capacity() < this->size() + input_len ) {
 		this->vec_reallocate( recommand_size( this->size() + input_len ) );
 	}
-	size_type len = last - first;
-	for ( iterator tmp = _end; position + len != tmp; --tmp ) {
+	size_type input_len = std::distance( first, last );
+	for ( iterator tmp = _end; position + input_len != tmp; --tmp ) {
 		_alloc.construct( tmp, tmp[-1] );
 		_alloc.destroy( &tmp[-1] );
 	}
@@ -581,14 +561,6 @@ void vector<T, Allocator>::clear() {
 }
 
 // Constructor
-// template <class T, class Allocator>
-// vector<T, Allocator>::vector( void )
-// 	: _begin( NULL ),
-// 	  _end( NULL ),
-// 	  _end_cap( NULL ),
-// 	  _alloc( allocator_type() ) {
-// }
-
 template <class T, class Allocator>
 vector<T, Allocator>::vector( const allocator_type& alloc )
 	: _begin( NULL ), _end( NULL ), _end_cap( NULL ), _alloc( alloc ) {
