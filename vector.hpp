@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/15 01:16:07 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/15 01:30:16 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,7 +96,7 @@ class vector_iterator {
 	}
 
 	vector_iterator operator-( difference_type n ) const {
-		return _current - n;
+		return vector_iterator( _current - n );
 	}
 
 	difference_type operator-( vector_iterator& ref ) const {
@@ -219,7 +219,9 @@ class vector {
 
 	// Modifier
 	template <class InputIterator>
-	void     assign( InputIterator first, InputIterator last );
+	void     assign( InputIterator first, InputIterator last,
+					 typename enable_if<!is_integral<InputIterator>::value,
+                                    InputIterator>::type* = 0 );
 	void     assign( size_type n, const value_type& val );
 	void     push_back( const value_type& val );
 	void     pop_back();
@@ -383,7 +385,10 @@ typename vector<T, Allocator>::const_reference vector<T, Allocator>::back()
 
 template <class T, class Allocator>
 template <class InputIterator>
-void vector<T, Allocator>::assign( InputIterator first, InputIterator last ) {
+void vector<T, Allocator>::assign(
+	InputIterator first, InputIterator last,
+	typename enable_if<!is_integral<InputIterator>::value,
+					   InputIterator>::type* ) {
 	this->clear();
 	size_type input_len = last - first;
 	if ( this->capacity() < input_len ) {
@@ -403,6 +408,7 @@ void vector<T, Allocator>::assign( size_type n, const value_type& val ) {
 	}
 	for ( size_type i = 0; i < n; ++i ) {
 		_alloc.construct( _end, val );
+		++_end;
 	}
 }
 

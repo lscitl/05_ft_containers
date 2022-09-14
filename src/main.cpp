@@ -114,28 +114,24 @@ struct Buffer {
 // resizing vector
 
 int main() {
-	ft::vector<int>           myvector( 3, 100 );
+	ft::vector<int> first;
+	ft::vector<int> second;
+	ft::vector<int> third;
+
+	first.assign( 7, 100 );  // 7 ints with a value of 100
+
+	std::cout << "Size of first: " << int( first.size() ) << std::endl;
 	ft::vector<int>::iterator it;
+	it = first.begin() + 1;
 
-	it = myvector.begin();
-	it = myvector.insert( it, 200 );
+	second.assign( it, first.end() - 1 );  // the 5 central values of first
+	std::cout << "Size of first: " << int( first.size() ) << std::endl;
 
-	myvector.insert( it, 2, 300 );
+	int myints[] = { 1776, 7, 4 };
+	third.assign( myints, myints + 3 );  // assigning from array.
 
-	// "it" no longer valid, get a new one:
-	it = myvector.begin();
-
-	ft::vector<int> anothervector( 2, 400 );
-	std::cout << "myvector contains:" << std::endl;
-	myvector.insert( it + 2, anothervector.begin(), anothervector.end() );
-
-	int myarray[] = { 501, 502, 503 };
-	myvector.insert( myvector.begin(), myarray, myarray + 3 );
-
-	std::cout << "myvector contains:";
-	for ( it = myvector.begin(); it < myvector.end(); it++ )
-		std::cout << ' ' << *it;
-	std::cout << '\n';
-
+	std::cout << "Size of first: " << int( first.size() ) << '\n';
+	std::cout << "Size of second: " << int( second.size() ) << '\n';
+	std::cout << "Size of third: " << int( third.size() ) << '\n';
 	return 0;
 }
