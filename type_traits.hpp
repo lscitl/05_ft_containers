@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/13 23:59:01 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/14 01:09:04 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/14 22:20:41 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,15 @@
 #ifndef __TYPE_TRAITS_H__
 #define __TYPE_TRAITS_H__
 
+#include <string>
+
 namespace ft {
 
 template <class T, T val>
 struct integral_constant {
-	static T                          value = val;
+	static const T                    value = val;
 	typedef T                         value_type;
 	typedef integral_constant<T, val> type;
-
-	T operator T() {
-		return value;
-	}
 };
 
 typedef integral_constant<bool, true>  true_type;
@@ -36,10 +34,6 @@ template <>
 struct is_integral<bool> : public true_type {};
 template <>
 struct is_integral<char> : public true_type {};
-template <>
-struct is_integral<char16_t> : public true_type {};
-template <>
-struct is_integral<char32_t> : public true_type {};
 template <>
 struct is_integral<wchar_t> : public true_type {};
 template <>

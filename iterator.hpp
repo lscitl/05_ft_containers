@@ -6,13 +6,15 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/13 00:55:09 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/15 00:45:07 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #ifndef __ITERATOR_H__
 #define __ITERATOR_H__
+
+#include <cstddef>
 
 namespace ft {
 
@@ -35,15 +37,15 @@ template <class T>
 struct iterator_traits<T*> {
 	typedef std::ptrdiff_t             difference_type;
 	typedef T                          value_type;
-	typedef const T*                   pointer;
-	typedef const T&                   reference;
+	typedef T*                         pointer;
+	typedef T&                         reference;
 	typedef random_access_iterator_tag iterator_category;
 };
 
 template <class T>
 struct iterator_traits<const T*> {
 	typedef std::ptrdiff_t             difference_type;
-	typedef T                          value_type;
+	typedef const T                    value_type;
 	typedef const T*                   pointer;
 	typedef const T&                   reference;
 	typedef random_access_iterator_tag iterator_category;
@@ -58,6 +60,30 @@ struct iterator {
 	typedef Reference reference;
 	typedef Category  iterator_category;
 };
+
+template <class RandIter>
+typename iterator_traits<RandIter>::difference_type _distance(
+	RandIter first, RandIter last, random_access_iterator_tag ) {
+	return last - first;
+}
+
+template <class InputIter>
+typename iterator_traits<InputIter>::difference_type _distance(
+	InputIter first, InputIter last, input_iterator_tag ) {
+	typename iterator_traits<InputIter>::difference_type ret( 0 );
+	for ( ; first != last; ++first ) {
+		++ret;
+	}
+	return ret;
+}
+
+template <class InputIterator>
+typename iterator_traits<InputIterator>::difference_type distance(
+	InputIterator first, InputIterator last ) {
+	return _distance(
+		first, last,
+		typename iterator_traits<InputIterator>::iterator_category() );
+}
 
 template <class Iter>
 class reverse_iterator
@@ -103,7 +129,7 @@ class reverse_iterator
 	}
 
 	pointer operator->() const {
-		return std::addressof( operator*() );
+		return &operator*();
 	}
 
 	reverse_iterator& operator++() {
