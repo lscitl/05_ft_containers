@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/15 00:45:07 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/15 23:48:56 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,6 @@
 #include <cstddef>
 
 namespace ft {
-
-struct input_iterator_tag {};
-struct output_iterator_tag {};
-struct forward_iterator_tag : public input_iterator_tag {};
-struct bidirectional_iterator_tag : public forward_iterator_tag {};
-struct random_access_iterator_tag : public bidirectional_iterator_tag {};
 
 template <class Iter>
 struct iterator_traits {
@@ -35,20 +29,20 @@ struct iterator_traits {
 
 template <class T>
 struct iterator_traits<T*> {
-	typedef std::ptrdiff_t             difference_type;
-	typedef T                          value_type;
-	typedef T*                         pointer;
-	typedef T&                         reference;
-	typedef random_access_iterator_tag iterator_category;
+	typedef std::ptrdiff_t                  difference_type;
+	typedef T                               value_type;
+	typedef T*                              pointer;
+	typedef T&                              reference;
+	typedef std::random_access_iterator_tag iterator_category;
 };
 
 template <class T>
 struct iterator_traits<const T*> {
-	typedef std::ptrdiff_t             difference_type;
-	typedef const T                    value_type;
-	typedef const T*                   pointer;
-	typedef const T&                   reference;
-	typedef random_access_iterator_tag iterator_category;
+	typedef std::ptrdiff_t                  difference_type;
+	typedef const T                         value_type;
+	typedef const T*                        pointer;
+	typedef const T&                        reference;
+	typedef std::random_access_iterator_tag iterator_category;
 };
 
 template <class Category, class T, class Distance = ptrdiff_t,
@@ -63,13 +57,13 @@ struct iterator {
 
 template <class RandIter>
 typename iterator_traits<RandIter>::difference_type _distance(
-	RandIter first, RandIter last, random_access_iterator_tag ) {
+	RandIter first, RandIter last, std::random_access_iterator_tag ) {
 	return last - first;
 }
 
 template <class InputIter>
 typename iterator_traits<InputIter>::difference_type _distance(
-	InputIter first, InputIter last, input_iterator_tag ) {
+	InputIter first, InputIter last, std::input_iterator_tag ) {
 	typename iterator_traits<InputIter>::difference_type ret( 0 );
 	for ( ; first != last; ++first ) {
 		++ret;
@@ -178,6 +172,20 @@ class reverse_iterator
 		return base()[n - 1];
 	}
 };
+
+template <class Iterator>
+reverse_iterator<Iterator> operator+(
+	typename reverse_iterator<Iterator>::difference_type n,
+	const reverse_iterator<Iterator>&                    rev_it ) {
+	return rev_it + n;
+}
+
+template <class Iterator>
+typename reverse_iterator<Iterator>::difference_type operator-(
+	const reverse_iterator<Iterator>& lhs,
+	const reverse_iterator<Iterator>& rhs ) {
+	return lhs.base() - rhs.base();
+}
 
 template <class Iterator1, class Iterator2>
 bool operator==( const ft::reverse_iterator<Iterator1>& lhs,

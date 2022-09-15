@@ -111,27 +111,71 @@ struct Buffer {
 // 	return ( 0 );
 // }
 
-// resizing vector
+#include <vector>
 
-int main() {
-	ft::vector<int> first;
-	ft::vector<int> second;
-	ft::vector<int> third;
+#define TESTED_NAMESPACE ft
+#define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
 
-	first.assign( 7, 100 );  // 7 ints with a value of 100
+#include <iostream>
+#include <string>
 
-	std::cout << "Size of first: " << int( first.size() ) << std::endl;
-	ft::vector<int>::iterator it;
-	it = first.begin() + 1;
+template <typename T>
+void printSize( TESTED_NAMESPACE::vector<T> const &vct,
+				bool                               print_content = true ) {
+	const T_SIZE_TYPE size = vct.size();
+	const T_SIZE_TYPE capacity = vct.capacity();
+	const std::string isCapacityOk = ( capacity >= size ) ? "OK" : "KO";
+	// Cannot limit capacity's max value because it's implementation dependent
 
-	second.assign( it, first.end() - 1 );  // the 5 central values of first
-	std::cout << "Size of first: " << int( first.size() ) << std::endl;
+	std::cout << "size: " << size << std::endl;
+	std::cout << "capacity: " << isCapacityOk << std::endl;
+	std::cout << "max_size: " << vct.max_size() << std::endl;
+	if ( print_content ) {
+		typename TESTED_NAMESPACE::vector<T>::const_iterator it = vct.begin();
+		typename TESTED_NAMESPACE::vector<T>::const_iterator ite = vct.end();
+		std::cout << std::endl << "Content is:" << std::endl;
+		for ( ; it != ite; ++it ) std::cout << "- " << *it << std::endl;
+	}
+	std::cout << "###############################################" << std::endl;
+}
 
-	int myints[] = { 1776, 7, 4 };
-	third.assign( myints, myints + 3 );  // assigning from array.
+#define TESTED_TYPE int
 
-	std::cout << "Size of first: " << int( first.size() ) << '\n';
-	std::cout << "Size of second: " << int( second.size() ) << '\n';
-	std::cout << "Size of third: " << int( third.size() ) << '\n';
-	return 0;
+template <class T, class Alloc>
+void cmp( const TESTED_NAMESPACE::vector<T, Alloc> &lhs,
+		  const TESTED_NAMESPACE::vector<T, Alloc> &rhs ) {
+	static int i = 0;
+
+	std::cout << "############### [" << i++ << "] ###############" << std::endl;
+	std::cout << "eq: " << ( lhs == rhs ) << " | ne: " << ( lhs != rhs )
+			  << std::endl;
+	std::cout << "lt: " << ( lhs < rhs ) << " | le: " << ( lhs <= rhs )
+			  << std::endl;
+	std::cout << "gt: " << ( lhs > rhs ) << " | ge: " << ( lhs >= rhs )
+			  << std::endl;
+}
+
+int main( void ) {
+	TESTED_NAMESPACE::vector<TESTED_TYPE> vct( 4 );
+	TESTED_NAMESPACE::vector<TESTED_TYPE> vct2( 4 );
+
+	cmp( vct, vct );   // 0
+	cmp( vct, vct2 );  // 1
+
+	vct2.resize( 10 );
+
+	cmp( vct, vct2 );  // 2
+	cmp( vct2, vct );  // 3
+
+	vct[2] = 42;
+
+	cmp( vct, vct2 );  // 4
+	cmp( vct2, vct );  // 5
+
+	swap( vct, vct2 );
+
+	cmp( vct, vct2 );  // 6
+	cmp( vct2, vct );  // 7
+
+	return ( 0 );
 }
