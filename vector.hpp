@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/16 15:16:17 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/17 00:52:11 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,11 @@ namespace ft {
 template <class T>
 class vector_iterator {
    public:
-	typedef typename iterator_traits<T*>::value_type        value_type;
-	typedef typename iterator_traits<T*>::pointer           pointer;
-	typedef typename iterator_traits<T*>::reference         reference;
-	typedef typename iterator_traits<T*>::difference_type   difference_type;
-	typedef typename iterator_traits<T*>::iterator_category iterator_category;
+	typedef typename iterator_traits<T>::value_type        value_type;
+	typedef typename iterator_traits<T>::pointer           pointer;
+	typedef typename iterator_traits<T>::reference         reference;
+	typedef typename iterator_traits<T>::difference_type   difference_type;
+	typedef typename iterator_traits<T>::iterator_category iterator_category;
 
    protected:
 	pointer _current;
@@ -93,19 +93,37 @@ class vector_iterator {
 		return vector_iterator( _current + n );
 	}
 
+	// const vector_iterator operator+( difference_type n ) {
+	// 	return vector_iterator( _current + n );
+	// }
+
 	vector_iterator& operator+=( difference_type n ) {
 		_current += n;
 		return *this;
 	}
 
+	// const vector_iterator& operator+=( difference_type n ) const {
+	// 	_current += n;
+	// 	return *this;
+	// }
+
 	vector_iterator operator-( difference_type n ) const {
 		return vector_iterator( _current - n );
 	}
+
+	// const vector_iterator operator-( difference_type n ) {
+	// 	return vector_iterator( _current - n );
+	// }
 
 	vector_iterator& operator-=( difference_type n ) {
 		_current -= n;
 		return *this;
 	}
+
+	// const vector_iterator& operator-=( difference_type n ) const {
+	// 	_current -= n;
+	// 	return *this;
+	// }
 
 	reference operator[]( difference_type n ) const {
 		return this->base()[n];
@@ -165,16 +183,16 @@ bool operator>=( const ft::vector_iterator<Iterator1>& lhs,
 template <class T, class Allocator = std::allocator<T> >
 class vector {
    public:
-	typedef Allocator                               allocator_type;
-	typedef typename allocator_type::size_type      size_type;
-	typedef T                                       value_type;
-	typedef value_type&                             reference;
-	typedef const value_type&                       const_reference;
-	typedef typename allocator_type::pointer        pointer;
-	typedef typename allocator_type::const_pointer  const_pointer;
-	typedef typename ft::vector_iterator<T>         iterator;
-	typedef typename ft::vector_iterator<const T>   const_iterator;
-	typedef typename ft::reverse_iterator<iterator> reverse_iterator;
+	typedef Allocator                                   allocator_type;
+	typedef typename allocator_type::size_type          size_type;
+	typedef T                                           value_type;
+	typedef value_type&                                 reference;
+	typedef const value_type&                           const_reference;
+	typedef typename allocator_type::pointer            pointer;
+	typedef typename allocator_type::const_pointer      const_pointer;
+	typedef typename ft::vector_iterator<pointer>       iterator;
+	typedef typename ft::vector_iterator<const_pointer> const_iterator;
+	typedef typename ft::reverse_iterator<iterator>     reverse_iterator;
 	typedef typename ft::reverse_iterator<const_iterator>
 													 const_reverse_iterator;
 	typedef typename allocator_type::difference_type difference_type;
@@ -667,7 +685,7 @@ vector<T, Allocator>::vector(
 
 template <class T, class Allocator>
 vector<T, Allocator>::vector( const vector& x )
-	: _begin( NULL ), _end( NULL ), _alloc( x._alloc ) {
+	: _begin( NULL ), _end( NULL ), _end_cap( NULL ), _alloc( x._alloc ) {
 	size_type n = x.size();
 	if ( n > 0 ) {
 		vec_allocate( n );

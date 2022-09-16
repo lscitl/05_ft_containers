@@ -113,58 +113,122 @@ struct Buffer {
 
 #include <vector>
 
-#define TESTED_NAMESPACE ft
-#define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
+// #define TESTED_NAMESPACE ft
+// #define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
 
-#include <iostream>
-#include <string>
+// #include <iostream>
+// #include <string>
+
+// template <typename T>
+// void printSize( TESTED_NAMESPACE::vector<T> const &vct,
+// 				bool                               print_content = true ) {
+// 	const T_SIZE_TYPE size = vct.size();
+// 	const T_SIZE_TYPE capacity = vct.capacity();
+// 	const std::string isCapacityOk = ( capacity >= size ) ? "OK" : "KO";
+// 	// Cannot limit capacity's max value because it's implementation dependent
+
+// 	std::cout << "size: " << size << std::endl;
+// 	std::cout << "capacity: " << isCapacityOk << std::endl;
+// 	std::cout << "max_size: " << vct.max_size() << std::endl;
+// 	if ( print_content ) {
+// 		typename TESTED_NAMESPACE::vector<T>::const_iterator it = vct.begin();
+// 		typename TESTED_NAMESPACE::vector<T>::const_iterator ite = vct.end();
+// 		std::cout << std::endl << "Content is:" << std::endl;
+// 		for ( ; it != ite; ++it ) std::cout << "- " << *it << std::endl;
+// 	}
+// 	std::cout << "###############################################" << std::endl;
+// }
+
+// #define TESTED_TYPE int
+
+// int main( void ) {
+// 	const int                                               size = 5;
+// 	TESTED_NAMESPACE::vector<TESTED_TYPE>                   vct( size );
+// 	TESTED_NAMESPACE::vector<TESTED_TYPE>::reverse_iterator it = vct.rbegin();
+// 	TESTED_NAMESPACE::vector<TESTED_TYPE>::const_reverse_iterator ite =
+// 		vct.rbegin();
+
+// 	for ( int i = 0; i < size; ++i ) it[i] = ( size - i ) * 5;
+
+// 	it = it + 5;
+// 	it = 1 + it;
+// 	it = it - 4;
+// 	std::cout << *( it += 2 ) << std::endl;
+// 	std::cout << *( it -= 1 ) << std::endl;
+
+// 	*( it -= 2 ) = 42;
+// 	*( it += 2 ) = 21;
+
+// 	std::cout << "const_ite +=/-=: " << *( ite += 2 ) << " | " << *( ite -= 2 )
+// 			  << std::endl;
+
+// 	std::cout << "(it == const_it): " << ( ite == it ) << std::endl;
+// 	std::cout << "(const_ite - it): " << ( ite - it ) << std::endl;
+// 	std::cout << "(ite + 3 == it): " << ( ite + 3 == it ) << std::endl;
+
+// 	printSize( vct, true );
+// 	return ( 0 );
+// }
+
+#include "sys/time.h"
+
+time_t g_start1;
+time_t g_start2;
+time_t g_end1;
+time_t g_end2;
+
+time_t timer() {
+	struct timeval start = {};
+	gettimeofday( &start, nullptr );
+	time_t msecs_time = ( start.tv_sec * 1000 ) + ( start.tv_usec / 1000 );
+	return msecs_time;
+}
 
 template <typename T>
-void printSize( TESTED_NAMESPACE::vector<T> const &vct,
-				bool                               print_content = true ) {
-	const T_SIZE_TYPE size = vct.size();
-	const T_SIZE_TYPE capacity = vct.capacity();
-	const std::string isCapacityOk = ( capacity >= size ) ? "OK" : "KO";
-	// Cannot limit capacity's max value because it's implementation dependent
-
-	std::cout << "size: " << size << std::endl;
-	std::cout << "capacity: " << isCapacityOk << std::endl;
-	std::cout << "max_size: " << vct.max_size() << std::endl;
-	if ( print_content ) {
-		typename TESTED_NAMESPACE::vector<T>::const_iterator it = vct.begin();
-		typename TESTED_NAMESPACE::vector<T>::const_iterator ite = vct.end();
-		std::cout << std::endl << "Content is:" << std::endl;
-		for ( ; it != ite; ++it ) std::cout << "- " << *it << std::endl;
-	}
-	std::cout << "###############################################" << std::endl;
+std::vector<int> iterator_test( std::vector<T> vector ) {
+	typename std::vector<T>::iterator it;
+	std::vector<int>                  v;
+	for ( int i = 0; i < 10; ++i ) vector.push_back( i );
+	it = vector.begin();
+	g_start1 = timer();
+	v.push_back( *( ++it ) );
+	v.push_back( *( --it ) );
+	v.push_back( *( it + 1 ) );
+	it += 1;
+	v.push_back( *( it - 1 ) );
+	it -= 1;
+	v.push_back( *it );
+	g_end1 = timer();
+	return v;
 }
-#define TESTED_TYPE int
+
+template <typename T>
+std::vector<int> iterator_test( ft::vector<T> vector ) {
+	typename ft::vector<T>::iterator it;
+	std::vector<int>                 v;
+	for ( int i = 0; i < 10; ++i ) {
+		std::cout << vector.size() << std::endl;
+		std::cout << vector.capacity() << std::endl;
+		vector.push_back( i );
+	}
+	it = vector.begin();
+	g_start2 = timer();
+	v.push_back( *( ++it ) );
+	v.push_back( *( --it ) );
+	v.push_back( *( it + 1 ) );
+	it += 1;
+	v.push_back( *( it - 1 ) );
+	it -= 1;
+	v.push_back( *it );
+	g_end2 = timer();
+	return v;
+}
 
 int main( void ) {
-	const int                                               size = 5;
-	TESTED_NAMESPACE::vector<TESTED_TYPE>                   vct( size );
-	TESTED_NAMESPACE::vector<TESTED_TYPE>::reverse_iterator it = vct.rbegin();
-	TESTED_NAMESPACE::vector<TESTED_TYPE>::const_reverse_iterator ite =
-		vct.rbegin();
-
-	for ( int i = 0; i < size; ++i ) it[i] = ( size - i ) * 5;
-
-	it = it + 5;
-	it = 1 + it;
-	it = it - 4;
-	std::cout << *( it += 2 ) << std::endl;
-	std::cout << *( it -= 1 ) << std::endl;
-
-	*( it -= 2 ) = 42;
-	*( it += 2 ) = 21;
-
-	std::cout << "const_ite +=/-=: " << *( ite += 2 ) << " | " << *( ite -= 2 )
-			  << std::endl;
-
-	std::cout << "(it == const_it): " << ( ite == it ) << std::endl;
-	std::cout << "(const_ite - it): " << ( ite - it ) << std::endl;
-	std::cout << "(ite + 3 == it): " << ( ite + 3 == it ) << std::endl;
-
-	printSize( vct, true );
-	return ( 0 );
+	std::vector<int> v1;
+	ft::vector<int>  v2;
+	std::cout << v2.size() << std::endl;
+	std::cout << v2.capacity() << std::endl;
+	iterator_test( v1 );
+	iterator_test( v2 );
 }
