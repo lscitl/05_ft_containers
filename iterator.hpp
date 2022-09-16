@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/15 23:48:56 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/16 15:20:23 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -169,7 +169,7 @@ class reverse_iterator
 	}
 
 	reference operator[]( difference_type n ) const {
-		return base()[n - 1];
+		return *( base() - n + 1 );
 	}
 };
 
@@ -177,13 +177,20 @@ template <class Iterator>
 reverse_iterator<Iterator> operator+(
 	typename reverse_iterator<Iterator>::difference_type n,
 	const reverse_iterator<Iterator>&                    rev_it ) {
-	return rev_it + n;
+	return rev_it - n;
 }
 
 template <class Iterator>
 typename reverse_iterator<Iterator>::difference_type operator-(
 	const reverse_iterator<Iterator>& lhs,
 	const reverse_iterator<Iterator>& rhs ) {
+	return lhs.base() - rhs.base();
+}
+
+template <class Iterator1, class Iterator2>
+typename reverse_iterator<Iterator1>::difference_type operator-(
+	const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs ) {
 	return lhs.base() - rhs.base();
 }
 

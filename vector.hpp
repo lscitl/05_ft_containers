@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/16 00:22:29 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/16 15:16:17 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include <algorithm>
 #include "iterator.hpp"
 #include "type_traits.hpp"
+#include "algorithm.hpp"
 
 namespace ft {
 
@@ -704,29 +705,41 @@ template <class T, class Alloc>
 bool operator==( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
 	if ( lhs.size() != rhs.size() )
 		return false;
-	vector<T, Alloc>::pointer lbegin, lend, rbegin, rend;
-	lbegin = lhs.begin().base();
-	lend = lhs.end().base();
-	rbegin = rhs.begin().base();
-	rend = rhs.end().base();
+	typename vector<T, Alloc>::const_iterator lbegin = lhs.begin();
+	typename vector<T, Alloc>::const_iterator lend = lhs.end();
+	typename vector<T, Alloc>::const_iterator rbegin = rhs.begin();
+	typename vector<T, Alloc>::const_iterator rend = rhs.end();
 	for ( ; lbegin != lend; ++lbegin, ++rbegin ) {
-		if ( *lbegin != *rbegin )
+		if ( rbegin == rend || *lbegin != *rbegin )
 			return false;
 	}
 	return true;
 }
 
 template <class T, class Alloc>
-bool operator!=( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs );
+bool operator!=( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
+	return !( lhs == rhs );
+}
 
 template <class T, class Alloc>
-bool operator<( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs );
+bool operator<( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
+	return ft::lexicographical_compare( lhs.begin(), lhs.end(), rhs.begin(),
+										rhs.end() );
+}
+
 template <class T, class Alloc>
-bool operator<=( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs );
+bool operator<=( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
+	return ( lhs < rhs || lhs == rhs );
+}
 template <class T, class Alloc>
-bool operator>( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs );
+bool operator>( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
+	return !( lhs <= rhs );
+}
+
 template <class T, class Alloc>
-bool operator>=( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs );
+bool operator>=( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
+	return !( lhs < rhs );
+}
 
 template <class T, class Allocator>
 void swap( vector<T, Allocator>& x, vector<T, Allocator>& y ) {
