@@ -112,32 +112,32 @@ struct Buffer {
 // }
 
 #include <vector>
+#include <memory>
+#define TESTED_NAMESPACE ft
+#define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
 
-// #define TESTED_NAMESPACE ft
-// #define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
+#include <iostream>
+#include <string>
 
-// #include <iostream>
-// #include <string>
+template <typename T>
+void printSize( TESTED_NAMESPACE::vector<T> const &vct,
+				bool                               print_content = true ) {
+	const T_SIZE_TYPE size = vct.size();
+	const T_SIZE_TYPE capacity = vct.capacity();
+	const std::string isCapacityOk = ( capacity >= size ) ? "OK" : "KO";
+	// Cannot limit capacity's max value because it's implementation dependent
 
-// template <typename T>
-// void printSize( TESTED_NAMESPACE::vector<T> const &vct,
-// 				bool                               print_content = true ) {
-// 	const T_SIZE_TYPE size = vct.size();
-// 	const T_SIZE_TYPE capacity = vct.capacity();
-// 	const std::string isCapacityOk = ( capacity >= size ) ? "OK" : "KO";
-// 	// Cannot limit capacity's max value because it's implementation dependent
-
-// 	std::cout << "size: " << size << std::endl;
-// 	std::cout << "capacity: " << isCapacityOk << std::endl;
-// 	std::cout << "max_size: " << vct.max_size() << std::endl;
-// 	if ( print_content ) {
-// 		typename TESTED_NAMESPACE::vector<T>::const_iterator it = vct.begin();
-// 		typename TESTED_NAMESPACE::vector<T>::const_iterator ite = vct.end();
-// 		std::cout << std::endl << "Content is:" << std::endl;
-// 		for ( ; it != ite; ++it ) std::cout << "- " << *it << std::endl;
-// 	}
-// 	std::cout << "###############################################" << std::endl;
-// }
+	std::cout << "size: " << size << std::endl;
+	std::cout << "capacity: " << isCapacityOk << std::endl;
+	std::cout << "max_size: " << vct.max_size() << std::endl;
+	if ( print_content ) {
+		typename TESTED_NAMESPACE::vector<T>::const_iterator it = vct.begin();
+		typename TESTED_NAMESPACE::vector<T>::const_iterator ite = vct.end();
+		std::cout << std::endl << "Content is:" << std::endl;
+		for ( ; it != ite; ++it ) std::cout << "- " << *it << std::endl;
+	}
+	std::cout << "###############################################" << std::endl;
+}
 
 // #define TESTED_TYPE int
 
@@ -170,65 +170,65 @@ struct Buffer {
 // 	return ( 0 );
 // }
 
-#include "sys/time.h"
+class B {
+   public:
+	char *l;
+	int   i;
+	B() : l( NULL ), i( 1 ){};
+	B( const int &ex ) {
+		this->i = ex;
+		this->l = new char( 'a' );
+	};
+	virtual ~B() {
+		delete this->l;
+		this->l = NULL;
+	};
+};
 
-time_t g_start1;
-time_t g_start2;
-time_t g_end1;
-time_t g_end2;
-
-time_t timer() {
-	struct timeval start = {};
-	gettimeofday( &start, nullptr );
-	time_t msecs_time = ( start.tv_sec * 1000 ) + ( start.tv_usec / 1000 );
-	return msecs_time;
-}
-
-template <typename T>
-std::vector<int> iterator_test( std::vector<T> vector ) {
-	typename std::vector<T>::iterator it;
-	std::vector<int>                  v;
-	for ( int i = 0; i < 10; ++i ) vector.push_back( i );
-	it = vector.begin();
-	g_start1 = timer();
-	v.push_back( *( ++it ) );
-	v.push_back( *( --it ) );
-	v.push_back( *( it + 1 ) );
-	it += 1;
-	v.push_back( *( it - 1 ) );
-	it -= 1;
-	v.push_back( *it );
-	g_end1 = timer();
-	return v;
-}
-
-template <typename T>
-std::vector<int> iterator_test( ft::vector<T> vector ) {
-	typename ft::vector<T>::iterator it;
-	std::vector<int>                 v;
-	for ( int i = 0; i < 10; ++i ) {
-		std::cout << vector.size() << std::endl;
-		std::cout << vector.capacity() << std::endl;
-		vector.push_back( i );
+class A : public B {
+   public:
+	A() : B(){};
+	A( const B *ex ) {
+		this->l = new char( *( ex->l ) );
+		this->i = ex->i;
+		if ( ex->i == -1 )
+			throw "n";
 	}
-	it = vector.begin();
-	g_start2 = timer();
-	v.push_back( *( ++it ) );
-	v.push_back( *( --it ) );
-	v.push_back( *( it + 1 ) );
-	it += 1;
-	v.push_back( *( it - 1 ) );
-	it -= 1;
-	v.push_back( *it );
-	g_end2 = timer();
-	return v;
-}
+	~A() {
+		delete this->l;
+		this->l = NULL;
+	};
+};
 
 int main( void ) {
-	std::vector<int> v1;
-	ft::vector<int>  v2;
-	std::cout << v2.size() << std::endl;
-	std::cout << v2.capacity() << std::endl;
-	iterator_test( v1 );
-	iterator_test( v2 );
+	std::vector<int>              v;
+	TESTED_NAMESPACE::vector<int> tmp, vector;
+	tmp.assign( 2600 * 10000, 1 );
+	vector.assign( 4200 * 10000, 1 );
+	vector.insert( vector.end() - 1000 * 10000, tmp.begin(), tmp.end() );
+	v.push_back( vector[3] );
+	v.push_back( vector.size() );
+	v.push_back( vector.capacity() );
+
+	B                            *k2( new B( 3 ) );
+	B                            *k3( new B( 4 ) );
+	B                            *k4( new B( -1 ) );
+	TESTED_NAMESPACE::vector<A>   vv;
+	TESTED_NAMESPACE::vector<B *> v1;
+
+	v1.push_back( &( *k2 ) );
+	v1.push_back( &( *k3 ) );
+	v1.push_back( &( *k4 ) );
+	try {
+		vv.insert( vv.begin(), v1.begin(), v1.end() );
+	} catch ( char const *str ) {
+		std::cout << str << std::endl;
+		v.push_back( vv.size() );
+		v.push_back( vv.capacity() );
+	}
+
+	for ( std::vector<int>::iterator tmp = v.begin(); tmp != v.end(); tmp++ ) {
+		std::cout << *tmp << std::endl;
+	}
+	return 0;
 }

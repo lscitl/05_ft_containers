@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/17 00:30:48 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/17 22:42:53 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,11 +120,6 @@ class reverse_iterator
 		return *--ret;
 	}
 
-	// const reference operator*() {
-	// 	Iter ret = current;
-	// 	return *--ret;
-	// }
-
 	pointer operator->() const {
 		Iter ret = current;
 		return &( *--ret );
@@ -156,37 +151,19 @@ class reverse_iterator
 		return reverse_iterator( current - n );
 	}
 
-	// const reverse_iterator operator+( difference_type n ) {
-	// 	return reverse_iterator( current - n );
-	// }
-
 	reverse_iterator& operator+=( difference_type n ) {
 		current -= n;
 		return *this;
 	}
 
-	// const reverse_iterator& operator+=( difference_type n ) const {
-	// 	current -= n;
-	// 	return *this;
-	// }
-
 	reverse_iterator operator-( difference_type n ) const {
 		return reverse_iterator( current + n );
 	}
-
-	// const reverse_iterator operator-( difference_type n ) {
-	// 	return reverse_iterator( current + n );
-	// }
 
 	reverse_iterator& operator-=( difference_type n ) {
 		current += n;
 		return *this;
 	}
-
-	// const reverse_iterator& operator-=( difference_type n ) const {
-	// 	current += n;
-	// 	return *this;
-	// }
 
 	reference operator[]( difference_type n ) const {
 		return *( *this + n );
