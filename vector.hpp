@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/18 02:44:27 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/18 22:47:55 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,9 @@ class vector {
 	void      vec_reallocate( size_type n );
 	size_type recommand_size( size_type n ) const;
 	pointer range_construct( pointer start, pointer end, const_reference val );
+	pointer copy_range_to_uninitialized( pointer copy_from_start,
+										 pointer copy_from_end,
+										 pointer copy_to );
 
    public:
 	// Constructor, Copy Assignment Operator, Destructor
@@ -320,8 +323,8 @@ void vector<T, Allocator>::vec_reallocate( size_type n ) {
 
 	new_begin = new_end = _alloc.allocate( n );
 	new_end_cap = new_begin + n;
-	for ( pointer tmp = _begin; tmp < _end; ++tmp ) {
-		_alloc.construct( new_end++, *tmp );
+	for ( pointer tmp = _begin; tmp < _end; ++tmp, ++new_end ) {
+		_alloc.construct( new_end, *tmp );
 		_alloc.destroy( tmp );
 	}
 	_alloc.deallocate( _begin, _end_cap - _begin );
@@ -340,10 +343,27 @@ typename vector<T, Allocator>::pointer vector<T, Allocator>::range_construct(
 }
 
 template <class T, class Allocator>
+typename vector<T, Allocator>::pointer
+vector<T, Allocator>::copy_range_to_uninitialized( pointer copy_from_start,
+												   pointer copy_from_end,
+												   pointer copy_to ) {
+	// size_type copy_len = copy_from_end - copy_from_start;
+	// if ( copy_from_start + copy_len < copy_to )
+	for ( ; copy_from_start != copy_from_end; ++copy_from_start, ++copy_to ) {
+		_alloc.construct( copy_to, *copy_from_start );
+		_alloc.destory( copy_from_start );
+	}
+	// else {
+	// 	for (;)
+	// }
+	return end;
+}
+
+template <class T, class Allocator>
 void vector<T, Allocator>::resize( size_type n, value_type val ) {
 	if ( this->size() >= n ) {
-		for ( ; _end != _begin + n; --_end ) {
-			_alloc.destroy( _end );
+		for ( ; _end != _begin + n; ) {
+			_alloc.destroy( --_end );
 		}
 	} else {
 		if ( this->capacity() == 0 ) {
@@ -450,13 +470,12 @@ void vector<T, Allocator>::push_back( const_reference val ) {
 	} else if ( this->capacity() == this->size() ) {
 		this->vec_reallocate( this->recommand_size( this->size() + 1 ) );
 	}
-	_alloc.construct( _end, val );
-	++_end;
+	_alloc.construct( _end++, val );
 }
 
 template <class T, class Allocator>
 void vector<T, Allocator>::pop_back() {
-	_alloc.destroy( _end-- );
+	_alloc.destroy( --_end );
 }
 
 template <class T, class Allocator>
@@ -550,16 +569,20 @@ void vector<T, Allocator>::insert(
 					   InputIterator>::type* ) {
 	difference_type input_len = ft::distance( first, last );
 	size_type       pos_index = position.base() - _begin;
-	if ( this->capacity() == 0 ) {
-		this->reserve( input_len );
-		try {
-			_end = std::copy( first, last, _end );
-		} catch ( ... ) {
-			_alloc.deallocate( _begin, _end_cap - _begin );
-			_begin = _end = _end_cap = NULL;
-			throw;
-		}
-	} else if ( this->capacity() < this->size() + input_len ) {
+	// if ( this->capacity() == 0 ) {
+	// 	this->reserve( input_len );
+	// 	try {
+	// 		for ( InputIterator tmp(first); tmp != last; ++tmp) {
+	// 			_alloc.construct( new_end, *( p ) );
+	// 		}
+	// 		// _end = std::copy( first, last, _end );
+	// 	} catch ( ... ) {
+	// 		_alloc.deallocate( _begin, _end_cap - _begin );
+	// 		_begin = _end = _end_cap = NULL;
+	// 		throw;
+	// 	}
+	// } else
+	if ( this->capacity() < this->size() + input_len ) {
 		size_type rec_size = this->recommand_size( this->size() + input_len );
 		if ( rec_size > this->max_size() )
 			throw std::length_error( "vector: length error" );
@@ -574,10 +597,13 @@ void vector<T, Allocator>::insert(
 			_alloc.destroy( p );
 		}
 		try {
-			new_end = std::copy( first, last, new_end );
+			for ( InputIterator tmp( first ); tmp != last; ++tmp, ++new_end ) {
+				_alloc.construct( new_end, *tmp );
+			}
+			// new_end = std::copy( first, last, new_end );
 		} catch ( ... ) {
-			for ( ; new_end != new_begin; --new_end ) {
-				_alloc.destroy( new_end );
+			for ( ; new_end != new_begin; ) {
+				_alloc.destroy( --new_end );
 			}
 			_alloc.deallocate( new_begin, new_end_cap - new_begin );
 			throw;
@@ -605,8 +631,11 @@ void vector<T, Allocator>::insert(
 template <class T, class Allocator>
 typename vector<T, Allocator>::iterator vector<T, Allocator>::erase(
 	iterator position ) {
-	_end = std::copy( position.base() + 1, _end, position.base() );
-	_alloc.destory( _end );
+	for ( pointer tmp( position.base() ); tmp != _end - 1; ++tmp ) {
+		*tmp = *( tmp + 1 );
+	}
+	// _end = std::copy( position.base() + 1, _end, position.base() );
+	_alloc.destroy( _end );
 	return position;
 }
 
@@ -615,43 +644,71 @@ typename vector<T, Allocator>::iterator vector<T, Allocator>::erase(
 	iterator first, iterator last ) {
 	size_type del_len = static_cast<size_type>( last.base() - first.base() );
 	size_type move_len = static_cast<size_type>( _end - last.base() );
-	for ( pointer tmp = first.base(); tmp < last.base(); ++tmp ) {
-		_alloc.destroy( tmp );
-		if ( move_len ) {
-			_alloc.construct( tmp, tmp[del_len] );
-			_alloc.destroy( tmp - del_len );
-			--move_len;
+	if ( move_len <= del_len ) {
+		pointer new_end = _end - ( del_len - move_len );
+		for ( pointer to( first.base() ), from( last.base() ); move_len;
+			  ++to, ++from, --move_len, --del_len ) {
+			*to = *from;
+			_alloc.destroy( from );
+		}
+		for ( ; _end > new_end; ) {
+			_alloc.destory( --_end );
 		}
 	}
-	pointer tmp = last.base();
-	while ( move_len ) {
-		_alloc.construct( tmp, tmp[del_len] );
-		_alloc.destroy( tmp - del_len );
-		++tmp;
-		--move_len;
-	}
-	_end -= del_len;
+	// for ( pointer tmp = first.base(); tmp < last.base(); ++tmp ) {
+	// 	_alloc.destroy( tmp );
+	// 	if ( move_len ) {
+	// 		_alloc.construct( tmp, tmp[del_len] );
+	// 		_alloc.destroy( tmp - del_len );
+	// 		--move_len;
+	// 	}
+	// }
+	// pointer tmp = last.base();
+	// while ( move_len ) {
+	// 	_alloc.construct( tmp, tmp[del_len] );
+	// 	_alloc.destroy( tmp - del_len );
+	// 	++tmp;
+	// 	--move_len;
+	// }
+	// _end -= del_len;
+	// std::copy( first.base(), last.base(), _end );
+	// while ( move_len-- > del_len ) {
+	// 	_alloc.destroy( --_end );
+	// }
 	return first;
 }
 
 template <class T, class Allocator>
 void vector<T, Allocator>::swap( vector& x ) {
-	pointer tmp_begin = x._begin;
-	pointer tmp_end = x._end;
-	pointer tmp_end_cap = x._end_cap;
+	pointer tmp_begin = _begin;
+	pointer tmp_end = _end;
+	pointer tmp_end_cap = _end_cap;
 
-	x._begin = _begin;
-	x._end = _end;
-	x._end_cap = _end_cap;
-	_begin = tmp_begin;
-	_end = tmp_end;
-	_end_cap = tmp_end_cap;
+	_begin = x._begin;
+	_end = x._end;
+	_end_cap = x._end_cap;
+	x._begin = tmp_begin;
+	x._end = tmp_end;
+	x._end_cap = tmp_end_cap;
+	// pointer tmp_begin = x.get_begin();
+	// pointer tmp_end = x.get_end();
+	// pointer tmp_end_cap = x.get_end_cap();
+
+	// x.get_begin() = get_begin();
+	// x.get_end() = get_end();
+	// x.get_end_cap() = get_end_cap();
+	// get_begin() = tmp_begin;
+	// get_end() = tmp_end;
+	// get_end_cap() = tmp_end_cap;
+	// std::swap( _begin, x._begin );
+	// std::swap( _end, x._end );
+	// std::swap( _end_cap, x._end_cap );
 }
 
 template <class T, class Allocator>
 void vector<T, Allocator>::clear() {
 	while ( _begin != _end ) {
-		_alloc.destroy( _end-- );
+		_alloc.destroy( --_end );
 	}
 }
 
@@ -696,7 +753,11 @@ vector<T, Allocator>::vector( const vector& x )
 	size_type n = x.size();
 	if ( n > 0 ) {
 		this->vec_allocate( n );
-		_end = std::copy( x.begin(), x.end(), _end );
+		// _end = std::copy( x.begin(), x.end(), _end );
+		for ( pointer x_begin = x._begin; _end < _begin + n;
+			  ++_end, ++x_begin ) {
+			_alloc.construct( _end, *x_begin );
+		}
 	}
 }
 

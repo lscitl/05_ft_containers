@@ -170,65 +170,70 @@ void printSize( TESTED_NAMESPACE::vector<T> const &vct,
 // 	return ( 0 );
 // }
 
-class B {
-   public:
-	char *l;
-	int   i;
-	B() : l( NULL ), i( 1 ){};
-	B( const int &ex ) {
-		this->i = ex;
-		this->l = new char( 'a' );
-	};
-	virtual ~B() {
-		delete this->l;
-		this->l = NULL;
-	};
-};
+// class B {
+//    public:
+// 	char *l;
+// 	int   i;
+// 	B() : l( NULL ), i( 1 ){};
+// 	B( const int &ex ) {
+// 		this->i = ex;
+// 		this->l = new char( 'a' );
+// 	};
+// 	virtual ~B() {
+// 		delete this->l;
+// 		this->l = NULL;
+// 	};
+// };
 
-class A : public B {
-   public:
-	A() : B(){};
-	A( const B *ex ) {
-		this->l = new char( *( ex->l ) );
-		this->i = ex->i;
-		if ( ex->i == -1 )
-			throw "n";
-	}
-	~A() {
-		delete this->l;
-		this->l = NULL;
-	};
-};
+// class A : public B {
+//    public:
+// 	A() : B(){};
+// 	A( const B *ex ) {
+// 		this->l = new char( *( ex->l ) );
+// 		this->i = ex->i;
+// 		if ( ex->i == -1 )
+// 			throw "n";
+// 	}
+// 	~A() {
+// 		delete this->l;
+// 		this->l = NULL;
+// 	};
+// };
 
 int main( void ) {
 	std::vector<int>              v;
-	TESTED_NAMESPACE::vector<int> tmp, vector;
-	tmp.assign( 2600 * 10000, 1 );
-	vector.assign( 4200 * 10000, 1 );
-	vector.insert( vector.end() - 1000 * 10000, tmp.begin(), tmp.end() );
-	v.push_back( vector[3] );
+	TESTED_NAMESPACE::vector<int> vector;
+	vector.assign( 1100 * 10000, 11 );
+	TESTED_NAMESPACE::vector<int> tmp( 500 * 10000, 5 ),
+		tmp2( 1000 * 10000, 10 ), tmp3( 1500 * 10000, 15 ),
+		tmp4( 3000 * 10000, 30 );
+	v.push_back( vector[2] );
+	v.push_back( vector.size() );
+	v.push_back( vector.capacity() );
+	long *adr1 = reinterpret_cast<long *>( &vector );
+	long *adr2 = reinterpret_cast<long *>( &tmp );
+	vector.swap( tmp );
+	if ( reinterpret_cast<long *>( &vector ) == adr1 &&
+		 reinterpret_cast<long *>( &tmp ) == adr2 )
+		v.push_back( 1 );
+	v.push_back( vector[2] );
+	v.push_back( vector.size() );
+	v.push_back( vector.capacity() );
+	vector.swap( tmp3 );
+	v.push_back( vector[2] );
+	v.push_back( vector.size() );
+	v.push_back( vector.capacity() );
+	std::swap( vector, tmp2 );
+	v.push_back( vector[2] );
+	v.push_back( vector.size() );
+	v.push_back( vector.capacity() );
+	std::swap( vector, tmp4 );
+	v.push_back( vector[2] );
 	v.push_back( vector.size() );
 	v.push_back( vector.capacity() );
 
-	B                            *k2( new B( 3 ) );
-	B                            *k3( new B( 4 ) );
-	B                            *k4( new B( -1 ) );
-	TESTED_NAMESPACE::vector<A>   vv;
-	TESTED_NAMESPACE::vector<B *> v1;
-
-	v1.push_back( &( *k2 ) );
-	v1.push_back( &( *k3 ) );
-	v1.push_back( &( *k4 ) );
-	try {
-		vv.insert( vv.begin(), v1.begin(), v1.end() );
-	} catch ( char const *str ) {
-		std::cout << str << std::endl;
-		v.push_back( vv.size() );
-		v.push_back( vv.capacity() );
-	}
-
-	for ( std::vector<int>::iterator tmp = v.begin(); tmp != v.end(); tmp++ ) {
-		std::cout << *tmp << std::endl;
+	for ( std::vector<int>::iterator itr = v.begin(); itr != v.end(); ++itr ) {
+		std::cout << *itr << std::endl;
 	}
 	return 0;
 }
