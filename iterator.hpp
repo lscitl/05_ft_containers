@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/17 22:42:53 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/20 19:04:15 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -227,6 +227,6 @@ bool operator>=( const ft::reverse_iterator<Iterator1>& lhs,
 	return lhs.base() <= rhs.base();
 }
 
-};  // namespace ft
+}  // namespace ft
 
 #endif

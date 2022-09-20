@@ -139,36 +139,47 @@ void printSize( TESTED_NAMESPACE::vector<T> const &vct,
 	std::cout << "###############################################" << std::endl;
 }
 
-// #define TESTED_TYPE int
+#define TESTED_TYPE int
 
-// int main( void ) {
-// 	const int                                               size = 5;
-// 	TESTED_NAMESPACE::vector<TESTED_TYPE>                   vct( size );
-// 	TESTED_NAMESPACE::vector<TESTED_TYPE>::reverse_iterator it = vct.rbegin();
-// 	TESTED_NAMESPACE::vector<TESTED_TYPE>::const_reverse_iterator ite =
-// 		vct.rbegin();
+int main( void ) {
+	TESTED_NAMESPACE::vector<TESTED_TYPE> vct( 7 );
+	TESTED_NAMESPACE::vector<TESTED_TYPE> vct_two( 4 );
+	TESTED_NAMESPACE::vector<TESTED_TYPE> vct_three;
+	TESTED_NAMESPACE::vector<TESTED_TYPE> vct_four;
 
-// 	for ( int i = 0; i < size; ++i ) it[i] = ( size - i ) * 5;
+	for ( unsigned long int i = 0; i < vct.size(); ++i )
+		vct[i] = ( vct.size() - i ) * 3;
+	for ( unsigned long int i = 0; i < vct_two.size(); ++i )
+		vct_two[i] = ( vct_two.size() - i ) * 5;
+	printSize( vct );
+	printSize( vct_two );
 
-// 	it = it + 5;
-// 	it = 1 + it;
-// 	it = it - 4;
-// 	std::cout << *( it += 2 ) << std::endl;
-// 	std::cout << *( it -= 1 ) << std::endl;
+	vct_three.assign( vct.begin(), vct.end() );
+	vct.assign( vct_two.begin(), vct_two.end() );
+	vct_two.assign( 2, 42 );
+	vct_four.assign( 4, 21 );
 
-// 	*( it -= 2 ) = 42;
-// 	*( it += 2 ) = 21;
+	std::cout << "\t### After assign(): ###" << std::endl;
 
-// 	std::cout << "const_ite +=/-=: " << *( ite += 2 ) << " | " << *( ite -= 2 )
-// 			  << std::endl;
+	printSize( vct );
+	printSize( vct_two );
+	printSize( vct_three );
+	printSize( vct_four );
 
-// 	std::cout << "(it == const_it): " << ( ite == it ) << std::endl;
-// 	std::cout << "(const_ite - it): " << ( ite - it ) << std::endl;
-// 	std::cout << "(ite + 3 == it): " << ( ite + 3 == it ) << std::endl;
+	vct_four.assign( 6, 84 );
+	printSize( vct_four );
 
-// 	printSize( vct, true );
-// 	return ( 0 );
-// }
+	std::cout << "\t### assign() on enough capacity and low size: ###"
+			  << std::endl;
+
+	vct.assign( 5, 53 );
+	vct_two.assign( vct_three.begin(), vct_three.begin() + 3 );
+
+	printSize( vct );
+	printSize( vct_two );
+
+	return ( 0 );
+}
 
 // class B {
 //    public:
@@ -200,23 +211,48 @@ void printSize( TESTED_NAMESPACE::vector<T> const &vct,
 // 	};
 // };
 
-#include <sstream>
+// #include <sstream>
+// #include <list>
 
-int main( void ) {
-	TESTED_NAMESPACE::vector<char> v;
+// int main( void ) {
+// 	int arr[20];
 
-	std::istringstream             str( "1 2 3 4 5 6 7" );
-	std::istreambuf_iterator<char> it( str ), end;
+// 	for ( int i = 0; i < 20; i++ ) {
+// 		arr[i] = i;
+// 	}
 
-	v.assign( it, end );
+// 	std::list<int> li( arr, arr + 20 );
 
-	for ( TESTED_NAMESPACE::vector<char>::iterator tmp( v.begin() );
-		  tmp != v.end(); tmp++ ) {
-		std::cout << *tmp << std::endl;
-	}
+// 	// TESTED_NAMESPACE::vector<int> v( arr, arr + 20 );
 
-	std::cout << v.capacity() << std::endl;
-	std::cout << v.size() << std::endl;
+// 	std::string aa( "aaa" );
+// 	{ TESTED_NAMESPACE::vector<int> v( 64, 1 ); }
+// 	TESTED_NAMESPACE::vector<int> v( 0, -1 );
 
-	return 0;
-}
+// 	// v.insert( v.begin() + 3, li.begin(), li.end() );
+// 	// std::istringstream             str( "1 2 3 4 5 6 7" );
+// 	// std::istreambuf_iterator<char> it( str ), end;
+
+// 	// v.assign( it, end );
+
+// 	// std::deque<char> str;
+// 	// str.push_back( '1' );
+// 	// str.push_back( '2' );
+// 	// str.push_back( '3' );
+// 	// str.push_back( '4' );
+// 	// str.push_back( '5' );
+// 	// v.assign( str.begin(), str.end() );
+
+// 	// v.push_back( 64 );
+// 	// v.assign( v.begin(), v.begin() + 21 );
+
+// 	for ( TESTED_NAMESPACE::vector<int>::iterator tmp( v.begin() );
+// 		  tmp != v.end(); tmp++ ) {
+// 		std::cout << *tmp << std::endl;
+// 	}
+
+// 	std::cout << v.capacity() << std::endl;
+// 	std::cout << v.size() << std::endl;
+
+// 	return 0;
+// }

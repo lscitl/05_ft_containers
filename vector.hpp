@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/20 14:55:21 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/21 00:24:15 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -205,11 +205,22 @@ class vector {
 	explicit vector( const allocator_type& alloc = allocator_type() );
 	explicit vector( size_type n, const_reference val = value_type(),
 					 const allocator_type& alloc = allocator_type() );
+
 	template <class InputIterator>
 	vector( InputIterator first, InputIterator last,
 			const allocator_type& alloc = allocator_type(),
-			typename enable_if<!is_integral<InputIterator>::value,
+			typename enable_if<!is_integral<InputIterator>::value &&
+								   is_input_iterator<InputIterator>::value &&
+								   !is_forward_iterator<InputIterator>::value,
 							   InputIterator>::type* = 0 );
+
+	template <class ForwardIterator>
+	vector( ForwardIterator first, ForwardIterator last,
+			const allocator_type& alloc = allocator_type(),
+			typename enable_if<!is_integral<ForwardIterator>::value &&
+								   is_forward_iterator<ForwardIterator>::value,
+							   ForwardIterator>::type* = 0 );
+
 	vector( const vector& x );
 	~vector();
 	vector& operator=( const vector& x );
@@ -242,19 +253,73 @@ class vector {
 	const_reference back() const;
 
 	// Modifier
+	// template <class InputIterator>
+	// void assign(
+	// 	InputIterator first, InputIterator last,
+	// 	typename enable_if<!is_integral<InputIterator>::value &&
+	// 						   is_input_iterator<typename iterator_traits<
+	// 							   InputIterator>::iterator_category>::value &&
+	// 						   !is_forward_iterator<typename iterator_traits<
+	// 							   InputIterator>::iterator_category>::value,
+	// 					   InputIterator>::type* = 0 );
 	template <class InputIterator>
-	void     assign( InputIterator first, InputIterator last,
-					 typename enable_if<!is_integral<InputIterator>::value,
-                                    InputIterator>::type* = 0 );
-	void     assign( size_type n, const_reference val );
-	void     push_back( const_reference val );
-	void     pop_back();
+	void assign(
+		InputIterator first, InputIterator last,
+		typename enable_if<!is_integral<InputIterator>::value &&
+							   is_input_iterator<InputIterator>::value &&
+							   !is_forward_iterator<InputIterator>::value,
+						   InputIterator>::type* = 0 );
+	// template <class ForwardIterator>
+	// void assign(
+	// 	ForwardIterator first, ForwardIterator last,
+	// 	typename enable_if<!is_integral<ForwardIterator>::value &&
+	// 						   is_forward_iterator<typename iterator_traits<
+	// 							   ForwardIterator>::iterator_category>::value,
+	// 					   ForwardIterator>::type* = 0 );
+	template <class ForwardIterator>
+	void assign(
+		ForwardIterator first, ForwardIterator last,
+		typename enable_if<!is_integral<ForwardIterator>::value &&
+							   is_forward_iterator<ForwardIterator>::value,
+						   ForwardIterator>::type* = 0 );
+	void assign( size_type n, const_reference val );
+	void push_back( const_reference val );
+	void pop_back();
+
 	iterator insert( iterator position, const_reference val );
 	void     insert( iterator position, size_type n, const_reference val );
+
+	// template <class InputIterator>
+	// void insert(
+	// 	iterator position, InputIterator first, InputIterator last,
+	// 	typename enable_if<!is_integral<InputIterator>::value &&
+	// 						   is_input_iterator<typename iterator_traits<
+	// 							   InputIterator>::iterator_category>::value &&
+	// 						   !is_forward_iterator<typename iterator_traits<
+	// 							   InputIterator>::iterator_category>::value,
+	// 					   InputIterator>::type* = 0 );
 	template <class InputIterator>
-	void     insert( iterator position, InputIterator first, InputIterator last,
-					 typename enable_if<!is_integral<InputIterator>::value,
-                                    InputIterator>::type* = 0 );
+	void insert(
+		iterator position, InputIterator first, InputIterator last,
+		typename enable_if<!is_integral<InputIterator>::value &&
+							   is_input_iterator<InputIterator>::value &&
+							   !is_forward_iterator<InputIterator>::value,
+						   InputIterator>::type* = 0 );
+
+	// template <class ForwardIterator>
+	// void insert(
+	// 	iterator position, ForwardIterator first, ForwardIterator last,
+	// 	typename enable_if<!is_integral<ForwardIterator>::value &&
+	// 						   is_forward_iterator<typename iterator_traits<
+	// 							   ForwardIterator>::iterator_category>::value,
+	// 					   ForwardIterator>::type* = 0 );
+	template <class ForwardIterator>
+	void insert(
+		iterator position, ForwardIterator first, ForwardIterator last,
+		typename enable_if<!is_integral<ForwardIterator>::value &&
+							   is_forward_iterator<ForwardIterator>::value,
+						   ForwardIterator>::type* = 0 );
+
 	iterator erase( iterator position );
 	iterator erase( iterator first, iterator last );
 	void     swap( vector& x );
@@ -267,12 +332,10 @@ class vector {
 
 	// Iterators
 	iterator begin() {
-		iterator ret( _begin );
-		return ret;
+		return iterator( _begin );
 	}
 	const_iterator begin() const {
-		const_iterator ret( _begin );
-		return ret;
+		return const_iterator( _begin );
 	}
 	iterator end() {
 		return iterator( _end );
@@ -349,15 +412,10 @@ typename vector<T, Allocator>::pointer
 vector<T, Allocator>::copy_range_to_uninitialized( pointer copy_from_start,
 												   pointer copy_from_end,
 												   pointer copy_to ) {
-	// size_type copy_len = copy_from_end - copy_from_start;
-	// if ( copy_from_start + copy_len < copy_to )
 	for ( ; copy_from_start != copy_from_end; ++copy_from_start, ++copy_to ) {
 		_alloc.construct( copy_to, *copy_from_start );
 		_alloc.destory( copy_from_start );
 	}
-	// else {
-	// 	for (;)
-	// }
 	return end;
 }
 
@@ -438,12 +496,49 @@ typename vector<T, Allocator>::const_reference vector<T, Allocator>::back()
 	return *( _end - 1 );
 }
 
+// template <class T, class Allocator>
+// template <class InputIterator>
+// void vector<T, Allocator>::assign(
+// 	InputIterator first, InputIterator last,
+// 	typename enable_if<!is_integral<InputIterator>::value &&
+// 						   is_input_iterator<typename iterator_traits<
+// 							   InputIterator>::iterator_category>::value &&
+// 						   !is_forward_iterator<typename iterator_traits<
+// 							   InputIterator>::iterator_category>::value,
+// 					   InputIterator>::type* ) {
 template <class T, class Allocator>
 template <class InputIterator>
 void vector<T, Allocator>::assign(
 	InputIterator first, InputIterator last,
-	typename enable_if<!is_integral<InputIterator>::value,
+	typename enable_if<!is_integral<InputIterator>::value &&
+						   is_input_iterator<InputIterator>::value &&
+						   !is_forward_iterator<InputIterator>::value,
 					   InputIterator>::type* ) {
+	if ( this->capacity() == 0 ) {
+		this->vec_allocate( 1 );
+	} else if ( this->size() > 0 ) {
+		this->clear();
+	}
+	for ( ; first != last; ++first ) {
+		this->push_back( *first );
+	}
+}
+
+// template <class T, class Allocator>
+// template <class ForwardIterator>
+// void vector<T, Allocator>::assign(
+// 	ForwardIterator first, ForwardIterator last,
+// 	typename enable_if<!is_integral<ForwardIterator>::value &&
+// 						   is_forward_iterator<typename iterator_traits<
+// 							   ForwardIterator>::iterator_category>::value,
+// 					   ForwardIterator>::type* ) {
+template <class T, class Allocator>
+template <class ForwardIterator>
+void vector<T, Allocator>::assign(
+	ForwardIterator first, ForwardIterator last,
+	typename enable_if<!is_integral<ForwardIterator>::value &&
+						   is_forward_iterator<ForwardIterator>::value,
+					   ForwardIterator>::type* ) {
 	size_type input_len = static_cast<size_type>( ft::distance( first, last ) );
 	if ( this->capacity() == 0 ) {
 		this->vec_allocate( input_len );
@@ -453,13 +548,9 @@ void vector<T, Allocator>::assign(
 	if ( this->size() ) {
 		this->clear();
 	}
-	// for ( ; first != last; ++_end, ++first ) {
-	// 	_alloc.construct( _end, *first );
-	// }
-	for ( ; input_len; --input_len, ++_end ) {
-		_alloc.construct( _end, T() );
+	for ( ; first != last; ++first, ++_end ) {
+		_alloc.construct( _end, *first );
 	}
-	std::copy( first, last, _begin );
 }
 
 template <class T, class Allocator>
@@ -586,12 +677,76 @@ void vector<T, Allocator>::insert( iterator position, size_type n,
 	}
 }
 
+// template <class T, class Allocator>
+// template <class InputIterator>
+// void vector<T, Allocator>::insert(
+// 	iterator position, InputIterator first, InputIterator last,
+// 	typename enable_if<!is_integral<InputIterator>::value &&
+// 						   is_input_iterator<typename iterator_traits<
+// 							   InputIterator>::iterator_category>::value &&
+// 						   !is_forward_iterator<typename iterator_traits<
+// 							   InputIterator>::iterator_category>::value,
+// 					   InputIterator>::type* ) {
 template <class T, class Allocator>
 template <class InputIterator>
 void vector<T, Allocator>::insert(
 	iterator position, InputIterator first, InputIterator last,
-	typename enable_if<!is_integral<InputIterator>::value,
+	typename enable_if<!is_integral<InputIterator>::value &&
+						   is_input_iterator<InputIterator>::value &&
+						   !is_forward_iterator<InputIterator>::value,
 					   InputIterator>::type* ) {
+	size_type mov_len = _end - position.base();
+	pointer   tmp_begin = _alloc.allocate( mov_len );
+	pointer   tmp_end = tmp_begin;
+	pointer   tmp_end_cap = tmp_begin + mov_len;
+
+	for ( pointer tmp( position.base() ); tmp != position.base() + mov_len;
+		  ++tmp, ++tmp_end ) {
+		_alloc.construct( tmp_end, *tmp );
+		_alloc.destroy( tmp );
+	}
+	_end -= mov_len;
+	pointer recov_begin( _end );
+	try {
+		for ( ; first != last; ++first ) {
+			this->push_back( *first );
+		}
+	} catch ( ... ) {
+		while ( recov_begin != _end ) {
+			_alloc.destroy( --_end );
+		}
+		for ( pointer tmp( tmp_begin ); tmp != tmp_end; ++tmp, ++_end ) {
+			_alloc.construct( _end, *tmp );
+			_alloc.destroy( tmp );
+		}
+		_alloc.deallocate( tmp_begin, tmp_end_cap - tmp_begin );
+		throw;
+	}
+	if ( this->capacity() < this->size() + mov_len ) {
+		this->vec_reallocate( this->size() + mov_len );
+	}
+	for ( pointer tmp( tmp_begin ); tmp != tmp_end; ++tmp, ++_end ) {
+		_alloc.construct( _end, *tmp );
+		_alloc.destroy( tmp );
+	}
+	_alloc.deallocate( tmp_begin, tmp_end_cap - tmp_begin );
+}
+
+// template <class T, class Allocator>
+// template <class ForwardIterator>
+// void vector<T, Allocator>::insert(
+// 	iterator position, ForwardIterator first, ForwardIterator last,
+// 	typename enable_if<!is_integral<ForwardIterator>::value &&
+// 						   is_forward_iterator<typename iterator_traits<
+// 							   ForwardIterator>::iterator_category>::value,
+// 					   ForwardIterator>::type* ) {
+template <class T, class Allocator>
+template <class ForwardIterator>
+void vector<T, Allocator>::insert(
+	iterator position, ForwardIterator first, ForwardIterator last,
+	typename enable_if<!is_integral<ForwardIterator>::value &&
+						   is_forward_iterator<ForwardIterator>::value,
+					   ForwardIterator>::type* ) {
 	size_type input_len = static_cast<size_type>( ft::distance( first, last ) );
 	size_type pos_index = position.base() - _begin;
 
@@ -634,12 +789,12 @@ void vector<T, Allocator>::insert(
 		_end = new_end;
 		_end_cap = new_end_cap;
 	} else {
-		pointer tmp_end = _end;
-		pointer tmp_cpy_end = tmp_end + input_len - 1;
+		pointer tmp_end = _end - 1;
+		pointer tmp_cpy_end = tmp_end + input_len;
 		pointer recov_end = tmp_cpy_end;
-		for ( ; tmp_end != position.base(); --tmp_cpy_end, --tmp_end ) {
-			_alloc.construct( tmp_cpy_end, *( tmp_end - 1 ) );
-			_alloc.destroy( tmp_end - 1 );
+		for ( ; tmp_end + 1 != position.base(); --tmp_cpy_end, --tmp_end ) {
+			_alloc.construct( tmp_cpy_end, *( tmp_end ) );
+			_alloc.destroy( tmp_end );
 		}
 		pointer new_alloc_end( position.base() );
 		try {
@@ -730,8 +885,24 @@ template <class T, class Allocator>
 template <class InputIterator>
 vector<T, Allocator>::vector(
 	InputIterator first, InputIterator last, const allocator_type& alloc,
-	typename enable_if<!is_integral<InputIterator>::value,
+	typename enable_if<!is_integral<InputIterator>::value &&
+						   is_input_iterator<InputIterator>::value &&
+						   !is_forward_iterator<InputIterator>::value,
 					   InputIterator>::type* )
+	: _begin( NULL ), _end( NULL ), _end_cap( NULL ), _alloc( alloc ) {
+	this->vec_allocate( 1 );
+	for ( ; first != last; ++first ) {
+		this->push_back( *first );
+	}
+}
+
+template <class T, class Allocator>
+template <class ForwardIterator>
+vector<T, Allocator>::vector(
+	ForwardIterator first, ForwardIterator last, const allocator_type& alloc,
+	typename enable_if<!is_integral<ForwardIterator>::value &&
+						   is_forward_iterator<ForwardIterator>::value,
+					   ForwardIterator>::type* )
 	: _begin( NULL ), _end( NULL ), _end_cap( NULL ), _alloc( alloc ) {
 	size_type input_len = static_cast<size_type>( ft::distance( first, last ) );
 
@@ -836,6 +1007,6 @@ template <class T, class Allocator>
 void swap( vector<T, Allocator>& x, vector<T, Allocator>& y ) {
 	x.swap( y );
 }
-};  // namespace ft
+}  // namespace ft
 
 #endif

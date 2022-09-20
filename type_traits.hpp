@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/13 23:59:01 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/14 22:20:41 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/20 23:48:23 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@ template <>
 struct is_integral<int> : public true_type {};
 template <>
 struct is_integral<long int> : public true_type {};
-template <>
-struct is_integral<long long int> : public true_type {};
+// template <>
+// struct is_integral<int64_t> : public true_type {};
 template <>
 struct is_integral<unsigned char> : public true_type {};
 template <>
@@ -54,8 +54,62 @@ template <>
 struct is_integral<unsigned int> : public true_type {};
 template <>
 struct is_integral<unsigned long int> : public true_type {};
-template <>
-struct is_integral<unsigned long long int> : public true_type {};
+// template <>
+// struct is_integral<uint64_t> : public true_type {};
+
+// template <class T>
+// struct is_input_iterator : public false_type {};
+// template <>
+// struct is_input_iterator<std::input_iterator_tag> : public true_type {};
+
+template <class T>
+struct has_iterator_category {
+   private:
+	struct two {
+		char lx;
+		char lxx;
+	};
+	template <class U>
+	static two test( ... );
+	template <class U>
+	static char test( typename U::iterator_category* = 0 );
+
+   public:
+	static const bool value = sizeof( test<T>( 0 ) ) == 1;
+};
+
+template <class T1, class T2>
+struct is_convertible
+	: public integral_constant<bool, __is_convertible_to( T1, T2 )> {};
+
+template <class T, class U,
+		  bool = has_iterator_category<iterator_traits<T> >::value>
+struct has_iterator_tag
+	: public integral_constant<
+		  bool, is_convertible<typename iterator_traits<T>::iterator_category,
+							   U>::value> {};
+
+template <class T>
+struct is_input_iterator : public has_iterator_tag<T, std::input_iterator_tag> {
+};
+
+template <class T>
+struct is_forward_iterator
+	: public has_iterator_tag<T, std::forward_iterator_tag> {};
+
+// template <class T>
+// struct is_forward_iterator : public false_type {};
+// template <>
+// struct is_forward_iterator<std::forward_iterator_tag> : public true_type {};
+
+// template <>
+// struct is_forward_iterator<std::bidirectional_iterator_tag> : public
+// true_type {
+// };
+// template <>
+// struct is_forward_iterator<std::random_access_iterator_tag> : public
+// true_type {
+// };
 
 template <bool Cond, class T = void>
 struct enable_if {};
@@ -65,6 +119,6 @@ struct enable_if<true, T> {
 	typedef T type;
 };
 
-};  // namespace ft
+}  // namespace ft
 
 #endif
