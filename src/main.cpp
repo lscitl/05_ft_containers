@@ -200,48 +200,23 @@ void printSize( TESTED_NAMESPACE::vector<T> const &vct,
 // 	};
 // };
 
+#include <sstream>
+
 int main( void ) {
-	std::vector<int> vec;
-	std::vector<int> vec2( 2, 0 );
+	TESTED_NAMESPACE::vector<char> v;
 
-	std::cout << "cap: " << vec.capacity()
-			  << ", begin addr: " << &( *vec.begin() ) << std::endl;
-	vec.insert( vec2.begin(), vec2.begin(), vec2.begin() );
-	std::cout << "cap: " << vec.capacity()
-			  << ", begin addr: " << &( *vec.begin() ) << std::endl;
-	// std::vector<int>              v;
-	// TESTED_NAMESPACE::vector<int> vector;
-	// vector.assign( 1100 * 10000, 11 );
-	// TESTED_NAMESPACE::vector<int> tmp( 500 * 10000, 5 ),
-	// 	tmp2( 1000 * 10000, 10 ), tmp3( 1500 * 10000, 15 ),
-	// 	tmp4( 3000 * 10000, 30 );
-	// v.push_back( vector[2] );
-	// v.push_back( vector.size() );
-	// v.push_back( vector.capacity() );
-	// long *adr1 = reinterpret_cast<long *>( &vector );
-	// long *adr2 = reinterpret_cast<long *>( &tmp );
-	// vector.swap( tmp );
-	// if ( reinterpret_cast<long *>( &vector ) == adr1 &&
-	// 	 reinterpret_cast<long *>( &tmp ) == adr2 )
-	// 	v.push_back( 1 );
-	// v.push_back( vector[2] );
-	// v.push_back( vector.size() );
-	// v.push_back( vector.capacity() );
-	// vector.swap( tmp3 );
-	// v.push_back( vector[2] );
-	// v.push_back( vector.size() );
-	// v.push_back( vector.capacity() );
-	// std::swap( vector, tmp2 );
-	// v.push_back( vector[2] );
-	// v.push_back( vector.size() );
-	// v.push_back( vector.capacity() );
-	// std::swap( vector, tmp4 );
-	// v.push_back( vector[2] );
-	// v.push_back( vector.size() );
-	// v.push_back( vector.capacity() );
+	std::istringstream             str( "1 2 3 4 5 6 7" );
+	std::istreambuf_iterator<char> it( str ), end;
 
-	// for ( std::vector<int>::iterator itr = v.begin(); itr != v.end();
-	// ++itr ) { 	std::cout << *itr << std::endl;
-	// }
+	v.assign( it, end );
+
+	for ( TESTED_NAMESPACE::vector<char>::iterator tmp( v.begin() );
+		  tmp != v.end(); tmp++ ) {
+		std::cout << *tmp << std::endl;
+	}
+
+	std::cout << v.capacity() << std::endl;
+	std::cout << v.size() << std::endl;
+
 	return 0;
 }

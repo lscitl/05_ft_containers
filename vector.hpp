@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/19 23:38:32 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/20 14:55:21 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -453,9 +453,13 @@ void vector<T, Allocator>::assign(
 	if ( this->size() ) {
 		this->clear();
 	}
-	for ( ; first != last; ++_end, ++first ) {
-		_alloc.construct( _end, *first );
+	// for ( ; first != last; ++_end, ++first ) {
+	// 	_alloc.construct( _end, *first );
+	// }
+	for ( ; input_len; --input_len, ++_end ) {
+		_alloc.construct( _end, T() );
 	}
+	std::copy( first, last, _begin );
 }
 
 template <class T, class Allocator>
@@ -488,8 +492,10 @@ template <class T, class Allocator>
 typename vector<T, Allocator>::iterator vector<T, Allocator>::insert(
 	iterator position, const_reference val ) {
 	size_type pos_index = position.base() - _begin;
+	iterator  ret;
 	if ( this->capacity() == 0 ) {
 		this->vec_allocate( 1 );
+		ret = iterator( _end );
 		_alloc.construct( _end++, val );
 	} else if ( this->capacity() == this->size() ) {
 		size_type n = this->recommand_size( this->capacity() + 1 );
@@ -505,7 +511,7 @@ typename vector<T, Allocator>::iterator vector<T, Allocator>::insert(
 			_alloc.construct( new_end, *( p ) );
 			_alloc.destroy( p );
 		}
-		position = iterator( new_end );
+		ret = iterator( new_end );
 		_alloc.construct( new_end++, val );
 		for ( ; p != _end; ++new_end, ++p ) {
 			_alloc.construct( new_end, *( p ) );
@@ -517,24 +523,31 @@ typename vector<T, Allocator>::iterator vector<T, Allocator>::insert(
 		_end_cap = new_end_cap;
 	} else {
 		pointer p = position.base();
-		for ( pointer tmp( _end ); p != tmp; --tmp ) {
-			_alloc.construct( tmp, *( tmp - 1 ) );
-			_alloc.destroy( tmp - 1 );
+		if ( _end != p ) {
+			for ( pointer tmp( _end ); p != tmp; --tmp ) {
+				_alloc.construct( tmp, *( tmp - 1 ) );
+				_alloc.destroy( tmp - 1 );
+			}
 		}
 		++_end;
 		_alloc.construct( p, val );
+		ret = position;
 	}
-	return position;
+	return ret;
 }
 
 template <class T, class Allocator>
 void vector<T, Allocator>::insert( iterator position, size_type n,
 								   const_reference val ) {
 	size_type pos_index = position.base() - _begin;
+	if ( n == 0 ) {
+		return;
+	}
 	if ( this->capacity() == 0 ) {
 		this->vec_allocate( n );
-		for ( pointer tmp( _begin + pos_index ), end( _begin + pos_index + n );
-			  tmp != end; ++tmp, ++end ) {
+		for ( pointer tmp( _begin + pos_index ),
+			  tmp_end( _begin + pos_index + n );
+			  tmp != tmp_end; ++tmp, ++_end ) {
 			_alloc.construct( tmp, val );
 		}
 	} else if ( this->capacity() < this->size() + n ) {
@@ -573,8 +586,6 @@ void vector<T, Allocator>::insert( iterator position, size_type n,
 	}
 }
 
-#include <unistd.h>
-
 template <class T, class Allocator>
 template <class InputIterator>
 void vector<T, Allocator>::insert(
@@ -584,6 +595,9 @@ void vector<T, Allocator>::insert(
 	size_type input_len = static_cast<size_type>( ft::distance( first, last ) );
 	size_type pos_index = position.base() - _begin;
 
+	if ( input_len == 0 ) {
+		return;
+	}
 	if ( this->capacity() < this->size() + input_len ) {
 		size_type rec_size = this->recommand_size( this->size() + input_len );
 		if ( rec_size > this->max_size() )
@@ -620,15 +634,31 @@ void vector<T, Allocator>::insert(
 		_end = new_end;
 		_end_cap = new_end_cap;
 	} else {
-		if ( input_len > 0 ) {
-			pointer tmp_end = _end;
-			pointer tmp_cpy_end = tmp_end + input_len - 1;
-			for ( ; tmp_end != position.base(); --tmp_cpy_end, --tmp_end ) {
-				_alloc.construct( tmp_cpy_end, tmp_end[-1] );
-			}
-			std::copy( first, last, position );
-			_end += input_len;
+		pointer tmp_end = _end;
+		pointer tmp_cpy_end = tmp_end + input_len - 1;
+		pointer recov_end = tmp_cpy_end;
+		for ( ; tmp_end != position.base(); --tmp_cpy_end, --tmp_end ) {
+			_alloc.construct( tmp_cpy_end, *( tmp_end - 1 ) );
+			_alloc.destroy( tmp_end - 1 );
 		}
+		pointer new_alloc_end( position.base() );
+		try {
+			for ( ; first != last; ++first, ++new_alloc_end ) {
+				_alloc.construct( new_alloc_end, *first );
+			}
+		} catch ( ... ) {
+			for ( ; new_alloc_end != position.base(); ) {
+				_alloc.destroy( --new_alloc_end );
+			}
+			for ( pointer recov_begin( position.base() + input_len ),
+				  recov_to( position.base() );
+				  recov_begin != recov_end; ++recov_begin, ++recov_to ) {
+				_alloc.construct( recov_to, *recov_begin );
+				_alloc.destroy( recov_begin );
+			}
+			throw;
+		}
+		_end += input_len;
 	}
 }
 
@@ -643,9 +673,9 @@ typename vector<T, Allocator>::iterator vector<T, Allocator>::erase(
 template <class T, class Allocator>
 typename vector<T, Allocator>::iterator vector<T, Allocator>::erase(
 	iterator first, iterator last ) {
-	size_type del_len = static_cast<size_type>( last.base() - first.base() );
 	size_type move_len = static_cast<size_type>( _end - last.base() );
-	pointer   new_end = _end - del_len;
+	pointer   new_end =
+		_end - static_cast<size_type>( last.base() - first.base() );
 	for ( pointer to( first.base() ), from( last.base() ); move_len;
 		  ++to, ++from, --move_len ) {
 		*to = *from;
