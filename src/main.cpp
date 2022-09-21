@@ -157,26 +157,26 @@ int main( void ) {
 	vct_three.assign( vct.begin(), vct.end() );
 	vct.assign( vct_two.begin(), vct_two.end() );
 	vct_two.assign( 2, 42 );
-	vct_four.assign( 4, 21 );
+	// vct_four.assign( 4, 21 );
 
-	std::cout << "\t### After assign(): ###" << std::endl;
+	// std::cout << "\t### After assign(): ###" << std::endl;
 
-	printSize( vct );
-	printSize( vct_two );
-	printSize( vct_three );
-	printSize( vct_four );
+	// printSize( vct );
+	// printSize( vct_two );
+	// printSize( vct_three );
+	// printSize( vct_four );
 
-	vct_four.assign( 6, 84 );
-	printSize( vct_four );
+	// vct_four.assign( 6, 84 );
+	// printSize( vct_four );
 
-	std::cout << "\t### assign() on enough capacity and low size: ###"
-			  << std::endl;
+	// std::cout << "\t### assign() on enough capacity and low size: ###"
+	// 		  << std::endl;
 
-	vct.assign( 5, 53 );
-	vct_two.assign( vct_three.begin(), vct_three.begin() + 3 );
+	// vct.assign( 5, 53 );
+	// vct_two.assign( vct_three.begin(), vct_three.begin() + 3 );
 
-	printSize( vct );
-	printSize( vct_two );
+	// printSize( vct );
+	// printSize( vct_two );
 
 	return ( 0 );
 }
