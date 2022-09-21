@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   type_traits.hpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: seseo <seseo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/13 23:59:01 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/21 23:30:01 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/22 01:20:04 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #define __TYPE_TRAITS_H__
 
 #include <string>
+#include <stdint.h>
 
 namespace ft {
 

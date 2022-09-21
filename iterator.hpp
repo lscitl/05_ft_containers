@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   iterator.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
+/*   By: seseo <seseo@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/21 23:30:52 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/22 01:15:04 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,15 @@ struct iterator_traits<T*> {
 	typedef T*                              pointer;
 	typedef T&                              reference;
 	typedef std::random_access_iterator_tag iterator_category;
+};
+
+template <>
+struct iterator_traits<int> {
+	typedef std::ptrdiff_t difference_type;
+	typedef int            value_type;
+	typedef int*           pointer;
+	typedef int&           reference;
+	typedef void           iterator_category;
 };
 
 template <class T>
