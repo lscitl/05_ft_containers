@@ -10,10 +10,14 @@ namespace ft = std;
 // #include <map.hpp>
 // #include <stack.hpp>
 #include "../vector.hpp"
+#include "../stack.hpp"
 #endif
 
 #include <stdlib.h>
 
+#include <stack>
+#include <vector>
+#include <deque>
 #define MAX_RAM 4294967296
 #define BUFFER_SIZE 4096
 struct Buffer {
@@ -23,236 +27,26 @@ struct Buffer {
 
 #define COUNT ( MAX_RAM / (int)sizeof( Buffer ) )
 
-// template<typename T>
-// class MutantStack : public ft::stack<T>
-// {
-// public:
-// 	MutantStack() {}
-// 	MutantStack(const MutantStack<T>& src) { *this = src; }
-// 	MutantStack<T>& operator=(const MutantStack<T>& rhs)
-// 	{
-// 		this->c = rhs.c;
-// 		return *this;
-// 	}
-// 	~MutantStack() {}
+#define _vector ft::vector
+#define _stack ft::stack
 
-// 	typedef typename ft::stack<T>::container_type::iterator iterator;
-
-// 	iterator begin() { return this->c.begin(); }
-// 	iterator end() { return this->c.end(); }
-// };
-
-// int main( int argc, char** argv ) {
-// 	if ( argc != 2 ) {
-// 		std::cerr << "Usage: ./test seed" << std::endl;
-// 		std::cerr << "Provide a seed please" << std::endl;
-// 		std::cerr << "Count value:" << COUNT << std::endl;
-// 		return 1;
-// 	}
-// 	const int seed = atoi( argv[1] );
-// 	srand( seed );
-
-// 	ft::vector<std::string> vector_str;
-// 	ft::vector<int>         vector_int;
-// 	// ft::stack<int> stack_int;
-// 	ft::vector<Buffer> vector_buffer;
-// 	// ft::stack<Buffer, std::deque<Buffer> > stack_deq_buffer;
-// 	// ft::map<int, int> map_int;
-
-// 	for ( int i = 0; i < COUNT; i++ ) {
-// 		vector_buffer.push_back( Buffer() );
-// 	}
-
-// 	for ( int i = 0; i < COUNT; i++ ) {
-// 		const int idx = rand() % COUNT;
-// 		vector_buffer[idx].idx = 5;
-// 	}
-// 	ft::vector<Buffer> tmp;
-// 	tmp.swap( vector_buffer );
-
-// 	try {
-// 		for ( int i = 0; i < COUNT; i++ ) {
-// 			const int idx = rand() % COUNT;
-// 			vector_buffer.at( idx );
-// 			std::cerr << "Error: THIS VECTOR SHOULD BE EMPTY!!" << std::endl;
-// 		}
-// 	} catch ( const std::exception& e ) {
-// 		// NORMAL ! :P
-// 	}
-// 	swap( tmp, vector_buffer );
-// 	std::cout << "end" << std::endl;
-
-// 	// 	for (int i = 0; i < COUNT; ++i)
-// 	// 	{
-// 	// 		map_int.insert(ft::make_pair(rand(), rand()));
-// 	// 	}
-
-// 	// 	int sum = 0;
-// 	// 	for (int i = 0; i < 10000; i++)
-// 	// 	{
-// 	// 		int access = rand();
-// 	// 		sum += map_int[access];
-// 	// 	}
-// 	// 	std::cout << "should be constant with the same seed: " << sum <<
-// 	// std::endl;
-
-// 	// 	{
-// 	// 		ft::map<int, int> copy = map_int;
-// 	// 	}
-// 	// 	MutantStack<char> iterable_stack;
-// 	// 	for (char letter = 'a'; letter <= 'z'; letter++)
-// 	// 		iterable_stack.push(letter);
-// 	// 	for (MutantStack<char>::iterator it = iterable_stack.begin(); it !=
-// 	// iterable_stack.end(); it++)
-// 	// 	{
-// 	// 		std::cout << *it;
-// 	// 	}
-// 	// 	std::cout << std::endl;
-// 	return ( 0 );
-// }
-
-#include <vector>
-#include <memory>
-#define TESTED_NAMESPACE ft
-#define T_SIZE_TYPE typename TESTED_NAMESPACE::vector<T>::size_type
-
-#include <iostream>
-#include <string>
-
-template <typename T>
-void printSize( TESTED_NAMESPACE::vector<T> const &vct,
-				bool                               print_content = true ) {
-	const T_SIZE_TYPE size = vct.size();
-	const T_SIZE_TYPE capacity = vct.capacity();
-	const std::string isCapacityOk = ( capacity >= size ) ? "OK" : "KO";
-	// Cannot limit capacity's max value because it's implementation dependent
-
-	std::cout << "size: " << size << std::endl;
-	std::cout << "capacity: " << isCapacityOk << std::endl;
-	std::cout << "max_size: " << vct.max_size() << std::endl;
-	if ( print_content ) {
-		typename TESTED_NAMESPACE::vector<T>::const_iterator it = vct.begin();
-		typename TESTED_NAMESPACE::vector<T>::const_iterator ite = vct.end();
-		std::cout << std::endl << "Content is:" << std::endl;
-		for ( ; it != ite; ++it ) std::cout << "- " << *it << std::endl;
+int main() {
+	_stack<int>      stk;
+	std::vector<int> v;
+	_vector<int>     deque;
+	for ( int i = 0; i < 100 * 10000; ++i ) deque.push_back( i );
+	for ( int i = 100 * 10000; i < 200 * 10000; ++i ) stk.push( i );
+	_stack<int> stack( deque );
+	_stack<int> stack2( stk );
+	_stack<int> stack3;
+	stack3 = stack2;
+	while ( stack.size() > 0 ) {
+		v.push_back( stack.top() );
+		stack.pop();
 	}
-	std::cout << "###############################################" << std::endl;
+	while ( stack2.size() > 0 ) {
+		v.push_back( stack2.top() );
+		stack2.pop();
+	}
+	return 0;
 }
-
-#define TESTED_TYPE int
-
-int main( void ) {
-	TESTED_NAMESPACE::vector<TESTED_TYPE> vct( 7 );
-	TESTED_NAMESPACE::vector<TESTED_TYPE> vct_two( 4 );
-	TESTED_NAMESPACE::vector<TESTED_TYPE> vct_three;
-	TESTED_NAMESPACE::vector<TESTED_TYPE> vct_four;
-
-	for ( unsigned long int i = 0; i < vct.size(); ++i )
-		vct[i] = ( vct.size() - i ) * 3;
-	for ( unsigned long int i = 0; i < vct_two.size(); ++i )
-		vct_two[i] = ( vct_two.size() - i ) * 5;
-	printSize( vct );
-	printSize( vct_two );
-
-	vct_three.assign( vct.begin(), vct.end() );
-	vct.assign( vct_two.begin(), vct_two.end() );
-	vct_two.assign( 2, 42 );
-	// vct_four.assign( 4, 21 );
-
-	// std::cout << "\t### After assign(): ###" << std::endl;
-
-	// printSize( vct );
-	// printSize( vct_two );
-	// printSize( vct_three );
-	// printSize( vct_four );
-
-	// vct_four.assign( 6, 84 );
-	// printSize( vct_four );
-
-	// std::cout << "\t### assign() on enough capacity and low size: ###"
-	// 		  << std::endl;
-
-	// vct.assign( 5, 53 );
-	// vct_two.assign( vct_three.begin(), vct_three.begin() + 3 );
-
-	// printSize( vct );
-	// printSize( vct_two );
-
-	return ( 0 );
-}
-
-// class B {
-//    public:
-// 	char *l;
-// 	int   i;
-// 	B() : l( NULL ), i( 1 ){};
-// 	B( const int &ex ) {
-// 		this->i = ex;
-// 		this->l = new char( 'a' );
-// 	};
-// 	virtual ~B() {
-// 		delete this->l;
-// 		this->l = NULL;
-// 	};
-// };
-
-// class A : public B {
-//    public:
-// 	A() : B(){};
-// 	A( const B *ex ) {
-// 		this->l = new char( *( ex->l ) );
-// 		this->i = ex->i;
-// 		if ( ex->i == -1 )
-// 			throw "n";
-// 	}
-// 	~A() {
-// 		delete this->l;
-// 		this->l = NULL;
-// 	};
-// };
-
-// #include <sstream>
-// #include <list>
-
-// int main( void ) {
-// 	int arr[20];
-
-// 	for ( int i = 0; i < 20; i++ ) {
-// 		arr[i] = i;
-// 	}
-
-// 	std::list<int> li( arr, arr + 20 );
-
-// 	// TESTED_NAMESPACE::vector<int> v( arr, arr + 20 );
-
-// 	std::string aa( "aaa" );
-// 	{ TESTED_NAMESPACE::vector<int> v( 64, 1 ); }
-// 	TESTED_NAMESPACE::vector<int> v( 0, -1 );
-
-// 	// v.insert( v.begin() + 3, li.begin(), li.end() );
-// 	// std::istringstream             str( "1 2 3 4 5 6 7" );
-// 	// std::istreambuf_iterator<char> it( str ), end;
-
-// 	// v.assign( it, end );
-
-// 	// std::deque<char> str;
-// 	// str.push_back( '1' );
-// 	// str.push_back( '2' );
-// 	// str.push_back( '3' );
-// 	// str.push_back( '4' );
-// 	// str.push_back( '5' );
-// 	// v.assign( str.begin(), str.end() );
-
-// 	// v.push_back( 64 );
-// 	// v.assign( v.begin(), v.begin() + 21 );
-
-// 	for ( TESTED_NAMESPACE::vector<int>::iterator tmp( v.begin() );
-// 		  tmp != v.end(); tmp++ ) {
-// 		std::cout << *tmp << std::endl;
-// 	}
-
-// 	std::cout << v.capacity() << std::endl;
-// 	std::cout << v.size() << std::endl;
-
-// 	return 0;
-// }
