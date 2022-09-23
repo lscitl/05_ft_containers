@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/21 22:23:03 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/23 23:08:40 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,160 +14,10 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-#include <utility>
-#include <memory>
-#include <climits>
-#include <limits>
-#include <stdexcept>
-#include <algorithm>
-#include "iterator.hpp"
-#include "type_traits.hpp"
-#include "algorithm.hpp"
+#include "lexico_cmp.hpp"
+#include "vector_iterator.hpp"
 
 namespace ft {
-
-template <class T>
-class vector_iterator {
-   public:
-	typedef typename iterator_traits<T>::value_type        value_type;
-	typedef typename iterator_traits<T>::pointer           pointer;
-	typedef typename iterator_traits<T>::reference         reference;
-	typedef typename iterator_traits<T>::difference_type   difference_type;
-	typedef typename iterator_traits<T>::iterator_category iterator_category;
-
-   protected:
-	pointer _current;
-
-   public:
-	vector_iterator() : _current( NULL ) {
-	}
-
-	explicit vector_iterator( pointer x ) : _current( x ) {
-	}
-
-	template <class U>
-	vector_iterator( const vector_iterator<U>& u ) : _current( u.base() ) {
-	}
-
-	template <class U>
-	vector_iterator& operator=( const vector_iterator<U>& u ) {
-		_current = u.base();
-		return *this;
-	}
-
-	pointer base() const {
-		return _current;
-	};
-
-	reference operator*() const {
-		return *_current;
-	}
-
-	pointer operator->() const {
-		return &( operator*() );
-	}
-
-	vector_iterator& operator++() {
-		++_current;
-		return *this;
-	}
-
-	vector_iterator operator++( int ) {
-		vector_iterator ret( *this );
-		++_current;
-		return ret;
-	}
-
-	vector_iterator& operator--() {
-		--_current;
-		return *this;
-	}
-
-	vector_iterator operator--( int ) {
-		vector_iterator ret( *this );
-		--_current;
-		return ret;
-	}
-
-	vector_iterator operator+( difference_type n ) const {
-		return vector_iterator( _current + n );
-	}
-
-	vector_iterator& operator+=( difference_type n ) {
-		_current += n;
-		return *this;
-	}
-
-	vector_iterator operator-( difference_type n ) const {
-		return vector_iterator( _current - n );
-	}
-
-	vector_iterator& operator-=( difference_type n ) {
-		_current -= n;
-		return *this;
-	}
-
-	reference operator[]( difference_type n ) const {
-		return this->base()[n];
-	}
-};
-
-template <class Iterator>
-vector_iterator<Iterator> operator+(
-	typename vector_iterator<Iterator>::difference_type n,
-	const vector_iterator<Iterator>&                    iter ) {
-	return iter + n;
-}
-
-template <class Iterator>
-typename vector_iterator<Iterator>::difference_type operator-(
-	const vector_iterator<Iterator>& lhs,
-	const vector_iterator<Iterator>& rhs ) {
-	return lhs.base() - rhs.base();
-}
-
-template <class Iterator1, class Iterator2>
-typename vector_iterator<Iterator1>::difference_type operator-(
-	const vector_iterator<Iterator1>& lhs,
-	const vector_iterator<Iterator2>& rhs ) {
-	return lhs.base() - rhs.base();
-}
-
-template <class Iterator1, class Iterator2>
-bool operator==( const ft::vector_iterator<Iterator1>& lhs,
-				 const ft::vector_iterator<Iterator2>& rhs ) {
-	return lhs.base() == rhs.base();
-}
-
-template <class Iterator1, class Iterator2>
-bool operator!=( const ft::vector_iterator<Iterator1>& lhs,
-				 const ft::vector_iterator<Iterator2>& rhs ) {
-	return lhs.base() != rhs.base();
-}
-
-template <class Iterator1, class Iterator2>
-bool operator<( const ft::vector_iterator<Iterator1>& lhs,
-				const ft::vector_iterator<Iterator2>& rhs ) {
-	return lhs.base() < rhs.base();
-}
-
-template <class Iterator1, class Iterator2>
-bool operator<=( const ft::vector_iterator<Iterator1>& lhs,
-				 const ft::vector_iterator<Iterator2>& rhs ) {
-	return lhs.base() <= rhs.base();
-}
-
-template <class Iterator1, class Iterator2>
-bool operator>( const ft::vector_iterator<Iterator1>& lhs,
-				const ft::vector_iterator<Iterator2>& rhs ) {
-	return lhs.base() > rhs.base();
-}
-
-template <class Iterator1, class Iterator2>
-bool operator>=( const ft::vector_iterator<Iterator1>& lhs,
-				 const ft::vector_iterator<Iterator2>& rhs ) {
-	return lhs.base() >= rhs.base();
-}
 
 template <class T, class Allocator = std::allocator<T> >
 class vector {
@@ -196,9 +46,6 @@ class vector {
 	void      vec_reallocate( size_type n );
 	size_type recommand_size( size_type n ) const;
 	pointer range_construct( pointer start, pointer end, const_reference val );
-	pointer copy_range_to_uninitialized( pointer copy_from_start,
-										 pointer copy_from_end,
-										 pointer copy_to );
 
    public:
 	// Constructor, Copy Assignment Operator, Destructor
@@ -228,19 +75,10 @@ class vector {
 	// Capacity
 	void      resize( size_type n, value_type val = value_type() );
 	void      reserve( size_type n );
-	size_type max_size( void ) const {
-		return std::min<size_type>(
-			_alloc.max_size(), std::numeric_limits<difference_type>::max() );
-	}
-	size_type size( void ) const {
-		return static_cast<size_type>( _end - _begin );
-	}
-	size_type capacity( void ) const {
-		return static_cast<size_type>( _end_cap - _begin );
-	}
-	bool empty() const {
-		return this->size() == size_type( 0 );
-	}
+	size_type max_size( void ) const;
+	size_type size( void ) const;
+	size_type capacity( void ) const;
+	bool      empty() const;
 
 	// Element access
 	reference       operator[]( size_type n );
@@ -253,15 +91,6 @@ class vector {
 	const_reference back() const;
 
 	// Modifier
-	// template <class InputIterator>
-	// void assign(
-	// 	InputIterator first, InputIterator last,
-	// 	typename enable_if<!is_integral<InputIterator>::value &&
-	// 						   is_input_iterator<typename iterator_traits<
-	// 							   InputIterator>::iterator_category>::value &&
-	// 						   !is_forward_iterator<typename iterator_traits<
-	// 							   InputIterator>::iterator_category>::value,
-	// 					   InputIterator>::type* = 0 );
 	template <class InputIterator>
 	void assign(
 		InputIterator first, InputIterator last,
@@ -269,19 +98,14 @@ class vector {
 							   is_input_iterator<InputIterator>::value &&
 							   !is_forward_iterator<InputIterator>::value,
 						   InputIterator>::type* = 0 );
-	// template <class ForwardIterator>
-	// void assign(
-	// 	ForwardIterator first, ForwardIterator last,
-	// 	typename enable_if<!is_integral<ForwardIterator>::value &&
-	// 						   is_forward_iterator<typename iterator_traits<
-	// 							   ForwardIterator>::iterator_category>::value,
-	// 					   ForwardIterator>::type* = 0 );
+
 	template <class ForwardIterator>
 	void assign(
 		ForwardIterator first, ForwardIterator last,
 		typename enable_if<!is_integral<ForwardIterator>::value &&
 							   is_forward_iterator<ForwardIterator>::value,
 						   ForwardIterator>::type* = 0 );
+
 	void assign( size_type n, const_reference val );
 	void push_back( const_reference val );
 	void pop_back();
@@ -289,15 +113,6 @@ class vector {
 	iterator insert( iterator position, const_reference val );
 	void     insert( iterator position, size_type n, const_reference val );
 
-	// template <class InputIterator>
-	// void insert(
-	// 	iterator position, InputIterator first, InputIterator last,
-	// 	typename enable_if<!is_integral<InputIterator>::value &&
-	// 						   is_input_iterator<typename iterator_traits<
-	// 							   InputIterator>::iterator_category>::value &&
-	// 						   !is_forward_iterator<typename iterator_traits<
-	// 							   InputIterator>::iterator_category>::value,
-	// 					   InputIterator>::type* = 0 );
 	template <class InputIterator>
 	void insert(
 		iterator position, InputIterator first, InputIterator last,
@@ -306,13 +121,6 @@ class vector {
 							   !is_forward_iterator<InputIterator>::value,
 						   InputIterator>::type* = 0 );
 
-	// template <class ForwardIterator>
-	// void insert(
-	// 	iterator position, ForwardIterator first, ForwardIterator last,
-	// 	typename enable_if<!is_integral<ForwardIterator>::value &&
-	// 						   is_forward_iterator<typename iterator_traits<
-	// 							   ForwardIterator>::iterator_category>::value,
-	// 					   ForwardIterator>::type* = 0 );
 	template <class ForwardIterator>
 	void insert(
 		iterator position, ForwardIterator first, ForwardIterator last,
@@ -326,35 +134,17 @@ class vector {
 	void     clear();
 
 	// Allocator
-	allocator_type get_allocator() const {
-		return _alloc;
-	}
+	allocator_type get_allocator() const;
 
 	// Iterators
-	iterator begin() {
-		return iterator( _begin );
-	}
-	const_iterator begin() const {
-		return const_iterator( _begin );
-	}
-	iterator end() {
-		return iterator( _end );
-	}
-	const_iterator end() const {
-		return const_iterator( _end );
-	}
-	reverse_iterator rbegin() {
-		return reverse_iterator( this->end() );
-	}
-	const_reverse_iterator rbegin() const {
-		return const_reverse_iterator( this->end() );
-	}
-	reverse_iterator rend() {
-		return reverse_iterator( this->begin() );
-	}
-	const_reverse_iterator rend() const {
-		return const_reverse_iterator( this->begin() );
-	}
+	iterator               begin();
+	const_iterator         begin() const;
+	iterator               end();
+	const_iterator         end() const;
+	reverse_iterator       rbegin();
+	const_reverse_iterator rbegin() const;
+	reverse_iterator       rend();
+	const_reverse_iterator rend() const;
 };
 
 template <class T, class Allocator>
@@ -407,18 +197,7 @@ typename vector<T, Allocator>::pointer vector<T, Allocator>::range_construct(
 	return end;
 }
 
-template <class T, class Allocator>
-typename vector<T, Allocator>::pointer
-vector<T, Allocator>::copy_range_to_uninitialized( pointer copy_from_start,
-												   pointer copy_from_end,
-												   pointer copy_to ) {
-	for ( ; copy_from_start != copy_from_end; ++copy_from_start, ++copy_to ) {
-		_alloc.construct( copy_to, *copy_from_start );
-		_alloc.destory( copy_from_start );
-	}
-	return end;
-}
-
+// Capacity
 template <class T, class Allocator>
 void vector<T, Allocator>::resize( size_type n, value_type val ) {
 	if ( this->size() >= n ) {
@@ -444,6 +223,30 @@ void vector<T, Allocator>::reserve( size_type n ) {
 	} else if ( this->capacity() < n ) {
 		this->vec_reallocate( n );
 	}
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::size_type vector<T, Allocator>::max_size(
+	void ) const {
+	return std::min<size_type>( _alloc.max_size(),
+								std::numeric_limits<difference_type>::max() );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::size_type vector<T, Allocator>::size(
+	void ) const {
+	return static_cast<size_type>( _end - _begin );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::size_type vector<T, Allocator>::capacity(
+	void ) const {
+	return static_cast<size_type>( _end_cap - _begin );
+}
+
+template <class T, class Allocator>
+bool vector<T, Allocator>::empty() const {
+	return this->size() == size_type( 0 );
 }
 
 template <class T, class Allocator>
@@ -496,16 +299,6 @@ typename vector<T, Allocator>::const_reference vector<T, Allocator>::back()
 	return *( _end - 1 );
 }
 
-// template <class T, class Allocator>
-// template <class InputIterator>
-// void vector<T, Allocator>::assign(
-// 	InputIterator first, InputIterator last,
-// 	typename enable_if<!is_integral<InputIterator>::value &&
-// 						   is_input_iterator<typename iterator_traits<
-// 							   InputIterator>::iterator_category>::value &&
-// 						   !is_forward_iterator<typename iterator_traits<
-// 							   InputIterator>::iterator_category>::value,
-// 					   InputIterator>::type* ) {
 template <class T, class Allocator>
 template <class InputIterator>
 void vector<T, Allocator>::assign(
@@ -524,14 +317,6 @@ void vector<T, Allocator>::assign(
 	}
 }
 
-// template <class T, class Allocator>
-// template <class ForwardIterator>
-// void vector<T, Allocator>::assign(
-// 	ForwardIterator first, ForwardIterator last,
-// 	typename enable_if<!is_integral<ForwardIterator>::value &&
-// 						   is_forward_iterator<typename iterator_traits<
-// 							   ForwardIterator>::iterator_category>::value,
-// 					   ForwardIterator>::type* ) {
 template <class T, class Allocator>
 template <class ForwardIterator>
 void vector<T, Allocator>::assign(
@@ -677,16 +462,6 @@ void vector<T, Allocator>::insert( iterator position, size_type n,
 	}
 }
 
-// template <class T, class Allocator>
-// template <class InputIterator>
-// void vector<T, Allocator>::insert(
-// 	iterator position, InputIterator first, InputIterator last,
-// 	typename enable_if<!is_integral<InputIterator>::value &&
-// 						   is_input_iterator<typename iterator_traits<
-// 							   InputIterator>::iterator_category>::value &&
-// 						   !is_forward_iterator<typename iterator_traits<
-// 							   InputIterator>::iterator_category>::value,
-// 					   InputIterator>::type* ) {
 template <class T, class Allocator>
 template <class InputIterator>
 void vector<T, Allocator>::insert(
@@ -732,14 +507,6 @@ void vector<T, Allocator>::insert(
 	_alloc.deallocate( tmp_begin, tmp_end_cap - tmp_begin );
 }
 
-// template <class T, class Allocator>
-// template <class ForwardIterator>
-// void vector<T, Allocator>::insert(
-// 	iterator position, ForwardIterator first, ForwardIterator last,
-// 	typename enable_if<!is_integral<ForwardIterator>::value &&
-// 						   is_forward_iterator<typename iterator_traits<
-// 							   ForwardIterator>::iterator_category>::value,
-// 					   ForwardIterator>::type* ) {
 template <class T, class Allocator>
 template <class ForwardIterator>
 void vector<T, Allocator>::insert(
@@ -862,7 +629,7 @@ void vector<T, Allocator>::clear() {
 	}
 }
 
-// Constructor
+// Constructor, Copy Assignment Operator, Destructor
 template <class T, class Allocator>
 vector<T, Allocator>::vector( const allocator_type& alloc )
 	: _begin( NULL ), _end( NULL ), _end_cap( NULL ), _alloc( alloc ) {
@@ -962,14 +729,67 @@ vector<T, Allocator>& vector<T, Allocator>::operator=(
 	return *this;
 }
 
+// Allocator
+template <class T, class Allocator>
+typename vector<T, Allocator>::allocator_type
+vector<T, Allocator>::get_allocator() const {
+	return _alloc;
+}
+
+// Iterators
+template <class T, class Allocator>
+typename vector<T, Allocator>::iterator vector<T, Allocator>::begin() {
+	return iterator( _begin );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_iterator vector<T, Allocator>::begin()
+	const {
+	return const_iterator( _begin );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::iterator vector<T, Allocator>::end() {
+	return iterator( _end );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_iterator vector<T, Allocator>::end()
+	const {
+	return const_iterator( _end );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::reverse_iterator vector<T, Allocator>::rbegin() {
+	return reverse_iterator( this->end() );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_reverse_iterator
+vector<T, Allocator>::rbegin() const {
+	return const_reverse_iterator( this->end() );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::reverse_iterator vector<T, Allocator>::rend() {
+	return reverse_iterator( this->begin() );
+}
+
+template <class T, class Allocator>
+typename vector<T, Allocator>::const_reverse_iterator
+vector<T, Allocator>::rend() const {
+	return const_reverse_iterator( this->begin() );
+}
+
+// Comparison operator
 template <class T, class Alloc>
 bool operator==( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
 	if ( lhs.size() != rhs.size() )
 		return false;
-	typename vector<T, Alloc>::const_iterator lbegin = lhs.begin();
-	typename vector<T, Alloc>::const_iterator lend = lhs.end();
-	typename vector<T, Alloc>::const_iterator rbegin = rhs.begin();
-	typename vector<T, Alloc>::const_iterator rend = rhs.end();
+	typename vector<T, Alloc>::const_pointer lbegin = lhs.begin().base();
+	typename vector<T, Alloc>::const_pointer lend = lhs.end().base();
+	typename vector<T, Alloc>::const_pointer rbegin = rhs.begin().base();
+	typename vector<T, Alloc>::const_pointer rend = rhs.end().base();
 	for ( ; lbegin != lend; ++lbegin, ++rbegin ) {
 		if ( rbegin == rend || *lbegin != *rbegin )
 			return false;
@@ -978,7 +798,6 @@ bool operator==( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
 }
 
 template <class T, class Alloc>
-
 bool operator!=( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
 	return !( lhs == rhs );
 }
