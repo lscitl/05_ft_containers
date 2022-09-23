@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   iterator.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: seseo <seseo@student.42.fr>                +#+  +:+       +#+        */
+/*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/22 01:15:04 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/23 23:52:40 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,15 +28,6 @@ struct iterator_traits {
 	typedef typename Iter::iterator_category iterator_category;
 };
 
-template <class T>
-struct iterator_traits<T*> {
-	typedef std::ptrdiff_t                  difference_type;
-	typedef T                               value_type;
-	typedef T*                              pointer;
-	typedef T&                              reference;
-	typedef std::random_access_iterator_tag iterator_category;
-};
-
 template <>
 struct iterator_traits<int> {
 	typedef std::ptrdiff_t difference_type;
@@ -44,6 +35,15 @@ struct iterator_traits<int> {
 	typedef int*           pointer;
 	typedef int&           reference;
 	typedef void           iterator_category;
+};
+
+template <class T>
+struct iterator_traits<T*> {
+	typedef std::ptrdiff_t                  difference_type;
+	typedef T                               value_type;
+	typedef T*                              pointer;
+	typedef T&                              reference;
+	typedef std::random_access_iterator_tag iterator_category;
 };
 
 template <class T>
