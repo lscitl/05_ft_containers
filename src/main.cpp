@@ -13,11 +13,6 @@ namespace ft = std;
 #include "../stack.hpp"
 #endif
 
-#include <stdlib.h>
-
-#include <stack>
-#include <vector>
-#include <deque>
 #define MAX_RAM 4294967296
 #define BUFFER_SIZE 4096
 struct Buffer {
@@ -26,6 +21,8 @@ struct Buffer {
 };
 
 #define COUNT ( MAX_RAM / (int)sizeof( Buffer ) )
+
+#include <vector>
 
 #define _vector ft::vector
 #define _stack ft::stack
