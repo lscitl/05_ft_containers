@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/23 23:08:40 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/27 00:39:13 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 #include "lexico_cmp.hpp"
 #include "vector_iterator.hpp"
+#include <vector>
 
 namespace ft {
 
@@ -52,7 +53,6 @@ class vector {
 	explicit vector( const allocator_type& alloc = allocator_type() );
 	explicit vector( size_type n, const_reference val = value_type(),
 					 const allocator_type& alloc = allocator_type() );
-
 	template <class InputIterator>
 	vector( InputIterator first, InputIterator last,
 			const allocator_type& alloc = allocator_type(),
@@ -91,6 +91,7 @@ class vector {
 	const_reference back() const;
 
 	// Modifier
+	void assign( size_type n, const_reference val );
 	template <class InputIterator>
 	void assign(
 		InputIterator first, InputIterator last,
@@ -106,13 +107,11 @@ class vector {
 							   is_forward_iterator<ForwardIterator>::value,
 						   ForwardIterator>::type* = 0 );
 
-	void assign( size_type n, const_reference val );
 	void push_back( const_reference val );
 	void pop_back();
 
 	iterator insert( iterator position, const_reference val );
 	void     insert( iterator position, size_type n, const_reference val );
-
 	template <class InputIterator>
 	void insert(
 		iterator position, InputIterator first, InputIterator last,

@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/23 23:52:40 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/27 01:28:02 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,14 +28,23 @@ struct iterator_traits {
 	typedef typename Iter::iterator_category iterator_category;
 };
 
-template <>
-struct iterator_traits<int> {
-	typedef std::ptrdiff_t difference_type;
-	typedef int            value_type;
-	typedef int*           pointer;
-	typedef int&           reference;
-	typedef void           iterator_category;
-};
+// template <class T>
+// struct iterator_traits {
+// 	typedef std::ptrdiff_t difference_type;
+// 	typedef T              value_type;
+// 	typedef T*             pointer;
+// 	typedef T&             reference;
+// 	typedef void           iterator_category;
+// };
+
+// template <>
+// struct iterator_traits<int> {
+// 	typedef std::ptrdiff_t difference_type;
+// 	typedef int            value_type;
+// 	typedef int*           pointer;
+// 	typedef int&           reference;
+// 	typedef void           iterator_category;
+// };
 
 template <class T>
 struct iterator_traits<T*> {
@@ -46,14 +55,14 @@ struct iterator_traits<T*> {
 	typedef std::random_access_iterator_tag iterator_category;
 };
 
-template <class T>
-struct iterator_traits<const T*> {
-	typedef std::ptrdiff_t                  difference_type;
-	typedef const T                         value_type;
-	typedef const T*                        pointer;
-	typedef const T&                        reference;
-	typedef std::random_access_iterator_tag iterator_category;
-};
+// template <class T>
+// struct iterator_traits<const T*> {
+// 	typedef std::ptrdiff_t                  difference_type;
+// 	typedef const T                         value_type;
+// 	typedef const T*                        pointer;
+// 	typedef const T&                        reference;
+// 	typedef std::random_access_iterator_tag iterator_category;
+// };
 
 template <class Category, class T, class Distance = ptrdiff_t,
 		  class Pointer = T*, class Reference = T&>
@@ -237,20 +246,38 @@ bool operator>=( const ft::reverse_iterator<Iterator1>& lhs,
 	return lhs.base() <= rhs.base();
 }
 
-template <class T>
-struct has_iterator_category {
+// template <typename T>
+// class has_iterator_category {
+//    private:
+// 	typedef char one;
+// 	typedef struct {
+// 		char x[2];
+// 	} two;
+// 	template <typename C>
+// 	static one test( typename C::* );
+// 	template <typename C>
+// 	static two test( ... );
+
+//    public:
+// 	static const bool value =
+// 		sizeof( has_iterator_category<T>::test<T>( 0 ) ) == 1;
+// };
+
+template <typename T>
+class has_iterator_category {
    private:
-	struct two {
-		char lx;
-		char lxx;
-	};
-	template <class U>
-	static two test( ... );
-	template <class U>
-	static char test( typename U::iterator_category* = 0 );
+	typedef char One;
+	typedef struct {
+		char x[2];
+	} Two;
+	template <typename C>
+	static One test( int C::* );
+	template <typename C>
+	static Two test( ... );
 
    public:
-	static const bool value = sizeof( test<T>( 0 ) ) == 1;
+	static const bool value =
+		sizeof( has_iterator_category<T>::test<T>( 0 ) ) == 1;
 };
 
 template <class T>
