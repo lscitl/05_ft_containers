@@ -24,26 +24,15 @@ struct Buffer {
 
 #include <vector>
 
-#define _vector ft::vector
-#define _stack ft::stack
+#define _vector std::vector
 
 int main() {
-	_stack<int>      stk;
-	std::vector<int> v;
-	_vector<int>     deque;
-	for ( int i = 0; i < 100 * 10000; ++i ) deque.push_back( i );
-	for ( int i = 100 * 10000; i < 200 * 10000; ++i ) stk.push( i );
-	_stack<int> stack( deque );
-	_stack<int> stack2( stk );
-	_stack<int> stack3;
-	stack3 = stack2;
-	while ( stack.size() > 0 ) {
-		v.push_back( stack.top() );
-		stack.pop();
-	}
-	while ( stack2.size() > 0 ) {
-		v.push_back( stack2.top() );
-		stack2.pop();
-	}
+	_vector<int>::iterator itr;
+	_vector<int>           v( 10, 1 );
+	int                   *a[10];
+
+	itr = v.begin();
+	std::cout << itr.base() << std::endl;
+
 	return 0;
 }

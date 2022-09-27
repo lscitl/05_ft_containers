@@ -6,13 +6,15 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 00:37:15 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/27 22:23:48 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 #ifndef __RBTREE_H__
 #define __RBTREE_H__
+
+#include <iterator>
 
 // 1. Every node is either red or black.
 // 2. Root node is black.
@@ -21,12 +23,10 @@
 // 5. Every path from a given node to any of its descendant NIL nodes goes
 // through the same number of black nodes.
 
-typedef bool       rbtree_color;
-const rbtree_color rbtree_red = false;
-const rbtree_color rbtree_black = true;
+typedef enum color_t { RED, BLACK };
 
 struct rbtree_node_base {
-	typedef rbtree_color      color_type;
+	typedef color_t           color_type;
 	typedef rbtree_node_base* base_ptr;
 
 	color_type color;
@@ -70,9 +70,32 @@ struct rbtree_base_iterator_base {
 				node = node->left;
 			}
 		} else {
-			ndoe = node->parent;
+			base_ptr tmp = node->parent;
+			while ( node == tmp->right ) {
+				node = tmp;
+				tmp = tmp->parent;
+			}
+			if ( node->right != tmp )
+				node = tmp;
 		}
 	}
-}
+
+	void decremet() {
+		if ( node->left != NULL ) {
+			node = node->left;
+			while ( node->right != NULL ) {
+				node = node->right;
+			}
+		} else {
+			base_ptr tmp = node->parent;
+			while ( node == tmp->left ) {
+				node = tmp;
+				tmp = tmp->parent;
+			}
+			if ( node->left != tmp )
+				node = tmp;
+		}
+	}
+};
 
 #endif
