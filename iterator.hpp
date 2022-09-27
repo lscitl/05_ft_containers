@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 01:28:02 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/27 19:31:00 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -263,70 +263,76 @@ bool operator>=( const ft::reverse_iterator<Iterator1>& lhs,
 // 		sizeof( has_iterator_category<T>::test<T>( 0 ) ) == 1;
 // };
 
-template <typename T>
-class has_iterator_category {
-   private:
-	typedef char One;
-	typedef struct {
-		char x[2];
-	} Two;
-	template <typename C>
-	static One test( int C::* );
-	template <typename C>
-	static Two test( ... );
+// template <typename T>
+// class has_iterator_category {
+//    private:
+// 	typedef char one;
+// 	typedef struct {
+// 		char x[2];
+// 	} two;
+// 	template <typename C>
+// 	static one test( int C::* );
+// 	template <typename C>
+// 	static two test( ... );
 
-   public:
-	static const bool value =
-		sizeof( has_iterator_category<T>::test<T>( 0 ) ) == 1;
-};
+//    public:
+// 	static const bool value =
+// 		sizeof( has_iterator_category<T>::test<T>( 0 ) ) == 1;
+// };
+
+// template <class T>
+// struct __is_input_iterator : public false_type {};
+// template <>
+// struct __is_input_iterator<std::input_iterator_tag> : public true_type {};
+// template <>
+// struct __is_input_iterator<std::forward_iterator_tag> : public true_type {};
+// template <>
+// struct __is_input_iterator<std::bidirectional_iterator_tag> : public
+// true_type {
+// };
+// template <>
+// struct __is_input_iterator<std::random_access_iterator_tag> : public
+// true_type {
+// };
+
+// template <class T>
+// struct __is_forward_iterator : public false_type {};
+// template <>
+// struct __is_forward_iterator<std::forward_iterator_tag> : public true_type
+// {}; template <> struct __is_forward_iterator<std::bidirectional_iterator_tag>
+// 	: public true_type {};
+// template <>
+// struct __is_forward_iterator<std::random_access_iterator_tag>
+// 	: public true_type {};
+
+// template <class T, bool = has_iterator_category<iterator_traits<T> >::value>
+// struct _is_input_iterator
+// 	: public integral_constant<
+// 		  bool, __is_input_iterator<
+// 					typename iterator_traits<T>::iterator_category>::value> {};
+
+// template <class T>
+// struct _is_input_iterator<T, false> : public false_type {};
+
+// template <class T, bool = has_iterator_category<iterator_traits<T> >::value>
+// struct _is_forward_iterator
+// 	: public integral_constant<
+// 		  bool, __is_forward_iterator<
+// 					typename iterator_traits<T>::iterator_category>::value> {};
+
+// template <class T>
+// struct _is_forward_iterator<T, false> : public false_type {};
+
+// template <class T>
+// struct is_input_iterator : public _is_input_iterator<T> {};
+
+// template <class T>
+// struct is_forward_iterator : public _is_forward_iterator<T> {};
 
 template <class T>
-struct __is_input_iterator : public false_type {};
+struct is_input_iterator_tag : public false_type {};
 template <>
-struct __is_input_iterator<std::input_iterator_tag> : public true_type {};
-template <>
-struct __is_input_iterator<std::forward_iterator_tag> : public true_type {};
-template <>
-struct __is_input_iterator<std::bidirectional_iterator_tag> : public true_type {
-};
-template <>
-struct __is_input_iterator<std::random_access_iterator_tag> : public true_type {
-};
-
-template <class T>
-struct __is_forward_iterator : public false_type {};
-template <>
-struct __is_forward_iterator<std::forward_iterator_tag> : public true_type {};
-template <>
-struct __is_forward_iterator<std::bidirectional_iterator_tag>
-	: public true_type {};
-template <>
-struct __is_forward_iterator<std::random_access_iterator_tag>
-	: public true_type {};
-
-template <class T, bool = has_iterator_category<iterator_traits<T> >::value>
-struct _is_input_iterator
-	: public integral_constant<
-		  bool, __is_input_iterator<
-					typename iterator_traits<T>::iterator_category>::value> {};
-
-template <class T>
-struct _is_input_iterator<T, false> : public false_type {};
-
-template <class T, bool = has_iterator_category<iterator_traits<T> >::value>
-struct _is_forward_iterator
-	: public integral_constant<
-		  bool, __is_forward_iterator<
-					typename iterator_traits<T>::iterator_category>::value> {};
-
-template <class T>
-struct _is_forward_iterator<T, false> : public false_type {};
-
-template <class T>
-struct is_input_iterator : public _is_input_iterator<T> {};
-
-template <class T>
-struct is_forward_iterator : public _is_forward_iterator<T> {};
+struct is_input_iterator_tag<std::input_iterator_tag> : public true_type {};
 
 }  // namespace ft
 
