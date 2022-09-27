@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/13 23:59:01 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/22 17:43:24 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/27 19:55:45 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 #ifndef __TYPE_TRAITS_H__
 #define __TYPE_TRAITS_H__
 
-#include <string>
-#include <stdint.h>
+#include <iterator>  // for iterator_tag
+// #include <stdint.h>
 
 namespace ft {
 
