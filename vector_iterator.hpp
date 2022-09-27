@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:16:05 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/23 15:26:42 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/27 21:17:02 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ class vector_iterator {
 	}
 
 	pointer operator->() const {
-		return &( operator*() );
+		return _current;
 	}
 
 	vector_iterator& operator++() {

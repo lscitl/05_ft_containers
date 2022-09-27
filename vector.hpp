@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 19:56:46 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/27 21:18:07 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include "lexico_cmp.hpp"
 #include "vector_iterator.hpp"
 #include <limits>  // for numeric_limits
+#include <stdexcept>
+#include <algorithm>
 
 namespace ft {
 
