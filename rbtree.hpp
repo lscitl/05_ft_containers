@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 22:23:48 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/28 00:16:29 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #define __RBTREE_H__
 
 #include <iterator>
+#include <__tree>
 
 // 1. Every node is either red or black.
 // 2. Root node is black.
@@ -54,6 +55,36 @@ struct rbtree_node : public rbtree_node_base {
 	typedef rbtree_node<value>* link_type;
 
 	value value_field;
+};
+
+template <class T>
+struct rbtree_header {
+	rbtree_node_base header;
+	size_t           node_cnt;
+};
+
+template <class T, class Compare>
+struct rbtree_key_compare {
+	typedef typename Compare<T> key_comp;
+};
+
+template <class T, class Allocator>
+struct rbtree_node_allocator {
+	typedef typename Allocator<rbtree_node<T> > allocator_type;
+};
+
+template <class T, class Compare, class Allocator>
+class rbtree : public rbtree_header<T>,
+			   public rbtree_key_compare<Compare>,
+			   public rbtree_node_allocator<Allocator> {
+	typedef Allocator allocator_type;
+
+	// rbtree( const allocator_type& __a ) : _Base( __a ) {
+	// 	header = _M_get_node();
+	// }
+	// ~rbtree() {
+	// 	_M_put_node( _M_header );
+	// }
 };
 
 struct rbtree_base_iterator_base {
