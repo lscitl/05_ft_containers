@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/28 00:16:29 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/28 23:07:17 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,9 @@ struct rbtree_node_base {
 };
 
 template <class value>
-struct rbtree_node : public rbtree_node_base {
+class rbtree_node : public rbtree_node_base {
+   public:
+	typedef rbtree_node<value>  node_type;
 	typedef rbtree_node<value>* link_type;
 
 	value value_field;
@@ -73,18 +75,62 @@ struct rbtree_node_allocator {
 	typedef typename Allocator<rbtree_node<T> > allocator_type;
 };
 
-template <class T, class Compare, class Allocator>
-class rbtree : public rbtree_header<T>,
-			   public rbtree_key_compare<Compare>,
-			   public rbtree_node_allocator<Allocator> {
-	typedef Allocator allocator_type;
+template <class nodePtr>
+struct rbtree_node_types;
 
-	// rbtree( const allocator_type& __a ) : _Base( __a ) {
-	// 	header = _M_get_node();
-	// }
-	// ~rbtree() {
-	// 	_M_put_node( _M_header );
-	// }
+template <class nodePtr, class T, class voidPtr>
+struct tree_node_types<nodePtr, tree_node<T, voidPtr> >
+	: public rbtree_node_base_types<voidPtr>,
+	  tree_key_value_types<T>,
+	  tree_map_pointer_types<T, voidPtr> {
+	typedef tree_node_base_types<voidPtr>      _base;
+	typedef tree_key_value_types<T>            _key_base;
+	typedef tree_map_pointer_types<T, voidPtr> _map_pointer_base;
+
+   public:
+	typedef typename pointer_traits<nodePtr>::element_type _node_type;
+	typedef nodePtr                                        _node_pointer;
+
+	typedef T _node_value_type;
+	typedef typename _rebind_pointer<voidPtr, _node_value_type>::type
+		_node_value_type_pointer;
+	typedef typename _rebind_pointer<voidPtr, const _node_value_type>::type
+											   _const_node_value_type_pointer;
+	typedef typename _base::__end_node_pointer __iter_pointer;
+};
+
+template <class T, class Compare, class Allocator>
+class rbtree
+// : public rbtree_header<T>,
+// 			   public rbtree_key_compare<Compare>,
+// 			   public rbtree_node_allocator<Allocator>
+{
+   public:
+	typedef T                                        value_type;
+	typedef Compare                                  value_compare;
+	typedef Allocator                                allocator_type;
+	typedef typename allocator_type::pointer         pointer;
+	typedef typename allocator_type::const_pointer   const_pointer;
+	typedef typename allocator_type::size_type       size_type;
+	typedef typename allocator_type::difference_type difference_type;
+	typedef typename rbtree_iterator_base            iterator;
+	typedef typename rbtree_iterator_base            const_iterator;
+
+   protected:
+	typedef rbtree_node_base*       link_type;
+	typedef const rbtree_node_base* const_link_type;
+
+   private:
+	link_type      _begin_node;
+	link_type      _end_node;
+	value_compare  _comp;
+	size_type      _size;
+	allocator_type _alloc;
+
+   public:
+	rbtree();
+	~rbtree();
+	rbtree( const rbtree& ref );
 };
 
 struct rbtree_base_iterator_base {

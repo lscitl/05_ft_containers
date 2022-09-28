@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/26 17:02:45 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/28 19:39:28 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,13 @@
 #define __MAP_H__
 
 // #include <map>
+// #include <set>
 #include <functional>
 #include "iterator.hpp"
 #include "type_traits.hpp"
 #include "lexico_cmp.hpp"
 #include "pair.hpp"
+#include "rbtree.hpp"
 
 namespace ft {
 
@@ -109,10 +111,19 @@ class map {
 	typedef typename allocator_type::size_type       size_type;
 	typedef typename allocator_type::difference_type difference_type;
 
-	typedef ft::map_iterator<T>                  iterator;
-	typedef ft::map_iterator<const T>            const_iterator;
-	typedef ft::reverse_iterator<iterator>       reverse_iterator;
-	typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+	typedef ft::map_iterator<_base::iterator>       iterator;
+	typedef ft::map_iterator<_base::const_iterator> const_iterator;
+	typedef ft::reverse_iterator<iterator>          reverse_iterator;
+	typedef ft::reverse_iterator<const_iterator>    const_reverse_iterator;
+
+   private:
+	typedef typename rbtree_node<value_type>::node_type _node_type;
+	typedef
+		typename Allocator::template rebind<_node_type>::other _node_allocator;
+	typedef typename rbtree<key_type, value_type, key_compare, _node_allocator>
+		_base;
+
+	_base _tree;
 
 	class value_compare : public binary_function<value_type, value_type, bool> {
 		friend class map;
