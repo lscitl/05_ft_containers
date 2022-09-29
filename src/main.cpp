@@ -26,13 +26,28 @@ struct Buffer {
 
 #define _vector std::vector
 
-int main() {
-	_vector<int>::iterator itr;
-	_vector<int>           v( 10, 1 );
-	int                   *a[10];
+template <typename T>
+class is_pair {
+	typedef char yes[1];
+	typedef struct {
+		char x[2];
+	} no;
+	template <typename C>
+	static yes& test( typename C::first_type = 0, typename C::second_type = 0 );
 
-	itr = v.begin();
-	std::cout << itr.base() << std::endl;
+	template <typename C>
+	static no& test( ... );
+
+   public:
+	static bool const value = sizeof( test<T>( 0, 0 ) ) == sizeof( yes );
+};
+
+int main() {
+	// std::pair<int, char> t( 123, 'a' );
+	// int                  b( 3 );
+
+	std::cout << is_pair<std::pair<int, char> >::value << std::endl;
+	std::cout << is_pair<int>::value << std::endl;
 
 	return 0;
 }

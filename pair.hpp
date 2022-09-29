@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 23:26:30 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/23 23:49:23 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/30 00:44:17 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,6 +94,22 @@ template <class T1, class T2>
 pair<T1, T2> make_pair( T1 t, T2 u ) {
 	return pair<T1, T2>( t, u );
 }
+
+template <typename T>
+class is_pair {
+	typedef char yes[1];
+	typedef struct {
+		char x[2];
+	} no;
+	template <typename C>
+	static yes& test( typename C::first_type = 0, typename C::second_type = 0 );
+
+	template <typename C>
+	static no& test( ... );
+
+   public:
+	static bool const value = sizeof( test<T>( 0, 0 ) ) == sizeof( yes );
+};
 
 }  // namespace ft
 

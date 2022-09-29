@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/13 23:59:01 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 19:55:45 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/29 22:48:00 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,9 +83,6 @@ struct remove_cv {
 
 template <class T>
 struct is_integral : public ft_is_integral<typename remove_cv<T>::type> {};
-
-// template <class T>
-// struct is_integral : public ft_is_integral<T> {};
 
 template <bool Cond, class T = void>
 struct enable_if {};
