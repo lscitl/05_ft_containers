@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 21:18:07 by seseo            ###   ########.fr       */
+/*   Updated: 2022/09/30 23:38:39 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-#include "lexico_cmp.hpp"
+#include "equal_lexico_cmp.hpp"
 #include "vector_iterator.hpp"
 #include <limits>  // for numeric_limits
 #include <stdexcept>
@@ -970,15 +970,7 @@ template <class T, class Alloc>
 bool operator==( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
 	if ( lhs.size() != rhs.size() )
 		return false;
-	typename vector<T, Alloc>::const_pointer lbegin = lhs.begin().base();
-	typename vector<T, Alloc>::const_pointer lend = lhs.end().base();
-	typename vector<T, Alloc>::const_pointer rbegin = rhs.begin().base();
-	typename vector<T, Alloc>::const_pointer rend = rhs.end().base();
-	for ( ; lbegin != lend; ++lbegin, ++rbegin ) {
-		if ( rbegin == rend || *lbegin != *rbegin )
-			return false;
-	}
-	return true;
+	return ft::equal( lhs.begin(), lhs.end(), rhs.begin() );
 }
 
 template <class T, class Alloc>
