@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:16:05 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 21:17:02 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/02 21:36:58 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,14 +19,15 @@
 
 namespace ft {
 
-template <class T>
+template <class Iter>
 class vector_iterator {
    public:
-	typedef typename iterator_traits<T>::value_type        value_type;
-	typedef typename iterator_traits<T>::pointer           pointer;
-	typedef typename iterator_traits<T>::reference         reference;
-	typedef typename iterator_traits<T>::difference_type   difference_type;
-	typedef typename iterator_traits<T>::iterator_category iterator_category;
+	typedef Iter                                              iterator_type;
+	typedef typename iterator_traits<Iter>::value_type        value_type;
+	typedef typename iterator_traits<Iter>::pointer           pointer;
+	typedef typename iterator_traits<Iter>::reference         reference;
+	typedef typename iterator_traits<Iter>::difference_type   difference_type;
+	typedef typename iterator_traits<Iter>::iterator_category iterator_category;
 
    protected:
 	pointer _current;
