@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/03 00:11:16 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/03 22:26:41 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,31 @@ class rbtree_node : public rbtree_node_base {
    public:
 	typedef rbtree_node<value>* link_type;
 
+   public:
 	value value_field;
+
+   public:
+	rbtree_node()
+		: color( RED ),
+		  left( NULL ),
+		  right( NULL ),
+		  parent( NULL ),
+		  value_field() {
+	}
+	rbtree_node( const value& val )
+		: color( RED ),
+		  left( NULL ),
+		  right( NULL ),
+		  parent( NULL ),
+		  value_field( val ) {
+	}
+	rbtree_node( const rbtree_node& node )
+		: color( node.color ),
+		  left( node.left ),
+		  right( node.right ),
+		  parent( node.parent ),
+		  value_field( node.value_field ) {
+	}
 };
 
 template <class T, bool = ft::is_pair<T>::value>
@@ -166,7 +190,7 @@ class rbtree {
 		  _comp( Compare() ),
 		  _size( 0 ),
 		  _alloc( Allocator() ) {
-		__end_node.color = BLACK;
+		__end_node.color = RED;
 		__end_node.left = NULL;
 		__end_node.right = NULL;
 		__end_node.parent = NULL;
@@ -175,11 +199,9 @@ class rbtree {
 	}
 
 	ft::pair<iterator, bool> insert( const value_type& val ) {
-		link_type* new_node = _alloc.allocate( 1 );
-		_alloc.construct( new_node, val );
-		new_node->left = NULL;
-		new_node->right = NULL;
-		new_node->parent = NULL;
+		node_type __new_node( val );
+		link_type new_node = _alloc.allocate( 1 );
+		_alloc.construct( new_node, __new_node );
 
 		if ( _root_node == NULL ) {
 			_root_node = new_node;
@@ -188,8 +210,8 @@ class rbtree {
 			++_size;
 			return make_pair( iterator( _root_node ), true );
 		}
-		link_type* cur_node = _root_node;
-		link_type* prev_node = _root_node;
+		link_type cur_node = _root_node;
+		link_type prev_node = _root_node;
 		if ( _comp( cur_node->value_field, val ) ) {
 			cur_node = cur_node->right;
 		}
@@ -198,6 +220,7 @@ class rbtree {
 			prev_node = cur_node;
 			cur_node = cur_node->right;
 		}
+
 		_begin_node->left = _end_node;
 		_begin_node->right = _end_node;
 		return make_pair( iterator( new_node ), true );

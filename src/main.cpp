@@ -43,11 +43,8 @@ int main() {
 
 	ft::rbtree<int>                  a;
 	ft::rbtree<ft::pair<int, char> > b;
-	std::less<int>                   tmp;
-	int                              c = 1;
-	int                              d = 2;
 
-	std::cout << tmp( c, d ) << std::endl;
+	std::cout << a.insert( 3 ).second << std::endl;
 
 	return 0;
 }
