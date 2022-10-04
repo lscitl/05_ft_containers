@@ -23,12 +23,27 @@ struct Buffer {
 #define COUNT ( MAX_RAM / (int)sizeof( Buffer ) )
 
 #include <vector>
-#include "../rbtree.hpp"
+// #include "../rbtree.hpp"
 
 #define _vector std::vector
 
 #include <functional>
 
+class Base {
+   public:
+	Base() {
+		std::cout << "Base constructor called!" << std::endl;
+	}
+	Base( const Base &ref ) {
+		(void)ref;
+		std::cout << "Base copy contstructor called!" << std::endl;
+	}
+	~Base() {
+		std::cout << "Base destructor called!" << std::endl;
+	}
+};
+
+#include <map>
 int main() {
 	// std::pair<int, char> t( 123, 'a' );
 	// int                  b( 3 );
@@ -41,10 +56,19 @@ int main() {
 	// ft::pair<int, char> a;
 	// int                 c;
 
-	ft::rbtree<int>                  a;
-	ft::rbtree<ft::pair<int, char> > b;
+	// ft::rbtree<int>                  a;
+	// ft::rbtree<ft::pair<int, char> > b;
 
-	std::cout << a.insert( 3 ).second << std::endl;
+	// std::cout << a.insert( 3 ).second << std::endl;
+
+	Base                b;
+	std::map<int, Base> a;
+
+	std::cout << "pair" << std::endl;
+	std::pair<int, Base> tmp( 1, b );
+	std::cout << "start" << std::endl;
+	a.insert( tmp );
+	std::cout << a.size() << std::endl;
 
 	return 0;
 }

@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/03 22:26:41 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/05 00:44:27 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,12 +102,17 @@ class get_node_type<T, false> {
 	typedef T              value_type;
 };
 
-struct rbtree_iterator_base {
-	typedef rbtree_node_base::base_ptr      base_ptr;
-	typedef std::bidirectional_iterator_tag iterator_category;
-	typedef ptrdiff_t                       difference_type;
+template <class T, class NodePtr, class DiffType>
+class rbtree_iterator {
+   public:
+	typedef NodePtr                             link_type;
+	typedef typename rbtree_node<T>::node_type  node_type;
+	typedef typename rbtree_node<T>::value_type value_type;
+	typedef typename rbtree_node<T>::key_type   key_type;
+	typedef DiffType                            difference_type;
+	typedef std::bidirectional_iterator_tag     iterator_category;
 
-	base_ptr node;
+	link_type node;
 
 	void incremet() {
 		if ( node->right != NULL ) {
@@ -116,7 +121,7 @@ struct rbtree_iterator_base {
 				node = node->left;
 			}
 		} else {
-			base_ptr tmp = node->parent;
+			link_type tmp = node->parent;
 			while ( node == tmp->right ) {
 				node = tmp;
 				tmp = tmp->parent;
@@ -133,7 +138,7 @@ struct rbtree_iterator_base {
 				node = node->right;
 			}
 		} else {
-			base_ptr tmp = node->parent;
+			link_type tmp = node->parent;
 			while ( node == tmp->left ) {
 				node = tmp;
 				tmp = tmp->parent;
@@ -196,6 +201,62 @@ class rbtree {
 		__end_node.parent = NULL;
 	}
 	~rbtree() {
+	}
+
+	bool is_right_child( link_type target_node ) {
+		return target_node->parent->right == target_node;
+	}
+
+	void rotate_left( link_type target_node ) {
+		link_type r_child_node = target_node->right;
+		if ( target_node == NULL || r_child_node == NULL ) {
+			return;
+		}
+		link_type parent_node = target_node->parent;
+		link_type g_child_node = r_child_node->left;
+
+		if ( parent_node ) {
+			if ( is_right_child( target_node ) ) {
+				parent_node->right = r_child_node;
+			} else {
+				parent_node->left = r_child_node;
+			}
+		} else {
+			_root_node = r_child_node;
+		}
+		r_child_node->parent = parent_node;
+		r_child_node->left = target_node;
+		target_node->parent = r_child_node;
+		target_node->right = g_child_node;
+		if ( g_child_node ) {
+			g_child_node->parent = target_node;
+		}
+	}
+
+	void rotate_right( link_type target_node ) {
+		link_type l_child_node = target_node->left;
+		if ( target_node == NULL || l_child_node == NULL ) {
+			return;
+		}
+		link_type parent_node = target_node->parent;
+		link_type g_child_node = l_child_node->right;
+
+		if ( parent_node ) {
+			if ( is_right_child( target_node ) ) {
+				parent_node->right = l_child_node;
+			} else {
+				parent_node->left = l_child_node;
+			}
+		} else {
+			_root_node = l_child_node;
+		}
+		l_child_node->parent = parent_node;
+		l_child_node->right = target_node;
+		target_node->parent = l_child_node;
+		target_node->left = g_child_node;
+		if ( g_child_node ) {
+			g_child_node->parent = target_node;
+		}
 	}
 
 	ft::pair<iterator, bool> insert( const value_type& val ) {
