@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/05 00:44:27 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/05 23:12:17 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,7 +163,7 @@ class rbtree {
 	typedef typename allocator_type::const_pointer   const_pointer;
 	typedef typename allocator_type::size_type       size_type;
 	typedef typename allocator_type::difference_type difference_type;
-	typedef rbtree_iterator_base                     iterator;
+	typedef rbtree_iterator_base<T>                  iterator;
 	typedef const iterator                           const_iterator;
 
    protected:
@@ -195,12 +195,13 @@ class rbtree {
 		  _comp( Compare() ),
 		  _size( 0 ),
 		  _alloc( Allocator() ) {
-		__end_node.color = RED;
-		__end_node.left = NULL;
-		__end_node.right = NULL;
-		__end_node.parent = NULL;
+		__end_node.color = BLACK;
+		__end_node.left = &__end_node;
+		__end_node.right = &__end_node;
+		__end_node.parent = &__end_node;
 	}
 	~rbtree() {
+		this->clear();
 	}
 
 	bool is_right_child( link_type target_node ) {
@@ -208,14 +209,17 @@ class rbtree {
 	}
 
 	void rotate_left( link_type target_node ) {
+		if ( target_node == NULL || target_node == _end_node ) {
+			return;
+		}
 		link_type r_child_node = target_node->right;
-		if ( target_node == NULL || r_child_node == NULL ) {
+		if ( r_child_node == _end_node ) {
 			return;
 		}
 		link_type parent_node = target_node->parent;
 		link_type g_child_node = r_child_node->left;
 
-		if ( parent_node ) {
+		if ( parent_node != _end_node ) {
 			if ( is_right_child( target_node ) ) {
 				parent_node->right = r_child_node;
 			} else {
@@ -228,20 +232,23 @@ class rbtree {
 		r_child_node->left = target_node;
 		target_node->parent = r_child_node;
 		target_node->right = g_child_node;
-		if ( g_child_node ) {
+		if ( g_child_node != _end_node ) {
 			g_child_node->parent = target_node;
 		}
 	}
 
 	void rotate_right( link_type target_node ) {
-		link_type l_child_node = target_node->left;
-		if ( target_node == NULL || l_child_node == NULL ) {
+		if ( target_node == NULL || target_node == _end_node ) {
+			return;
+		}
+		link_type l_child_node = target_node->right;
+		if ( l_child_node == _end_node ) {
 			return;
 		}
 		link_type parent_node = target_node->parent;
 		link_type g_child_node = l_child_node->right;
 
-		if ( parent_node ) {
+		if ( parent_node != _end_node ) {
 			if ( is_right_child( target_node ) ) {
 				parent_node->right = l_child_node;
 			} else {
@@ -254,23 +261,54 @@ class rbtree {
 		l_child_node->right = target_node;
 		target_node->parent = l_child_node;
 		target_node->left = g_child_node;
-		if ( g_child_node ) {
+		if ( g_child_node != _end_node ) {
 			g_child_node->parent = target_node;
 		}
 	}
 
-	ft::pair<iterator, bool> insert( const value_type& val ) {
-		node_type __new_node( val );
-		link_type new_node = _alloc.allocate( 1 );
-		_alloc.construct( new_node, __new_node );
+	link_type find_node( const value_type& val ) {
+		link_type cur = _root_node;
+		if ( _comp( val, cur->value_field ) ) {
+			cur = cur->left;
+		} else {
+			if ( _comp( cur->value_field, val ) ) {
+				cur = cur->right;
+			} else {
+				return cur;
+			}
+		}
+		while ( cur != _end_node ) {
+			if ( _comp( val, cur->value_field ) ) {
+				cur = cur->left;
+			} else {
+				if ( _comp( cur->value_field, val ) ) {
+					cur = cur->right;
+				} else {
+					return cur;
+				}
+			}
+		}
+		return _end_node;
+	}
 
-		if ( _root_node == NULL ) {
+	ft::pair<iterator, bool> insert( const value_type& val ) {
+		if ( this->_size == 0 ) {
+			node_type __new_node( val );
+			link_type new_node = _alloc.allocate( 1 );
+			_alloc.construct( new_node, __new_node );
+
 			_root_node = new_node;
-			new_node->right = _end_node;
-			_end_node->parent = _root_node;
+			_end_node->left = _root_node;
+			_begin_node = _root_node;
 			++_size;
 			return make_pair( iterator( _root_node ), true );
 		}
+
+		link_type child_node = find_node( val );
+		if ( child_node != _end_node ) {
+			return make_pair( iterator( child_node ), false );
+		}
+
 		link_type cur_node = _root_node;
 		link_type prev_node = _root_node;
 		if ( _comp( cur_node->value_field, val ) ) {
@@ -294,6 +332,15 @@ class rbtree {
 	// 	rbtree();
 	// 	~rbtree();
 	// 	rbtree( const rbtree& ref );
+
+	void clear() {
+		if ( _root_node == _end_node ) {
+		}
+		del_node( _root_node->left );
+	}
+
+	void del_node( link_type node ) {
+	}
 };
 
 }  // namespace ft

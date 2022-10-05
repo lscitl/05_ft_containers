@@ -69,6 +69,8 @@ int main() {
 	std::cout << "start" << std::endl;
 	a.insert( tmp );
 	std::cout << a.size() << std::endl;
+	a.insert( tmp );
+	std::cout << a.size() << std::endl;
 
 	return 0;
 }
