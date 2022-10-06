@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/06 23:04:35 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/07 00:25:31 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -341,31 +341,31 @@ class rbtree {
 		_alloc.construct( new_node, __new_node );
 
 		link_type parent_node = result.first;
-		bool      child_pos_left;
+		bool      child_is_right;
 
 		if ( _comp( parent_node->value_field, val ) ) {
 			parent_node->right = new_node;
-			child_pos_left = false;
+			child_is_right = true;
 		} else {
 			parent_node->left = new_node;
-			child_pos_left = true;
+			child_is_right = false;
 		}
 		new_node->parent = parent_node;
-		if ( parent_node == _root_node ) {
+		if ( parent_node->color == BLACK ) {
 			return make_pair( iterator( new_node ), true );
 		}
 		// balance check
 		link_type grand_parent = parent_node->parent;
 		link_type uncle;
-		if ( is_right_child( parent_node ) ) {
+		bool      parent_is_right = is_right_child( parent_node );
+		if ( parent_is_right ) {
 			uncle = grand_parent->left;
 		} else {
 			uncle = grand_parent->right;
 		}
 
 		// case 1 check
-		if ( grand_parent && grand_parent->color == BLACK && uncle &&
-			 uncle->color == RED && parent_node == RED ) {
+		if ( uncle && uncle->color == RED ) {
 			grand_parent->color = RED;
 			uncle->color = BLACK;
 			parent->color = BLACK;
@@ -401,10 +401,37 @@ class rbtree {
 				}
 			}
 		}
-		// case 2, 3 check
-		else if {
+		// case 2 or 3
+		else {
+			// case 2 check
+			if ( parent_is_right ^ child_is_right ) {
+				if ( child_is_right ) {
+					rotate_left( parent_node );
+					grand_parent->color = RED;
+					parent_node->color = BLACK;
+					rotate_right( grand_parent );
+				} else {
+					rotate_right( parent_node );
+					grand_parent->color = RED;
+					parent_node->color = BLACK;
+					rotate_left( grand_parent );
+				}
+			}
+			// case 3
+			else {
+				if ( parent_is_right ) {
+					rotate_left( grand_parent );
+				} else {
+					rotate_right( grand_parent );
+				}
+			}
 		}
-
+		if ( _comp( val, _begin_node->value_field ) ) {
+			_begin_node = new_node;
+		} else if ( _comp( _end_node->left->value_field, val ) ) {
+			_end_node->left = new_node;
+			new_node->right = _end_node;
+		}
 		return make_pair( iterator( new_node ), true );
 	}
 

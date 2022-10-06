@@ -23,7 +23,7 @@ struct Buffer {
 #define COUNT ( MAX_RAM / (int)sizeof( Buffer ) )
 
 #include <vector>
-// #include "../rbtree.hpp"
+#include "../rbtree.hpp"
 
 #define _vector std::vector
 
@@ -61,17 +61,20 @@ int main() {
 
 	// std::cout << a.insert( 3 ).second << std::endl;
 
-	Base                b;
-	std::map<int, Base> a;
+	// Base                b;
+	// std::map<int, Base> a;
 
-	std::cout << "pair" << std::endl;
-	std::pair<int, Base> tmp( 1, b );
-	std::cout << "start" << std::endl;
-	a.insert( tmp );
-	std::cout << a.size() << std::endl;
-	a.insert( tmp );
-	std::cout << a.size() << std::endl;
+	// std::cout << "pair" << std::endl;
+	// std::pair<int, Base> tmp( 1, b );
+	// std::cout << "start" << std::endl;
+	// a.insert( tmp );
+	// std::cout << a.size() << std::endl;
+	// a.insert( tmp );
+	// std::cout << a.size() << std::endl;
 
+	// std::cout << std::less<int>()( 1, 2 ) << std::endl;
+
+	ft::rbtree<int> a;
 	// std::map<int, Base>::iterator tmp;
 
 	// tmp = a.begin();
