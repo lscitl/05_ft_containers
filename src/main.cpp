@@ -72,5 +72,17 @@ int main() {
 	a.insert( tmp );
 	std::cout << a.size() << std::endl;
 
+	// std::map<int, Base>::iterator tmp;
+
+	// tmp = a.begin();
+
+	// std::cout << &( *tmp ) << std::endl;
+
+	// int *c = new int( 5 );
+
+	// std::cout << c << std::endl;
+	// std::cout << &a << std::endl;
+	// std::cout << &b << std::endl;
+
 	return 0;
 }
