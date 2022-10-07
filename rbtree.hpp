@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/07 00:25:31 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/07 21:51:11 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,59 +30,43 @@ namespace ft {
 
 typedef enum { RED, BLACK } color_t;
 
-struct rbtree_node_base {
-	typedef color_t           color_type;
-	typedef rbtree_node_base* base_ptr;
+template <class T>
+class rbtree_node {
+   public:
+	typedef rbtree_node<T>* link_type;
+	typedef color_t         color_type;
 
+   public:
 	color_type color;
-	base_ptr   parent;
-	base_ptr   left;
-	base_ptr   right;
+	link_type  parent;
+	link_type  left;
+	link_type  right;
+	T          value;
 
-	static base_ptr minimum( base_ptr x ) {
+   public:
+	rbtree_node() : color( RED ), value() {
+	}
+	rbtree_node( const T& val ) : color( RED ), value( val ) {
+	}
+	rbtree_node( const rbtree_node& node )
+		: color( node.color ),
+		  parent( node.parent ),
+		  left( node.left ),
+		  right( node.right ),
+		  value( node.value ) {
+	}
+	static link_type minimum( link_type x ) {
 		while ( x->left != NULL ) {
 			x = x->left;
 		}
 		return x;
 	}
 
-	static base_ptr maximum( base_ptr x ) {
+	static link_type maximum( link_type x ) {
 		while ( x->right != NULL ) {
 			x = x->right;
 		}
 		return x;
-	}
-};
-
-template <class value>
-class rbtree_node : public rbtree_node_base {
-   public:
-	typedef rbtree_node<value>* link_type;
-
-   public:
-	value value_field;
-
-   public:
-	rbtree_node()
-		: color( RED ),
-		  left( NULL ),
-		  right( NULL ),
-		  parent( NULL ),
-		  value_field() {
-	}
-	rbtree_node( const value& val )
-		: color( RED ),
-		  left( NULL ),
-		  right( NULL ),
-		  parent( NULL ),
-		  value_field( val ) {
-	}
-	rbtree_node( const rbtree_node& node )
-		: color( node.color ),
-		  left( node.left ),
-		  right( node.right ),
-		  parent( node.parent ),
-		  value_field( node.value_field ) {
 	}
 };
 
@@ -105,17 +89,23 @@ class get_node_type<T, false> {
 template <class T, class NodePtr, class DiffType>
 class rbtree_iterator {
    public:
-	typedef NodePtr                             link_type;
-	typedef typename rbtree_node<T>::node_type  node_type;
-	typedef typename rbtree_node<T>::value_type value_type;
-	typedef typename rbtree_node<T>::key_type   key_type;
-	typedef DiffType                            difference_type;
-	typedef std::bidirectional_iterator_tag     iterator_category;
+	typedef NodePtr                               link_type;
+	typedef typename get_node_type<T>::node_type  node_type;
+	typedef typename get_node_type<T>::value_type value_type;
+	typedef typename get_node_type<T>::key_type   key_type;
+	typedef DiffType                              difference_type;
+	typedef std::bidirectional_iterator_tag       iterator_category;
 
    private:
 	link_type node;
 
    public:
+	rbtree_iterator() : node( NULL ) {
+	}
+
+	rbtree_iterator( link_type node ) : node( node ) {
+	}
+
 	void incremet() {
 		if ( node->right != NULL ) {
 			node = node->right;
@@ -179,7 +169,6 @@ class rbtree {
 	node_type      __end_node;
 	link_type      _root_node;
 	link_type      _begin_node;
-	link_type      _end_node;
 	value_compare  _comp;
 	size_type      _size;
 	allocator_type _alloc;
@@ -194,6 +183,7 @@ class rbtree {
 
 	rbtree()
 		: __end_node(),
+		  _root_node( &__end_node ),
 		  _begin_node( &__end_node ),
 		  _comp( Compare() ),
 		  _size( 0 ),
@@ -256,7 +246,7 @@ class rbtree {
 		if ( target_node == NULL || target_node == end_node_ptr() ) {
 			return;
 		}
-		link_type l_child_node = target_node->right;
+		link_type l_child_node = target_node->left;
 		if ( l_child_node == end_node_ptr() ) {
 			return;
 		}
@@ -286,29 +276,49 @@ class rbtree {
 	ft::pair<link_type, bool> find_node( const value_type& val ) {
 		link_type cur = _root_node;
 		link_type parent = _root_node;
-		if ( _comp( val, cur->value_field ) ) {
+		if ( _comp( val, cur->value ) ) {
 			cur = cur->left;
 		} else {
-			if ( _comp( cur->value_field, val ) ) {
+			if ( _comp( cur->value, val ) ) {
 				cur = cur->right;
 			} else {
 				return ft::pair<link_type, bool>( cur, true );
 			}
 		}
-		while ( cur != NULL || cur != end_node_ptr() ) {
-			if ( _comp( val, cur->value_field ) ) {
-				prev = cur;
+		while ( cur != NULL && cur != end_node_ptr() ) {
+			if ( _comp( val, cur->value ) ) {
+				parent = cur;
 				cur = cur->left;
 			} else {
-				if ( _comp( cur->value_field, val ) ) {
-					prev = cur;
+				if ( _comp( cur->value, val ) ) {
+					parent = cur;
 					cur = cur->right;
 				} else {
 					return ft::pair<link_type, bool>( cur, true );
 				}
 			}
 		}
-		return ft::pair<link_type, bool>( prev, false );
+		return ft::pair<link_type, bool>( parent, false );
+	}
+
+	bool check_case1( link_type grand_parent, link_type parent ) {
+		bool      parent_is_right = is_right_child( parent );
+		link_type uncle;
+
+		if ( child_is_right ) {
+			uncle = grand_parent->left;
+		} else {
+			uncle = grand_parent->right;
+		}
+		if ( uncle != NULL && uncle != end_node_ptr() && uncle->color == RED ) {
+			if ( grand_parent != _root_node ) {
+				grand_parent = RED;
+			}
+			uncle->color = BLACK;
+			parent->color = BLACK;
+			return true;
+		}
+		return false;
 	}
 
 	// case 1 : subtree root - black, both child - red, grand child red.
@@ -326,6 +336,7 @@ class rbtree {
 			_root_node = new_node;
 			__end_node.left = _root_node;
 			_begin_node = _root_node;
+			new_node->right = end_node_ptr();
 			new_node->color = BLACK;
 			++_size;
 			return make_pair( iterator( _root_node ), true );
@@ -338,14 +349,25 @@ class rbtree {
 
 		node_type __new_node( val );
 		link_type new_node = _alloc.allocate( 1 );
+		if ( _comp( __end_node.value, val ) ) {
+			__new_node.right = end_node_ptr();
+			__end_node.left = new_node;
+		} else if ( _comp( val, _begin_node->value ) ) {
+			_begin_node = new_node;
+		}
 		_alloc.construct( new_node, __new_node );
+		++_size;
 
 		link_type parent_node = result.first;
 		bool      child_is_right;
 
-		if ( _comp( parent_node->value_field, val ) ) {
+		if ( _comp( parent_node->value, val ) ) {
 			parent_node->right = new_node;
 			child_is_right = true;
+			if ( _comp( __end_node.left->value, val ) ) {
+				end_node_ptr()->left = new_node;
+				new_node->right = end_node_ptr();
+			}
 		} else {
 			parent_node->left = new_node;
 			child_is_right = false;
@@ -354,107 +376,196 @@ class rbtree {
 		if ( parent_node->color == BLACK ) {
 			return make_pair( iterator( new_node ), true );
 		}
+
 		// balance check
-		link_type grand_parent = parent_node->parent;
-		link_type uncle;
-		bool      parent_is_right = is_right_child( parent_node );
-		if ( parent_is_right ) {
-			uncle = grand_parent->left;
-		} else {
-			uncle = grand_parent->right;
+		if ( check_case1( parent_node->parent, parent_node ) ) {
+			link_type gg_parent = parent_node->parent->parent;
+			if ( gg_parent->color == BLACK ) {
+				return make_pair( iterator( new_node ), true );
+			}
+			link_type ggg_parent = gg_parent->parent;
+			if ( check_case1( ggg_parent, gg_parent ) ) {
+			} else if ( check_case2( ggg_parent, gg_parent ) ) {
+			} else {
+			}
+		} else if ( check_case2() ) {
 		}
+	}
+	else if ( check_case2() ) {
+		do_case2();
+	}
+	else {
+		do_case3();
+	}
+	// link_type grand_parent = parent_node->parent;
+	// link_type uncle;
+	// bool      parent_is_right = is_right_child( parent_node );
+	// if ( parent_is_right ) {
+	// 	uncle = grand_parent->left;
+	// } else {
+	// 	uncle = grand_parent->right;
+	// }
 
-		// case 1 check
-		if ( uncle && uncle->color == RED ) {
-			grand_parent->color = RED;
-			uncle->color = BLACK;
-			parent->color = BLACK;
-			// case 4 check
-			if ( grand_parent == _root_node ) {
-				grand_parent->color = BLACK;
-			}
-			// case 2, 3 check
-			else if ( grand_parent->parent->color == RED ) {
-				link_type gg_p = grand_parent->parent;
-				link_type ggg_p = gg_p->parent;
-				bool      g_p_is_right = is_right_child( grand_parent );
-				bool      gg_p_is_right = is_right_child( gg_p );
-				// case 2 check
-				if ( g_p_is_right ^ gg_p_is_right ) {
-					if ( g_p_is_right ) {
-						rotate_left( gg_p );
-						ggg_p->color = RED;
-						gg_p->color = BLACK;
-						rotate_right( ggg_p );
-					} else {
-						rotate_right( gg_p );
-						ggg_p->color = RED;
-						gg_p->color = BLACK;
-						rotate_left( ggg_p );
-					}
-				} else {
-					if ( gg_p_is_right ) {
-						rotate_left( ggg_p );
-					} else {
-						rotate_right( ggg_p );
-					}
-				}
-			}
+	// case 1 check
+	if ( uncle != NULL && uncle != end_node_ptr() && uncle->color == RED ) {
+		grand_parent->color = RED;
+		uncle->color = BLACK;
+		parent_node->color = BLACK;
+		// case 4 check
+		if ( grand_parent == _root_node ) {
+			grand_parent->color = BLACK;
 		}
-		// case 2 or 3
-		else {
+		// case 2, 3 check
+		else if ( grand_parent->parent->color == RED ) {
+			link_type gg_p = grand_parent->parent;
+			link_type ggg_p = gg_p->parent;
+			bool      g_p_is_right = is_right_child( grand_parent );
+			bool      gg_p_is_right = is_right_child( gg_p );
 			// case 2 check
-			if ( parent_is_right ^ child_is_right ) {
-				if ( child_is_right ) {
-					rotate_left( parent_node );
-					grand_parent->color = RED;
-					parent_node->color = BLACK;
-					rotate_right( grand_parent );
+			if ( g_p_is_right ^ gg_p_is_right ) {
+				if ( g_p_is_right ) {
+					rotate_left( gg_p );
+					ggg_p->color = RED;
+					grand_parent->color = BLACK;
+					rotate_right( ggg_p );
 				} else {
-					rotate_right( parent_node );
-					grand_parent->color = RED;
-					parent_node->color = BLACK;
-					rotate_left( grand_parent );
+					rotate_right( gg_p );
+					ggg_p->color = RED;
+					grand_parent->color = BLACK;
+					rotate_left( ggg_p );
+				}
+			} else {
+				ggg_p->color = RED;
+				gg_p->color = BLACK;
+				if ( gg_p_is_right ) {
+					rotate_left( ggg_p );
+				} else {
+					rotate_right( ggg_p );
 				}
 			}
-			// case 3
-			else {
-				if ( parent_is_right ) {
-					rotate_left( grand_parent );
-				} else {
-					rotate_right( grand_parent );
-				}
+		}
+	}
+	// case 2 or 3
+	else {
+		// case 2 check
+		if ( parent_is_right ^ child_is_right ) {
+			if ( child_is_right ) {
+				rotate_left( parent_node );
+				grand_parent->color = RED;
+				new_node->color = BLACK;
+				rotate_right( grand_parent );
+			} else {
+				rotate_right( parent_node );
+				grand_parent->color = RED;
+				new_node->color = BLACK;
+				rotate_left( grand_parent );
 			}
 		}
-		if ( _comp( val, _begin_node->value_field ) ) {
-			_begin_node = new_node;
-		} else if ( _comp( _end_node->left->value_field, val ) ) {
-			_end_node->left = new_node;
-			new_node->right = _end_node;
+		// case 3
+		else {
+			grand_parent->color = RED;
+			parent_node->color = BLACK;
+			if ( parent_is_right ) {
+				rotate_left( grand_parent );
+			} else {
+				rotate_right( grand_parent );
+			}
 		}
-		return make_pair( iterator( new_node ), true );
+	}
+	if ( _comp( val, _begin_node->value ) ) {
+		_begin_node = new_node;
+	} else if ( _comp( __end_node.left->value, val ) ) {
+		end_node_ptr()->left = new_node;
+		new_node->right = end_node_ptr();
+	}
+	return make_pair( iterator( new_node ), true );
+}
+
+link_type
+get_begin_node() {
+	return ( _begin_node );
+}
+
+void clear() {
+	if ( _root_node == end_node_ptr() ) {
+		return;
+	}
+	del_node( _root_node->left );
+	__end_node.left = NULL;
+}
+
+void del_node( link_type node ) {
+	if ( node == NULL || node == end_node_ptr() ) {
+		return;
+	}
+	del_node( node->left );
+	del_node( node->right );
+	_alloc.deallocate( node, 1 );
+}
+
+struct Trunk {
+	Trunk*      prev;
+	std::string str;
+
+	Trunk( Trunk* prev, std::string str ) {
+		this->prev = prev;
+		this->str = str;
+	}
+};
+
+// 이진 트리의 분기를 인쇄하는 도우미 함수
+void showTrunks( Trunk* p ) {
+	if ( p == NULL ) {
+		return;
 	}
 
-	link_type get_begin_node() {
-		return ( _begin_node );
+	showTrunks( p->prev );
+	std::cout << p->str;
+}
+
+void print_tree() {
+	printTree( _root_node, NULL, false );
+}
+
+void printTree( link_type root, Trunk* prev, bool isLeft ) {
+	if ( root == NULL ) {
+		return;
 	}
 
-	void clear() {
-		if ( _root_node == _end_node ) {
-			return;
-		}
-		del_node( _root_node->left );
-		__end_node.left = NULL;
+	std::string prev_str = "    ";
+	Trunk*      trunk = new Trunk( prev, prev_str );
+
+	printTree( root->right, trunk, true );
+
+	if ( !prev ) {
+		trunk->str = "———";
+	} else if ( isLeft ) {
+		trunk->str = ".———";
+		prev_str = "   |";
+	} else {
+		trunk->str = "'———";
+		prev->str = prev_str;
 	}
 
-	void del_node( link_type node ) {
-		if ( node == NULL || node == _end_node ) {
-			return;
+	showTrunks( trunk );
+	if ( root == end_node_ptr() ) {
+		std::cout << " end_node!" << std::endl;
+		return;
+	} else {
+		if ( root->color == RED ) {
+			std::cout << "\033[0;31m" << root->value << "\033[0;49m"
+					  << std::endl;
+		} else {
+			std::cout << root->value << std::endl;
 		}
-		del_node( node->left );
-		del_node( node->right );
-		_alloc.deallocate( node, 1 );
+		if ( prev ) {
+			prev->str = prev_str;
+		}
+		trunk->str = "   |";
 	}
+
+	printTree( root->left, trunk, false );
+}
 };
 
 }  // namespace ft

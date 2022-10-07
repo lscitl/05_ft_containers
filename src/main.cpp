@@ -75,6 +75,13 @@ int main() {
 	// std::cout << std::less<int>()( 1, 2 ) << std::endl;
 
 	ft::rbtree<int> a;
+
+	for ( int i = 0; i < 9; i++ ) {
+		a.insert( i );
+	}
+
+	// a.insert( 7 );
+	a.print_tree();
 	// std::map<int, Base>::iterator tmp;
 
 	// tmp = a.begin();
