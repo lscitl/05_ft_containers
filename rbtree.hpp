@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   rbtree.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: seseo <seseo@student.42.fr>                +#+  +:+       +#+        */
+/*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/08 19:35:19 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/09 01:06:41 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,6 +88,7 @@ template <class T, bool = ft::is_pair<T>::value>
 class get_node_type {
    public:
 	typedef rbtree_node<T>          node_type;
+	typedef T                       input_type;
 	typedef typename T::first_type  key_type;
 	typedef typename T::second_type value_type;
 };
@@ -96,9 +97,16 @@ template <class T>
 class get_node_type<T, false> {
    public:
 	typedef rbtree_node<T> node_type;
+	typedef T              input_type;
 	typedef T              key_type;
 	typedef T              value_type;
 };
+
+// template<class T, bool = ft::is_pair<T>::value>
+// class get_key_from_input {
+// 	public:
+// 		T val =
+// }
 
 template <class T, class NodePtr, class DiffType>
 class rbtree_iterator {
@@ -158,6 +166,7 @@ template <class T,
 		  class Allocator = std::allocator<T> >
 class rbtree {
    public:
+	typedef typename get_node_type<T>::input_type input_type;
 	typedef typename get_node_type<T>::key_type   key_type;
 	typedef typename get_node_type<T>::value_type value_type;
 	typedef Compare                               value_compare;
@@ -291,7 +300,7 @@ class rbtree {
 
 	// return value is input value link_type with true, but if not found, it
 	// will return parent node with false.
-	ft::pair<link_type, bool> find_node( const value_type& val ) {
+	ft::pair<link_type, bool> find_node( const input_type& val ) {
 		link_type cur = _root_node;
 		link_type parent = _root_node;
 		if ( _comp( val, cur->value ) ) {
@@ -322,7 +331,7 @@ class rbtree {
 	// Search starts from the hint node.
 	// If the input value is not found, search agin from the root node.
 	ft::pair<link_type, bool> find_node( link_type         hint,
-										 const value_type& val ) {
+										 const input_type& val ) {
 		link_type cur = hint;
 		link_type parent = hint;
 		link_type ret_candidate;
@@ -443,7 +452,7 @@ class rbtree {
 	// case 2 : grand parent - black, parent - red, other side child - red.
 	// case 3 : grand parent - black, parent - red, same side child - red.
 	// case 4 : root - red.
-	ft::pair<iterator, bool> insert( const value_type& val ) {
+	ft::pair<iterator, bool> insert( const input_type& val ) {
 		if ( this->_size == 0 ) {
 			node_type __new_node( BLACK, NULL, NULL, end_node_ptr(), val );
 			link_type new_node = _alloc.allocate( 1 );
@@ -492,6 +501,10 @@ class rbtree {
 		// Check case2 or case3 and rotate to make balance.
 		check_rotation_dir_and_make_balance( g_parent, parent_node, new_node );
 		return make_pair( iterator( new_node ), true );
+	}
+
+	void erase( input_type val ) {
+		find_node( val );
 	}
 
 	link_type get_begin_node() {
@@ -583,7 +596,7 @@ class rbtree {
 		printTree( root->left, trunk, false );
 		delete trunk;
 	}
-};  // namespace ft
+};
 
 }  // namespace ft
 
