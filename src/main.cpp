@@ -74,14 +74,21 @@ int main() {
 
 	// std::cout << std::less<int>()( 1, 2 ) << std::endl;
 
-	ft::rbtree<int> a;
+	ft::rbtree<ft::pair<int, char> > a;
 
-	for ( int i = 0; i < 9; i++ ) {
-		a.insert( i );
+	for ( int i = 0; i < 120; i++ ) {
+		const ft::pair<int, char> tmp = ft::pair<int, char>( i, i );
+		a.insert( tmp );
 	}
 
 	// a.insert( 7 );
-	a.print_tree();
+	// a.print_tree();
+	// a.clear();
+	// for ( int i = 0; i > -120; i-- ) {
+	// 	a.insert( i );
+	// }
+	// a.print_tree();
+	// a.print_tree();
 	// std::map<int, Base>::iterator tmp;
 
 	// tmp = a.begin();
