@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/09 01:06:41 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/09 18:02:59 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -503,8 +503,77 @@ class rbtree {
 		return make_pair( iterator( new_node ), true );
 	}
 
+	colot_type delete_ndoe( link_type del_node ) {
+		link_type parent = del_node->parent;
+		link_type left = del_node->left;
+		link_type right = del_node->right;
+		if ( left == NULL || right == NULL || right == end_node_ptr() ) {
+			if ( left == NULL && right ) {
+				if ( del_node == _root_node ) {
+					_root_node = right;
+				} else {
+					if ( parent->right == del_node ) {
+						parent->right = right;
+					} else {
+						parent->left = right;
+					}
+					if ( right == end_node_ptr() ) {
+						__end_node.left = parent;
+					}
+				}
+				if ( _begin_node == del_node ) {
+					_begin_node = right;
+				}
+			} else if ( ( right == NULL || right == end_node_ptr() ) && left ) {
+				if ( del_node == _root_node ) {
+					_root_node = left;
+					__end_node.left = left;
+					left->right = end_node_ptr();
+				} else {
+					if ( parent->right == del_node ) {
+						parent->right = left;
+						if ( right == end_node_ptr() ) {
+							left->right = end_node_ptr();
+						}
+					} else {
+						parent->left = left;
+					}
+				}
+			} else {
+			}
+			--_size;
+			_alloc.destroy( del_node );
+			_alloc.deallocate( del_node, 1 );
+			return del_node->color;
+		}
+		link_type swap_node = del_node->left.maximum();
+		if ( swap_node ) {
+			swap_node->parent->right = NULL;
+			swap_node->parent = del_node->parent;
+			swap_node->left = del_node->left;
+			swap_node->right = del_node->right;
+		}
+		if ( del_node->parent ) {
+			if ( is_right_child( del_node ) ) {
+				del_node->parent->right = swap_node;
+			} else {
+				del_node->parent->left = swap_node;
+			}
+		}
+		if ( del_node->left ) {
+			del_node->left->parent = swap_node;
+		}
+		if ( del_node->right ) {
+			del_node->right->parent = swap_node;
+		}
+		return swap_node->color;
+	}
+
 	void erase( input_type val ) {
-		find_node( val );
+		ft::pair<iterator, bool> del_node = find_node( val );
+		if ( del_ndoe.second == false ) {
+			return;
+		}
 	}
 
 	link_type get_begin_node() {
