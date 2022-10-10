@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/09 18:02:59 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/11 00:22:34 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,6 +126,10 @@ class rbtree_iterator {
 	}
 
 	rbtree_iterator( link_type node ) : node( node ) {
+	}
+
+	link_type base() {
+		return node;
 	}
 
 	void incremet() {
@@ -503,28 +507,139 @@ class rbtree {
 		return make_pair( iterator( new_node ), true );
 	}
 
-	colot_type delete_ndoe( link_type del_node ) {
+	// erase node function.
+	void do_erase_cases( link_type parent, link_type sibling,
+						 link_type extra_black ) {
+		if ( extra_black ) {
+			if ( extra_black->color == RED ) {
+				extra_black->color = BLACK;
+				return;
+			}
+		}
+		// check case1
+		if ( sibling->color == RED ) {
+			sibling->color = BLACK;
+			parent->color = RED;
+			if ( parent->right == sibling ) {
+				sibling = sibling->left;
+				rotate_left( parent );
+			} else {
+				sibling = sibling->right;
+				rotate_right( parent );
+			}
+		}
+		do_erase_sibling_is_black( parent, sibling, extra_black );
+	}
+
+	// case 2
+	void do_erase_sibling_is_black( link_type parent, link_type sibling,
+									link_type extra_black ) {
+		if ( parent->right == extra_black ) {
+			if ( sibling->left && sibling->left->color == RED ) {
+				return erase_case_sibling_same_side_child_red( parent, sibling,
+															   false );
+			} else if ( sibling->right && sibling->right->color == RED ) {
+				return erase_case_sibling_other_side_child_red( parent, sibling,
+																false );
+			}
+		} else {
+			if ( sibling->right && sibling->right->color == RED ) {
+				return erase_case_sibling_same_side_child_red( parent, sibling,
+															   true );
+			} else if ( sibling->right && sibling->right->color == RED ) {
+				return erase_case_sibling_other_side_child_red( parent, sibling,
+																true );
+			}
+		}
+		sibling->color = RED;
+		if ( parent->color == RED ) {
+			parent->color = BLACK;
+			return;
+		}
+		if ( parent == _root_node ) {
+			return;
+		}
+		link_type new_parent = parent->parent;
+		if ( is_right_child( parent ) ) {
+			do_erase_cases( new_parent, new_parent->left, parent );
+		} else {
+			do_erase_cases( new_parent, new_parent->right, parent );
+		}
+	}
+
+	// erase case3
+	void erase_case_sibling_other_side_child_red(
+		link_type parent, link_type sibling, bool sibling_is_right_child ) {
+		link_type sibling_child;
+		sibling->color = BLACK;
+		if ( sibling_is_right_child ) {
+			sibling_child = sibling->left;
+			sibling_child->color = parent->color;
+			rotate_right( sibling );
+			rotate_left( parent );
+		} else {
+			sibling_child = sibling->right;
+			sibling_child->color = parent->color;
+			rotate_left( sibling );
+			rotate_right( parent );
+		}
+	}
+
+	// erase case4
+	void erase_case_sibling_same_side_child_red( link_type parent,
+												 link_type sibling,
+												 bool sibling_is_right_child ) {
+		sibling->color = parent->color;
+		parent->color = BLACK;
+		if ( sibling_is_right_child ) {
+			sibling->right->color = BLACK;
+			rotate_left( parent );
+		} else {
+			sibling->left->color = BLACK;
+			rotate_right( parent );
+		}
+	}
+
+	// case1: sibling - red.
+	// case2: sibling - black, sibling's children - black
+	// case3: sibling - black, other side sibling's child - red
+	// case4: sibling - black, same side sibling's child - red
+	size_type erase( input_type val ) {
+		ft::pair<iterator, bool> tmp = find_node( val );
+		if ( tmp.second == false ) {
+			return 0;
+		}
+		link_type extra_black_parent = NULL;
+		link_type extra_black = NULL;
+		// bool      extra_black_is_right_child;
+		bool      del_node_color_is_black;
+		link_type swap_node = NULL;
+		link_type del_node = ( tmp.first ).base();
 		link_type parent = del_node->parent;
 		link_type left = del_node->left;
 		link_type right = del_node->right;
+		// One or zero child node.
 		if ( left == NULL || right == NULL || right == end_node_ptr() ) {
-			if ( left == NULL && right ) {
+			// One right child node.
+			if ( left == NULL && right != NULL && right != end_node_ptr() ) {
 				if ( del_node == _root_node ) {
 					_root_node = right;
+					_begin_node = right;
 				} else {
 					if ( parent->right == del_node ) {
 						parent->right = right;
 					} else {
 						parent->left = right;
-					}
-					if ( right == end_node_ptr() ) {
-						__end_node.left = parent;
+						if ( _begin_node == del_node ) {
+							_begin_node = right;
+						}
 					}
 				}
-				if ( _begin_node == del_node ) {
-					_begin_node = right;
-				}
-			} else if ( ( right == NULL || right == end_node_ptr() ) && left ) {
+				right->parent = parent;
+				swap_node = right;
+			}
+			// One left child node.
+			else if ( ( right == NULL || right == end_node_ptr() ) && left ) {
 				if ( del_node == _root_node ) {
 					_root_node = left;
 					__end_node.left = left;
@@ -534,46 +649,88 @@ class rbtree {
 						parent->right = left;
 						if ( right == end_node_ptr() ) {
 							left->right = end_node_ptr();
+							__end_node.left = left;
 						}
 					} else {
 						parent->left = left;
 					}
 				}
-			} else {
+				left->parent = parent;
+				swap_node = left;
 			}
-			--_size;
-			_alloc.destroy( del_node );
-			_alloc.deallocate( del_node, 1 );
-			return del_node->color;
-		}
-		link_type swap_node = del_node->left.maximum();
-		if ( swap_node ) {
-			swap_node->parent->right = NULL;
-			swap_node->parent = del_node->parent;
-			swap_node->left = del_node->left;
-			swap_node->right = del_node->right;
-		}
-		if ( del_node->parent ) {
-			if ( is_right_child( del_node ) ) {
-				del_node->parent->right = swap_node;
-			} else {
-				del_node->parent->left = swap_node;
+			// Zero child node.
+			else {
+				if ( del_node == _root_node ) {
+					_root_node = end_node_ptr();
+					_begin_node = end_node_ptr();
+					__end_node.left = end_node_ptr();
+				} else {
+					if ( parent->right == del_node ) {
+						parent->right = del_node->right;
+					} else {
+						parent->left = NULL;
+					}
+				}
+			}
+			del_node_color_is_black = ( del_node->color == BLACK );
+			if ( del_node_color_is_black ) {
+				extra_black = swap_node;
+				if ( swap_node ) {
+					extra_black_parent = swap_node->parent;
+				}
 			}
 		}
-		if ( del_node->left ) {
-			del_node->left->parent = swap_node;
+		// Two children node.
+		else {
+			swap_node = left->maximum( left );
+			if ( swap_node != left ) {
+				swap_node->parent->right = NULL;
+				swap_node->left = left;
+				left->parent = swap_node;
+				extra_black_parent = swap_node->parent;
+			}
+			swap_node->parent = parent;
+			swap_node->right = right;
+			if ( del_node == _root_node ) {
+				_root_node = swap_node;
+			} else {
+				if ( is_right_child( del_node ) ) {
+					parent->right = swap_node;
+				} else {
+					parent->left = swap_node;
+				}
+			}
+			right->parent = swap_node;
+			del_node_color_is_black = ( swap_node->color == BLACK );
+			swap_node->color = del_node->color;
+			if ( del_node_color_is_black ) {
+				if ( swap_node == left ) {
+					extra_black = swap_node->left;
+					extra_black_parent = swap_node;
+				}
+			}
 		}
-		if ( del_node->right ) {
-			del_node->right->parent = swap_node;
+		--_size;
+		_alloc.destroy( del_node );
+		_alloc.deallocate( del_node, 1 );
+		// if ( extra_black )
+		// 	std::cout << "extra_black val:" << extra_black->value << std::endl;
+		// std::cout << extra_black << std::endl;
+		// if ( extra_black_parent )
+		// 	std::cout << "parent val:" << extra_black_parent->value
+		// 			  << std::endl;
+		// std::cout << extra_black_parent << std::endl;
+		// print_tree();
+		if ( del_node_color_is_black ) {
+			if ( extra_black_parent->right == extra_black ) {
+				do_erase_cases( extra_black_parent, extra_black_parent->left,
+								extra_black );
+			} else {
+				do_erase_cases( extra_black_parent, extra_black_parent->right,
+								extra_black );
+			}
 		}
-		return swap_node->color;
-	}
-
-	void erase( input_type val ) {
-		ft::pair<iterator, bool> del_node = find_node( val );
-		if ( del_ndoe.second == false ) {
-			return;
-		}
+		return 1;
 	}
 
 	link_type get_begin_node() {

@@ -46,21 +46,43 @@ class Base {
 #include <map>
 #include <chrono>
 int main() {
-	std::map<int, Base> a;
-	Base                b;
+	// std::map<int, Base> a;
+	// ft::rbtree<ft::pair<int, Base> > a;
+	ft::rbtree<int> a;
+	Base            b;
 
 	for ( int i = 0; i < 21; i++ ) {
-		a.insert( std::make_pair( i, b ) );
+		a.insert( i );
 	}
 
-	// std::cout << "erase" << std::endl;
+	std::cout << "erase" << std::endl;
+	a.erase( 1 );
+	a.erase( 2 );
+	a.erase( 3 );
+	a.erase( 5 );
+	a.erase( 7 );
+
+	a.erase( 3 );
+	a.erase( 20 );
+	a.erase( 19 );
+	a.erase( 17 );
+	a.erase( 15 );
+	a.erase( 14 );
+	a.erase( 6 );
+	a.erase( 11 );
+	a.erase( 4 );
+	a.erase( 0 );
+	a.erase( 9 );
+	a.erase( 10 );
+	a.erase( 8 );
+	a.erase( 13 );
+	a.print_tree();
+	std::cout << "done!" << std::endl;
 
 	// std::cout << &( a.find( 2 )->second ) << std::endl;
 
 	// a.erase( 3 );
 	// std::cout << &( a.find( 3 )->second ) << std::endl;
-
-	// std::cout << "done!" << std::endl;
 
 	// std::map<int, char>::iterator tmp;
 
