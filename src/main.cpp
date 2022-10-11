@@ -30,12 +30,17 @@ struct Buffer {
 #include <functional>
 
 class Base {
+   private:
+	std::string a;
+
    public:
-	Base() {
+	Base() : a() {
 		std::cout << "Base constructor called!" << std::endl;
 	}
-	Base( const Base &ref ) {
-		(void)ref;
+	Base( const std::string &tmp ) : a( tmp ) {
+		std::cout << "Base str constructor called!" << std::endl;
+	}
+	Base( const Base &ref ) : a( ref.a ) {
 		std::cout << "Base copy contstructor called!" << std::endl;
 	}
 	~Base() {
@@ -46,37 +51,19 @@ class Base {
 #include <map>
 #include <chrono>
 int main() {
-	// std::map<int, Base> a;
 	// ft::rbtree<ft::pair<int, Base> > a;
-	ft::rbtree<int> a;
-	Base            b;
+	// ft::rbtree<int> a;
+	std::map<int, Base> a;
+	Base                b;
 
 	for ( int i = 0; i < 21; i++ ) {
-		a.insert( i );
+		// a.insert( ft::make_pair( i, b ) );
+		a.insert( std::make_pair( i, b ) );
 	}
 
 	std::cout << "erase" << std::endl;
-	a.erase( 1 );
-	a.erase( 2 );
-	a.erase( 3 );
-	a.erase( 5 );
-	a.erase( 7 );
 
-	a.erase( 3 );
-	a.erase( 20 );
-	a.erase( 19 );
-	a.erase( 17 );
-	a.erase( 15 );
-	a.erase( 14 );
-	a.erase( 6 );
-	a.erase( 11 );
-	a.erase( 4 );
-	a.erase( 0 );
-	a.erase( 9 );
-	a.erase( 10 );
-	a.erase( 8 );
-	a.erase( 13 );
-	a.print_tree();
+	// a.print_tree();
 	std::cout << "done!" << std::endl;
 
 	// std::cout << &( a.find( 2 )->second ) << std::endl;

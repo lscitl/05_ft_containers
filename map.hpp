@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/28 19:39:28 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/11 21:56:51 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,11 +19,46 @@
 #include <functional>
 #include "iterator.hpp"
 #include "type_traits.hpp"
-#include "lexico_cmp.hpp"
+#include "equal_lexico_cmp.hpp"
 #include "pair.hpp"
 #include "rbtree.hpp"
 
 namespace ft {
+
+template <class Key, class T>
+struct _value_type {
+	typedef Key                                   key_type;
+	typedef T                                     mapped_type;
+	typedef ft::pair<const key_type, mapped_type> value_type;
+	typedef ft::pair<key_type&, mapped_type&>     ref_pair_type;
+
+   private:
+	value_type cc;
+
+   public:
+	value_type& _get_value() {
+		return cc;
+	}
+
+	const value_type& _get_value() const {
+		return cc;
+	}
+
+	ref_pair_type ref() {
+		value_type& v = _get_value();
+		return ref_pair_type( const_cast<key_type&>( v.first ), v.second );
+	}
+
+	_value_type& operator=( const _value_type& v ) {
+		ref() = v._get_value();
+		return *this;
+	}
+
+   private:
+	_value_type();
+	~_value_type();
+	_value_type( const _value_type& v );
+};
 
 template <class TreeIterator>
 class map_iterator {
@@ -32,7 +67,7 @@ class map_iterator {
 	TreeIterator i;
 
    public:
-	typedef typename NodeType::value_type                value_type;
+	typedef typename NodeTypes::value_type               value_type;
 	typedef typename iterator_traits<T>::pointer         pointer;
 	typedef typename iterator_traits<T>::reference       reference;
 	typedef typename iterator_traits<T>::difference_type difference_type;
@@ -98,13 +133,13 @@ template <class Key, class T, class Compare = std::less<Key>,
 class map {
    public:
 	// types:
-	typedef Key                               key_type;
-	typedef T                                 mapped_type;
-	typedef pair<const key_type, mapped_type> value_type;
-	typedef Compare                           key_compare;
-	typedef Allocator                         allocator_type;
-	typedef value_type&                       reference;
-	typedef const value_type&                 const_reference;
+	typedef Key                                   key_type;
+	typedef T                                     mapped_type;
+	typedef ft::pair<const key_type, mapped_type> value_type;
+	typedef Compare                               key_compare;
+	typedef Allocator                             allocator_type;
+	typedef value_type&                           reference;
+	typedef const value_type&                     const_reference;
 
 	typedef typename allocator_type::pointer         pointer;
 	typedef typename allocator_type::const_pointer   const_pointer;
@@ -117,7 +152,7 @@ class map {
 	typedef ft::reverse_iterator<const_iterator>    const_reverse_iterator;
 
    private:
-	typedef typename rbtree_node<value_type>::node_type _node_type;
+	typedef ft::_value_type<Key, T> _value_type;
 	typedef
 		typename Allocator::template rebind<_node_type>::other _node_allocator;
 	typedef typename rbtree<key_type, value_type, key_compare, _node_allocator>

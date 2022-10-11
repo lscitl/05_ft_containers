@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/07 00:09:56 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/27 19:31:00 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/11 19:43:51 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,24 +28,6 @@ struct iterator_traits {
 	typedef typename Iter::iterator_category iterator_category;
 };
 
-// template <class T>
-// struct iterator_traits {
-// 	typedef std::ptrdiff_t difference_type;
-// 	typedef T              value_type;
-// 	typedef T*             pointer;
-// 	typedef T&             reference;
-// 	typedef void           iterator_category;
-// };
-
-// template <>
-// struct iterator_traits<int> {
-// 	typedef std::ptrdiff_t difference_type;
-// 	typedef int            value_type;
-// 	typedef int*           pointer;
-// 	typedef int&           reference;
-// 	typedef void           iterator_category;
-// };
-
 template <class T>
 struct iterator_traits<T*> {
 	typedef std::ptrdiff_t                  difference_type;
@@ -54,15 +36,6 @@ struct iterator_traits<T*> {
 	typedef T&                              reference;
 	typedef std::random_access_iterator_tag iterator_category;
 };
-
-// template <class T>
-// struct iterator_traits<const T*> {
-// 	typedef std::ptrdiff_t                  difference_type;
-// 	typedef const T                         value_type;
-// 	typedef const T*                        pointer;
-// 	typedef const T&                        reference;
-// 	typedef std::random_access_iterator_tag iterator_category;
-// };
 
 template <class Category, class T, class Distance = ptrdiff_t,
 		  class Pointer = T*, class Reference = T&>
@@ -245,89 +218,6 @@ bool operator>=( const ft::reverse_iterator<Iterator1>& lhs,
 				 const ft::reverse_iterator<Iterator2>& rhs ) {
 	return lhs.base() <= rhs.base();
 }
-
-// template <typename T>
-// class has_iterator_category {
-//    private:
-// 	typedef char one;
-// 	typedef struct {
-// 		char x[2];
-// 	} two;
-// 	template <typename C>
-// 	static one test( typename C::* );
-// 	template <typename C>
-// 	static two test( ... );
-
-//    public:
-// 	static const bool value =
-// 		sizeof( has_iterator_category<T>::test<T>( 0 ) ) == 1;
-// };
-
-// template <typename T>
-// class has_iterator_category {
-//    private:
-// 	typedef char one;
-// 	typedef struct {
-// 		char x[2];
-// 	} two;
-// 	template <typename C>
-// 	static one test( int C::* );
-// 	template <typename C>
-// 	static two test( ... );
-
-//    public:
-// 	static const bool value =
-// 		sizeof( has_iterator_category<T>::test<T>( 0 ) ) == 1;
-// };
-
-// template <class T>
-// struct __is_input_iterator : public false_type {};
-// template <>
-// struct __is_input_iterator<std::input_iterator_tag> : public true_type {};
-// template <>
-// struct __is_input_iterator<std::forward_iterator_tag> : public true_type {};
-// template <>
-// struct __is_input_iterator<std::bidirectional_iterator_tag> : public
-// true_type {
-// };
-// template <>
-// struct __is_input_iterator<std::random_access_iterator_tag> : public
-// true_type {
-// };
-
-// template <class T>
-// struct __is_forward_iterator : public false_type {};
-// template <>
-// struct __is_forward_iterator<std::forward_iterator_tag> : public true_type
-// {}; template <> struct __is_forward_iterator<std::bidirectional_iterator_tag>
-// 	: public true_type {};
-// template <>
-// struct __is_forward_iterator<std::random_access_iterator_tag>
-// 	: public true_type {};
-
-// template <class T, bool = has_iterator_category<iterator_traits<T> >::value>
-// struct _is_input_iterator
-// 	: public integral_constant<
-// 		  bool, __is_input_iterator<
-// 					typename iterator_traits<T>::iterator_category>::value> {};
-
-// template <class T>
-// struct _is_input_iterator<T, false> : public false_type {};
-
-// template <class T, bool = has_iterator_category<iterator_traits<T> >::value>
-// struct _is_forward_iterator
-// 	: public integral_constant<
-// 		  bool, __is_forward_iterator<
-// 					typename iterator_traits<T>::iterator_category>::value> {};
-
-// template <class T>
-// struct _is_forward_iterator<T, false> : public false_type {};
-
-// template <class T>
-// struct is_input_iterator : public _is_input_iterator<T> {};
-
-// template <class T>
-// struct is_forward_iterator : public _is_forward_iterator<T> {};
 
 template <class T>
 struct is_input_iterator_tag : public false_type {};
