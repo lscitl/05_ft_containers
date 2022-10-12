@@ -50,17 +50,26 @@ class Base {
 
 #include <map>
 #include <chrono>
+#include "../map.hpp"
+
 int main() {
 	// ft::rbtree<ft::pair<int, Base> > a;
 	// ft::rbtree<int> a;
-	std::map<int, Base> a;
-	Base                b;
+	// std::map<int, Base> a;
+	ft::map<int, char> a;
+	Base               b;
 
+	a.begin();
 	for ( int i = 0; i < 21; i++ ) {
-		// a.insert( ft::make_pair( i, b ) );
-		a.insert( std::make_pair( i, b ) );
+		// a.insert( i );
+		std::cout << i << ": " << std::endl;
+		a.insert( ft::make_pair( i, 'a' ) );
+		// a.insert( std::make_pair( i, b ) );
+		std::cout << std::endl;
 	}
 
+	// std::cout << a.begin() << std::endl;
+	// printf( "%p\n", &a.begin() );
 	std::cout << "erase" << std::endl;
 
 	// a.print_tree();

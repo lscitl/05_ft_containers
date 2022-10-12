@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/12 00:25:52 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/13 00:17:49 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,48 +30,87 @@ namespace ft {
 
 typedef enum { RED, BLACK } color_t;
 
-template <class Key, class T>
+template <class Key, class Value>
 struct _value_type;
 
-template <class T>
-struct rbtree_node_base {
-	typedef rbtree_node_base<T>* link_type;
-	typedef color_t              color_type;
+// template <class T>
+// struct rbtree_node_base {
+// 	typedef rbtree_node_base<T>* link_type;
+// 	typedef color_t              color_type;
 
-	color_type color;
-	link_type  parent;
-	link_type  left;
-	link_type  right;
-	T          value;
+// 	color_type color;
+// 	link_type  parent;
+// 	link_type  left;
+// 	link_type  right;
+// 	T          value;
 
-	rbtree_node_base()
-		: color( RED ), parent( NULL ), left( NULL ), right( NULL ), value() {
-	}
-	rbtree_node_base( const T& val )
-		: color( RED ),
-		  parent( NULL ),
-		  left( NULL ),
-		  right( NULL ),
-		  value( val ) {
-	}
-	rbtree_node_base( color_type color, link_type parent, link_type left,
-					  link_type right, const T& val )
-		: color( color ),
-		  parent( parent ),
-		  left( left ),
-		  right( right ),
-		  value( val ) {
-	}
-	~rbtree_node_base() {
-	}
+// 	rbtree_node_base()
+// 		: color( RED ), parent( NULL ), left( NULL ), right( NULL ), value() {
+// 	}
+// 	rbtree_node_base( const T& val )
+// 		: color( RED ),
+// 		  parent( NULL ),
+// 		  left( NULL ),
+// 		  right( NULL ),
+// 		  value( val ) {
+// 	}
+// 	rbtree_node_base( color_type color, link_type parent, link_type left,
+// 					  link_type right, const T& val )
+// 		: color( color ),
+// 		  parent( parent ),
+// 		  left( left ),
+// 		  right( right ),
+// 		  value( val ) {
+// 	}
+// 	~rbtree_node_base() {
+// 	}
+// };
+
+template <class VoidPtr>
+class rbtree_end_node;
+
+template <class VoidPtr>
+class rbtree_node_base;
+
+template <class T, class VoidPtr>
+class rbtree_node;
+
+template <class VoidPtr>
+struct rbtree_node_base_types {
+	typedef VoidPtr                            void_pointer;
+	typedef rbtree_node_base<void_pointer>     node_base_type;
+	typedef node_base_type*                    node_base_pointer;
+	typedef rbtree_end_node<node_base_pointer> end_node_type;
+	typedef end_node_type*                     end_node_pointer;
+};
+
+template <class NodePtr, class T, class VoidPtr>
+struct rbtree_node_types<NodePtr, rbtree_node<T, VoidPtr> >
+	: public rbtree_node_base_types<VoidPtr>,
+	  rbtree_key_value_types<T>,
+	  rbtree_map_pointer_types<T, VoidPtr> {
+	typedef rbtree_node_base_types<VoidPtr>      _base;
+	typedef rbtree_key_value_types<T>            _key_base;
+	typedef rbtree_map_pointer_types<T, VoidPtr> _map_pointer_base;
+
+   public:
+	typedef typename pointer_traits<NodePtr>::element_type __node_type;
+	typedef NodePtr                                        __node_pointer;
+
+	typedef T __node_value_type;
+	typedef typename __rebind_pointer<VoidPtr, __node_value_type>::type
+		__node_value_type_pointer;
+	typedef typename __rebind_pointer<VoidPtr, const __node_value_type>::type
+		__const_node_value_type_pointer;
 };
 
 template <class T>
 struct rbtree_node_types {
 	typedef T         key_type;
+	typedef T         value_type;
 	typedef T         node_value_type;
 	typedef T         container_value_type;
-	static const bool _is_map == false;
+	static const bool _is_map = false;
 
 	static key_type const& _get_key( T const& _v ) {
 		return _v;
@@ -83,12 +122,12 @@ struct rbtree_node_types {
 };
 
 template <class Key, class Value>
-struct rbtree_node_types<_value_type<Key, Value>> {
+struct rbtree_node_types<_value_type<Key, Value> > {
 	typedef Key                        key_type;
 	typedef Value                      value_type;
 	typedef _value_type<Key, Value>    node_value_type;
 	typedef ft::pair<const Key, Value> container_value_type;
-	static const bool                  _is_map == false;
+	static const bool                  _is_map = true;
 
 	static key_type const& _get_key( node_value_type const& _v ) {
 		return _v._get_value().first;
@@ -100,110 +139,147 @@ struct rbtree_node_types<_value_type<Key, Value>> {
 };
 
 template <class T>
-class rbtree_node : rbtree_node_type<T> {};
+struct rbtree_node : rbtree_node_types<T> {
+	typedef rbtree_node<T>*                                link_type;
+	typedef color_t                                        color_type;
+	typedef typename rbtree_node_types<T>::key_type        key_type;
+	typedef typename rbtree_node_types<T>::value_type      value_type;
+	typedef typename rbtree_node_types<T>::node_value_type node_value_type;
+	typedef typename rbtree_node_types<T>::container_value_type
+		container_value_type;
 
-template <class T>
-struct rbtree_node : public rbtree_node_base<T> {
-	// typedef rbtree_node* link_type;
-	// typedef color_t      color_type;
-	typedef T key_type;
-	typedef T value_type;
-	typedef T node_value_type;
+	color_type color;
+	link_type  parent;
+	link_type  left;
+	link_type  right;
+	T          value;
 
-	rbtree_node() : rbtree_node_base() {
-	}
-	rbtree_node( const node_value_type& val )
-		: rbtree_node_base( val.color, val.parent, val.left, val.right ) {
+	rbtree_node( const T& val )
+		: color( RED ),
+		  parent( NULL ),
+		  left( NULL ),
+		  right( NULL ),
+		  value( val ) {
 	}
 	rbtree_node( color_type color, link_type parent, link_type left,
 				 link_type right, const T& val )
-		: rbtree_node_base( color, parent, left, right, val ) {
+		: color( color ),
+		  parent( parent ),
+		  left( left ),
+		  right( right ),
+		  value( val ) {
 	}
-	rbtree_node( const rbtree_node& node )
-		: rbtree_node_base( node.color, node.parent, node.left, node.right,
-							node.value ) {
+
+   private:
+	rbtree_node()
+		: color( RED ), parent( NULL ), left( NULL ), right( NULL ), value() {
 	}
 	~rbtree_node() {
 	}
-
-	static link_type minimum( link_type x ) {
-		while ( x->left != NULL ) {
-			x = x->left;
-		}
-		return x;
-	}
-
-	static link_type maximum( link_type x ) {
-		while ( x->right != NULL ) {
-			x = x->right;
-		}
-		return x;
-	}
-
-	key_type& get_key() {
-		return this->value;
-	}
-
-	value_type& get_value() {
-		return this->value;
-	}
-
-	node_value_type& get_node_value() {
-		return this->value;
-	}
 };
 
-template <class Key, class Value>
-struct rbtree_node<_value_type<Key, Value>>
-	: public rbtree_node_base<_value_type<Key, Value>> {
-	// typedef rbtree_node*    link_type;
-	// typedef color_t         color_type;
-	typedef Key                     key_type;
-	typedef Value                   value_type;
-	typedef _value_type<Key, Value> node_value_type;
+// template <class T>
+// struct rbtree_node : public rbtree_node_base<T> {
+// 	// typedef rbtree_node* link_type;
+// 	// typedef color_t      color_type;
+// 	typedef T key_type;
+// 	typedef T value_type;
+// 	typedef T node_value_type;
 
-	rbtree_node() : rbtree_node_base() {
-	}
-	rbtree_node( const node_value_type& val )
-		: rbtree_node_base( val.color, val.parent, val.left, val.right ) {
-	}
-	rbtree_node( color_type color, link_type parent, link_type left,
-				 link_type right, const T& val )
-		: rbtree_node_base( color, parent, left, right, val ) {
-	}
-	rbtree_node( const rbtree_node& node )
-		: rbtree_node_base( node.color, node.parent, node.left, node.right,
-							node.value ) {
-	}
-	~rbtree_node() {
-	}
+// 	rbtree_node() : rbtree_node_base() {
+// 	}
+// 	rbtree_node( const node_value_type& val )
+// 		: rbtree_node_base( val.color, val.parent, val.left, val.right ) {
+// 	}
+// 	rbtree_node( color_type color, link_type parent, link_type left,
+// 				 link_type right, const T& val )
+// 		: rbtree_node_base( color, parent, left, right, val ) {
+// 	}
+// 	rbtree_node( const rbtree_node& node )
+// 		: rbtree_node_base( node.color, node.parent, node.left, node.right,
+// 							node.value ) {
+// 	}
+// 	~rbtree_node() {
+// 	}
 
-	static link_type minimum( link_type x ) {
-		while ( x->left != NULL ) {
-			x = x->left;
-		}
-		return x;
-	}
+// 	static link_type minimum( link_type x ) {
+// 		while ( x->left != NULL ) {
+// 			x = x->left;
+// 		}
+// 		return x;
+// 	}
 
-	static link_type maximum( link_type x ) {
-		while ( x->right != NULL ) {
-			x = x->right;
-		}
-		return x;
-	}
+// 	static link_type maximum( link_type x ) {
+// 		while ( x->right != NULL ) {
+// 			x = x->right;
+// 		}
+// 		return x;
+// 	}
 
-	key_type& get_key() {
-		return this->value.first();
-	}
+// 	key_type& get_key() {
+// 		return this->value;
+// 	}
 
-	value_type& get_value() {
-		return this->value.second();
-	}
+// 	value_type& get_value() {
+// 		return this->value;
+// 	}
 
-	node_value_type& get_node_value() {
-		return this->value;
-	}
-};
+// 	node_value_type& get_node_value() {
+// 		return this->value;
+// 	}
+// };
+
+// template <class Key, class Value>
+// struct rbtree_node<_value_type<Key, Value>>
+// 	: public rbtree_node_base<_value_type<Key, Value>> {
+// 	// typedef rbtree_node*    link_type;
+// 	// typedef color_t         color_type;
+// 	typedef Key                     key_type;
+// 	typedef Value                   value_type;
+// 	typedef _value_type<Key, Value> node_value_type;
+
+// 	rbtree_node() : rbtree_node_base() {
+// 	}
+// 	rbtree_node( const node_value_type& val )
+// 		: rbtree_node_base( val.color, val.parent, val.left, val.right ) {
+// 	}
+// 	rbtree_node( color_type color, link_type parent, link_type left,
+// 				 link_type right, const T& val )
+// 		: rbtree_node_base( color, parent, left, right, val ) {
+// 	}
+// 	rbtree_node( const rbtree_node& node )
+// 		: rbtree_node_base( node.color, node.parent, node.left, node.right,
+// 							node.value ) {
+// 	}
+// 	~rbtree_node() {
+// 	}
+
+// 	static link_type minimum( link_type x ) {
+// 		while ( x->left != NULL ) {
+// 			x = x->left;
+// 		}
+// 		return x;
+// 	}
+
+// 	static link_type maximum( link_type x ) {
+// 		while ( x->right != NULL ) {
+// 			x = x->right;
+// 		}
+// 		return x;
+// 	}
+
+// 	key_type& get_key() {
+// 		return this->value.first();
+// 	}
+
+// 	value_type& get_value() {
+// 		return this->value.second();
+// 	}
+
+// 	node_value_type& get_node_value() {
+// 		return this->value;
+// 	}
+// };
 
 // template <class T, bool = ft::is_pair<T>::value>
 // class get_node_type {
@@ -229,7 +305,9 @@ class rbtree_iterator {
 	// typedef typename get_node_type<T>::node_type  node_type;
 	// typedef typename get_node_type<T>::value_type value_type;
 	// typedef typename get_node_type<T>::key_type   key_type;
-	typedef rbtree_node<T>*                 link_type;
+	typedef rbtree_node<T>                  node_type;
+	typedef node_type*                      link_type;
+	typedef node_type&                      reference;
 	typedef DiffType                        difference_type;
 	typedef std::bidirectional_iterator_tag iterator_category;
 
@@ -280,15 +358,14 @@ class rbtree_iterator {
 	}
 };
 
-template <class T, class Compare = std::less<typename rbtree_node<T>::key_type>,
-		  class Allocator = std::allocator<T>>
+template <class T, class Compare, class Allocator>
 class rbtree {
    public:
 	typedef typename rbtree_node<T>::node_value_type node_value_type;
 	typedef typename rbtree_node<T>::key_type        key_type;
 	typedef typename rbtree_node<T>::value_type      value_type;
 	typedef Compare                                  value_compare;
-	typedef typename Allocator::template rebind<rbtree_node<T>>::other
+	typedef typename Allocator::template rebind<rbtree_node<T> >::other
 													 allocator_type;
 	typedef typename allocator_type::pointer         pointer;
 	typedef typename allocator_type::const_pointer   const_pointer;
@@ -296,9 +373,9 @@ class rbtree {
 	typedef typename allocator_type::difference_type difference_type;
 
    protected:
-	typedef typename rbtree_node<T> node_type;
-	typedef node_type*              link_type;
-	typedef const node_type*        const_link_type;
+	typedef rbtree_node<T>   node_type;
+	typedef node_type*       link_type;
+	typedef const node_type* const_link_type;
 
    public:
 	typedef rbtree_iterator<T, difference_type>       iterator;
@@ -346,8 +423,21 @@ class rbtree {
 		}
 	}
 
+	rbtree( value_compare comp, allocator_type alloc )
+		: __end_node(),
+		  _root_node( &__end_node ),
+		  _begin_node( &__end_node ),
+		  _comp( comp ),
+		  _size( 0 ),
+		  _alloc( alloc ) {
+	}
+
 	~rbtree() {
-		this->clear();
+		// this->clear();
+	}
+
+	iterator begin() {
+		return iterator( _begin_node );
 	}
 
 	link_type end_node_ptr() {
@@ -418,24 +508,52 @@ class rbtree {
 
 	// return value is input value link_type with true, but if not found, it
 	// will return parent node with false.
-	ft::pair<link_type, bool> find_node( const node_value_type& val ) {
+	// ft::pair<link_type, bool> find_node( const node_value_type& val ) {
+	// 	link_type cur = _root_node;
+	// 	link_type parent = _root_node;
+	// 	if ( _comp( val, cur->value ) ) {
+	// 		cur = cur->left;
+	// 	} else {
+	// 		if ( _comp( cur->value, val ) ) {
+	// 			cur = cur->right;
+	// 		} else {
+	// 			return ft::pair<link_type, bool>( cur, true );
+	// 		}
+	// 	}
+	// 	while ( cur != NULL && cur != end_node_ptr() ) {
+	// 		if ( _comp( val, cur->value ) ) {
+	// 			parent = cur;
+	// 			cur = cur->left;
+	// 		} else {
+	// 			if ( _comp( cur->value, val ) ) {
+	// 				parent = cur;
+	// 				cur = cur->right;
+	// 			} else {
+	// 				return ft::pair<link_type, bool>( cur, true );
+	// 			}
+	// 		}
+	// 	}
+	// 	return ft::pair<link_type, bool>( parent, false );
+	// }
+
+	ft::pair<link_type, bool> find_node( const key_type& key ) {
 		link_type cur = _root_node;
 		link_type parent = _root_node;
-		if ( _comp( val, cur->value ) ) {
+		if ( _comp() ) {
 			cur = cur->left;
 		} else {
-			if ( _comp( cur->value, val ) ) {
+			if ( _comp( node_type::_get_key( cur->value ), key ) ) {
 				cur = cur->right;
 			} else {
 				return ft::pair<link_type, bool>( cur, true );
 			}
 		}
 		while ( cur != NULL && cur != end_node_ptr() ) {
-			if ( _comp( val, cur->value ) ) {
+			if ( _comp( key, node_type::_get_key( cur->value ) ) ) {
 				parent = cur;
 				cur = cur->left;
 			} else {
-				if ( _comp( cur->value, val ) ) {
+				if ( _comp( node_type::_get_key( cur->value ), key ) ) {
 					parent = cur;
 					cur = cur->right;
 				} else {
@@ -448,28 +566,25 @@ class rbtree {
 
 	// Search starts from the hint node.
 	// If the input value is not found, search agin from the root node.
-	ft::pair<link_type, bool> find_node(
-		link_type hint, const node_value_type& val,
-		typename ft::enable_if<!is_pair<node_value_type>::value,
-							   node_value_type>::type* = 0 ) {
+	ft::pair<link_type, bool> find_node( link_type hint, const key_type& key ) {
 		link_type cur = hint;
 		link_type parent = hint;
 		link_type ret_candidate;
-		if ( _comp( val, cur->value ) ) {
+		if ( _comp( key, cur->value ) ) {
 			cur = cur->left;
 		} else {
-			if ( _comp( cur->value, val ) ) {
+			if ( _comp( cur->value, key ) ) {
 				cur = cur->right;
 			} else {
 				return ft::pair<link_type, bool>( cur, true );
 			}
 		}
 		while ( cur != NULL && cur != end_node_ptr() ) {
-			if ( _comp( val, cur->value ) ) {
+			if ( _comp( key, cur->value ) ) {
 				parent = cur;
 				cur = cur->left;
 			} else {
-				if ( _comp( cur->value, val ) ) {
+				if ( _comp( cur->value, key ) ) {
 					parent = cur;
 					cur = cur->right;
 				} else {
@@ -480,21 +595,21 @@ class rbtree {
 		ret_candidate = parent;
 		cur = _root_node;
 		parent = _root_node;
-		if ( _comp( val, cur->value ) ) {
+		if ( _comp( key, cur->value ) ) {
 			cur = cur->left;
 		} else {
-			if ( _comp( cur->value, val ) ) {
+			if ( _comp( cur->value, key ) ) {
 				cur = cur->right;
 			} else {
 				return ft::pair<link_type, bool>( cur, true );
 			}
 		}
 		while ( cur != NULL && cur != end_node_ptr() && cur != hint ) {
-			if ( _comp( val, cur->value ) ) {
+			if ( _comp( key, cur->value ) ) {
 				parent = cur;
 				cur = cur->left;
 			} else {
-				if ( _comp( cur->value, val ) ) {
+				if ( _comp( cur->value, key ) ) {
 					parent = cur;
 					cur = cur->right;
 				} else {
@@ -505,60 +620,60 @@ class rbtree {
 		return ft::pair<link_type, bool>( ret_candidate, false );
 	}
 
-	ft::pair<link_type, bool> find_node_pair( link_type       hint,
-											  const key_type& val ) {
-		link_type cur = hint;
-		link_type parent = hint;
-		link_type ret_candidate;
-		if ( _comp( val, ( cur->value ).first() ) ) {
-			cur = cur->left;
-		} else {
-			if ( _comp( ( cur->value ).first(), val ) ) {
-				cur = cur->right;
-			} else {
-				return ft::pair<link_type, bool>( cur, true );
-			}
-		}
-		while ( cur != NULL && cur != end_node_ptr() ) {
-			if ( _comp( val, ( cur->value ).first() ) ) {
-				parent = cur;
-				cur = cur->left;
-			} else {
-				if ( _comp( cur->value, val ) ) {
-					parent = cur;
-					cur = cur->right;
-				} else {
-					return ft::pair<link_type, bool>( cur, true );
-				}
-			}
-		}
-		ret_candidate = parent;
-		cur = _root_node;
-		parent = _root_node;
-		if ( _comp( val, ( cur->value ).first() ) ) {
-			cur = cur->left;
-		} else {
-			if ( _comp( cur->value, val ) ) {
-				cur = cur->right;
-			} else {
-				return ft::pair<link_type, bool>( cur, true );
-			}
-		}
-		while ( cur != NULL && cur != end_node_ptr() && cur != hint ) {
-			if ( _comp( val, ( cur->value ).first() ) ) {
-				parent = cur;
-				cur = cur->left;
-			} else {
-				if ( _comp( cur->value, val ) ) {
-					parent = cur;
-					cur = cur->right;
-				} else {
-					return ft::pair<link_type, bool>( cur, true );
-				}
-			}
-		}
-		return ft::pair<link_type, bool>( ret_candidate, false );
-	}
+	// ft::pair<link_type, bool> find_node_pair( link_type       hint,
+	// 										  const key_type& key ) {
+	// 	link_type cur = hint;
+	// 	link_type parent = hint;
+	// 	link_type ret_candidate;
+	// 	if ( _comp( key, ( cur->value ).first() ) ) {
+	// 		cur = cur->left;
+	// 	} else {
+	// 		if ( _comp( ( cur->value ).first(), key ) ) {
+	// 			cur = cur->right;
+	// 		} else {
+	// 			return ft::pair<link_type, bool>( cur, true );
+	// 		}
+	// 	}
+	// 	while ( cur != NULL && cur != end_node_ptr() ) {
+	// 		if ( _comp( key, ( cur->value ).first() ) ) {
+	// 			parent = cur;
+	// 			cur = cur->left;
+	// 		} else {
+	// 			if ( _comp( cur->value, key ) ) {
+	// 				parent = cur;
+	// 				cur = cur->right;
+	// 			} else {
+	// 				return ft::pair<link_type, bool>( cur, true );
+	// 			}
+	// 		}
+	// 	}
+	// 	ret_candidate = parent;
+	// 	cur = _root_node;
+	// 	parent = _root_node;
+	// 	if ( _comp( key, ( cur->value ).first() ) ) {
+	// 		cur = cur->left;
+	// 	} else {
+	// 		if ( _comp( cur->value, key ) ) {
+	// 			cur = cur->right;
+	// 		} else {
+	// 			return ft::pair<link_type, bool>( cur, true );
+	// 		}
+	// 	}
+	// 	while ( cur != NULL && cur != end_node_ptr() && cur != hint ) {
+	// 		if ( _comp( key, ( cur->value ).first() ) ) {
+	// 			parent = cur;
+	// 			cur = cur->left;
+	// 		} else {
+	// 			if ( _comp( cur->value, key ) ) {
+	// 				parent = cur;
+	// 				cur = cur->right;
+	// 			} else {
+	// 				return ft::pair<link_type, bool>( cur, true );
+	// 			}
+	// 		}
+	// 	}
+	// 	return ft::pair<link_type, bool>( ret_candidate, false );
+	// }
 
 	bool check_uncle_is_red_and_make_balance( link_type grand_parent,
 											  link_type parent ) {
@@ -640,17 +755,22 @@ class rbtree {
 			return make_pair( iterator( _root_node ), true );
 		}
 
-		ft::pair<link_type, bool> result = find_node( val );
+		node_type __new_node( val );
+
+		ft::pair<link_type, bool> result =
+			find_node( node_type::_get_key( __new_node.value ) );
 		if ( result.second == true ) {
 			return make_pair( iterator( result.first ), false );
 		}
 
-		node_type __new_node( val );
 		link_type new_node = _alloc.allocate( 1 );
-		if ( _comp( __end_node.value, val ) ) {
+		if ( _comp( node_type::_get_key( __end_node.left->value ),
+					node_type::_get_key( __new_node.value ) ) ) {
+			__end_node.left->right = new_node;
 			__new_node.right = end_node_ptr();
 			__end_node.left = new_node;
-		} else if ( _comp( val, _begin_node->value ) ) {
+		} else if ( _comp( node_type::_get_key( __new_node.value ),
+						   node_type::_get_key( _begin_node->value ) ) ) {
 			_begin_node = new_node;
 		}
 		_alloc.construct( new_node, __new_node );
@@ -658,7 +778,8 @@ class rbtree {
 
 		link_type parent_node = result.first;
 
-		if ( _comp( parent_node->value, val ) ) {
+		if ( _comp( node_type::_get_key( parent_node->value ),
+					node_type::_get_key( __new_node.value ) ) ) {
 			parent_node->right = new_node;
 		} else {
 			parent_node->left = new_node;
@@ -678,56 +799,56 @@ class rbtree {
 		return make_pair( iterator( new_node ), true );
 	}
 
-	ft::pair<iterator, bool> insert( const node_value_type& val ) {
-		if ( this->_size == 0 ) {
-			node_type __new_node( BLACK, NULL, NULL, end_node_ptr(), val );
-			link_type new_node = _alloc.allocate( 1 );
-			_alloc.construct( new_node, __new_node );
+	// ft::pair<iterator, bool> insert( const node_value_type& val ) {
+	// 	if ( this->_size == 0 ) {
+	// 		node_type __new_node( BLACK, NULL, NULL, end_node_ptr(), val );
+	// 		link_type new_node = _alloc.allocate( 1 );
+	// 		_alloc.construct( new_node, __new_node );
 
-			_root_node = new_node;
-			__end_node.left = _root_node;
-			_begin_node = _root_node;
-			++_size;
-			return make_pair( iterator( _root_node ), true );
-		}
+	// 		_root_node = new_node;
+	// 		__end_node.left = _root_node;
+	// 		_begin_node = _root_node;
+	// 		++_size;
+	// 		return make_pair( iterator( _root_node ), true );
+	// 	}
 
-		ft::pair<link_type, bool> result = find_node( val );
-		if ( result.second == true ) {
-			return make_pair( iterator( result.first ), false );
-		}
+	// 	ft::pair<link_type, bool> result = find_node( val );
+	// 	if ( result.second == true ) {
+	// 		return make_pair( iterator( result.first ), false );
+	// 	}
 
-		node_type __new_node( val );
-		link_type new_node = _alloc.allocate( 1 );
-		if ( _comp( __end_node.value, val ) ) {
-			__new_node.right = end_node_ptr();
-			__end_node.left = new_node;
-		} else if ( _comp( val, _begin_node->value ) ) {
-			_begin_node = new_node;
-		}
-		_alloc.construct( new_node, __new_node );
-		++_size;
+	// 	node_type __new_node( val );
+	// 	link_type new_node = _alloc.allocate( 1 );
+	// 	if ( _comp( __end_node.value, val ) ) {
+	// 		__new_node.right = end_node_ptr();
+	// 		__end_node.left = new_node;
+	// 	} else if ( _comp( val, _begin_node->value ) ) {
+	// 		_begin_node = new_node;
+	// 	}
+	// 	_alloc.construct( new_node, __new_node );
+	// 	++_size;
 
-		link_type parent_node = result.first;
+	// 	link_type parent_node = result.first;
 
-		if ( _comp( parent_node->value, val ) ) {
-			parent_node->right = new_node;
-		} else {
-			parent_node->left = new_node;
-		}
-		new_node->parent = parent_node;
-		if ( parent_node->color == BLACK ) {
-			return make_pair( iterator( new_node ), true );
-		}
-		link_type g_parent = parent_node->parent;
+	// 	if ( _comp( parent_node->value, val ) ) {
+	// 		parent_node->right = new_node;
+	// 	} else {
+	// 		parent_node->left = new_node;
+	// 	}
+	// 	new_node->parent = parent_node;
+	// 	if ( parent_node->color == BLACK ) {
+	// 		return make_pair( iterator( new_node ), true );
+	// 	}
+	// 	link_type g_parent = parent_node->parent;
 
-		// Unbalanced state. Check case1 to make balance.
-		if ( check_uncle_is_red_and_make_balance( g_parent, parent_node ) ) {
-			return make_pair( iterator( new_node ), true );
-		}
-		// Check case2 or case3 and rotate to make balance.
-		check_rotation_dir_and_make_balance( g_parent, parent_node, new_node );
-		return make_pair( iterator( new_node ), true );
-	}
+	// 	// Unbalanced state. Check case1 to make balance.
+	// 	if ( check_uncle_is_red_and_make_balance( g_parent, parent_node ) )
+	// { 		return make_pair( iterator( new_node ), true );
+	// 	}
+	// 	// Check case2 or case3 and rotate to make balance.
+	// 	check_rotation_dir_and_make_balance( g_parent, parent_node, new_node
+	// ); 	return make_pair( iterator( new_node ), true );
+	// }
 
 	// erase node function.
 	void do_erase_cases( link_type parent, link_type sibling,
@@ -936,10 +1057,10 @@ class rbtree {
 		_alloc.destroy( del_node );
 		_alloc.deallocate( del_node, 1 );
 		// if ( extra_black )
-		// 	std::cout << "extra_black val:" << extra_black->value << std::endl;
-		// std::cout << extra_black << std::endl;
-		// if ( extra_black_parent )
-		// 	std::cout << "parent val:" << extra_black_parent->value
+		// 	std::cout << "extra_black val:" << extra_black->value <<
+		// std::endl; std::cout << extra_black << std::endl; if (
+		// extra_black_parent ) 	std::cout << "parent val:" <<
+		// extra_black_parent->value
 		// 			  << std::endl;
 		// std::cout << extra_black_parent << std::endl;
 		// print_tree();
