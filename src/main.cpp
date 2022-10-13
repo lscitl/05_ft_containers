@@ -23,7 +23,7 @@ struct Buffer {
 #define COUNT ( MAX_RAM / (int)sizeof( Buffer ) )
 
 #include <vector>
-#include "../rbtree.hpp"
+// #include "../rbtree.hpp"
 
 #define _vector std::vector
 
@@ -32,11 +32,11 @@ struct Buffer {
 class Base {
    private:
 	std::string a;
-
-   public:
 	Base() : a() {
 		std::cout << "Base constructor called!" << std::endl;
 	}
+
+   public:
 	Base( const std::string &tmp ) : a( tmp ) {
 		std::cout << "Base str constructor called!" << std::endl;
 	}
@@ -50,23 +50,24 @@ class Base {
 
 #include <map>
 #include <chrono>
-#include "../map.hpp"
+// #include "../map.hpp"
+#include "../rbtree_node_test.hpp"
 
 int main() {
 	// ft::rbtree<ft::pair<int, Base> > a;
-	// ft::rbtree<int> a;
+	ft::rbtree<int, std::less<int>, std::allocator<int> > a;
 	// std::map<int, Base> a;
-	ft::map<int, char> a;
-	Base               b;
+	// ft::map<int, char> a;
+	Base b( "A" );
 
-	a.begin();
-	for ( int i = 0; i < 21; i++ ) {
-		// a.insert( i );
-		std::cout << i << ": " << std::endl;
-		a.insert( ft::make_pair( i, 'a' ) );
-		// a.insert( std::make_pair( i, b ) );
-		std::cout << std::endl;
-	}
+	// a.begin();
+	// for ( int i = 0; i < 21; i++ ) {
+	// 	// a.insert( i );
+	// 	std::cout << i << ": " << std::endl;
+	// 	// a.insert( ft::make_pair( i, 'a' ) );
+	// 	a.insert( std::make_pair( i, b ) );
+	// 	std::cout << std::endl;
+	// }
 
 	// std::cout << a.begin() << std::endl;
 	// printf( "%p\n", &a.begin() );
