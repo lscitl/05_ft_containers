@@ -32,6 +32,7 @@ struct Buffer {
 class Base {
    private:
 	std::string a;
+
 	Base() : a() {
 		std::cout << "Base constructor called!" << std::endl;
 	}
@@ -50,14 +51,21 @@ class Base {
 
 #include <map>
 #include <chrono>
-// #include "../map.hpp"
-#include "../rbtree_node_test.hpp"
+#include "../map.hpp"
+// #include "../rbtree_node_test.hpp"
+// #include "../map_value_compare.hpp"
 
 int main() {
 	// ft::rbtree<ft::pair<int, Base> > a;
-	ft::rbtree<int, std::less<int>, std::allocator<int> > a;
+	// ft::rbtree<int, std::less<int>, std::allocator<int> > a;
+	// ft::rbtree<
+	// 	ft::_value_type<int, Base>,
+	// 	ft::map_value_compare<int, ft::_value_type<int, Base>, std::less<int> >,
+	// 	std::allocator<int> >
+	// 	a;
 	// std::map<int, Base> a;
-	// ft::map<int, char> a;
+	ft::map<int, Base> a;
+	// Base               b( "A" );
 	Base b( "A" );
 
 	// a.begin();
@@ -72,7 +80,29 @@ int main() {
 	// std::cout << a.begin() << std::endl;
 	// printf( "%p\n", &a.begin() );
 	std::cout << "erase" << std::endl;
+	for ( int i = 0; i < 20; i++ ) {
+		std::cout << i << ": " << std::endl;
+		a.insert( ft::make_pair( i, b ) );
+	}
+	// std::pair<int, Base>( 1, b );
+	// std::make_pair( 1, b );
+	// ft::pair<int, Base>( 1, b );
+	// ft::make_pair( 1, b );
+	// a.insert()
+	// a.insert( std::make_pair( 1, b ) );
+	// for ( int i = 0; i < 10; i++ ) {
+	// 	a.insert( ft::_value_type<int, Base>( ft::make_pair( i, b ) ) );
+	// }
+	// a.print_tree();
 
+	a.erase( 1 );
+	// a.print_tree();
+
+	// std::cout << ( a.insert(
+	// 					ft::_value_type<int, Base>( ft::make_pair( 1, b ) )
+	// ) 				   .first )
+	// 				 ->first
+	// 		  << std::endl;
 	// a.print_tree();
 	std::cout << "done!" << std::endl;
 

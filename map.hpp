@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/12 21:05:30 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/16 00:09:18 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,9 +21,37 @@
 #include "type_traits.hpp"
 #include "equal_lexico_cmp.hpp"
 #include "pair.hpp"
-#include "rbtree.hpp"
+#include "rbtree_node_test.hpp"
 
 namespace ft {
+
+template <class Key, class C, class Compare>
+class map_value_compare {
+   private:
+	Compare comp;
+
+   public:
+	map_value_compare() : comp() {
+	}
+	map_value_compare( Compare c ) : comp( c ) {
+	}
+
+	Compare& key_comp() {
+		return comp;
+	}
+
+	bool operator()( const C& x, const C& y ) {
+		return comp( x._get_value().first, y._get_value().first );
+	}
+
+	bool operator()( const Key& x, const C& y ) {
+		return comp( x, y._get_value().first );
+	}
+
+	bool operator()( const C& x, const Key& y ) {
+		return comp( x._get_value().first, y );
+	}
+};
 
 template <class Key, class Value>
 struct _value_type {
@@ -55,21 +83,25 @@ struct _value_type {
 	}
 
    private:
+	_value_type( const value_type& val ) : cc( val ) {
+	}
+	_value_type( const _value_type& v ) : cc( v._get_value() ) {
+	}
+	~_value_type() {
+	}
 	_value_type();
-	~_value_type();
-	_value_type( const _value_type& v );
 };
 
 template <class TreeIterator>
 class map_iterator {
-	typedef typename TreeIterator::node_type node_type;
+	typedef typename TreeIterator::NodeTypes NodeTypes;
 
 	TreeIterator i;
 
    public:
-	typedef typename node_type::value_type           value_type;
-	typedef typename node_type::link_type            pointer;
-	typedef typename TreeIterator::reference         reference;
+	typedef typename NodeTypes::value_type           value_type;
+	typedef typename NodeTypes::node_base_pointer    pointer;
+	typedef value_type&                              reference;
 	typedef typename TreeIterator::difference_type   difference_type;
 	typedef typename std::bidirectional_iterator_tag iterator_category;
 
@@ -132,7 +164,6 @@ template <class Key, class T, class Compare = std::less<Key>,
 		  class Allocator = std::allocator<ft::pair<const Key, T> > >
 class map {
    public:
-	// types:
 	typedef Key                                   key_type;
 	typedef T                                     mapped_type;
 	typedef ft::pair<const key_type, mapped_type> value_type;
@@ -163,16 +194,18 @@ class map {
 	typedef typename allocator_type::difference_type difference_type;
 
    private:
-	typedef ft::_value_type<Key, T> _value_type;
+	typedef ft::_value_type<Key, T>                              _value_type;
+	typedef ft::map_value_compare<Key, _value_type, key_compare> _vc;
 	typedef
-		typename Allocator::template rebind<value_type>::other  _node_allocator;
-	typedef rbtree<_value_type, value_compare, _node_allocator> _base;
-	_base                                                       _tree;
+		typename Allocator::template rebind<value_type>::other _node_allocator;
+	typedef rbtree<_value_type, _vc, _node_allocator>          _base;
+	_base                                                      _tree;
 
    public:
-	typedef ft::map_iterator<typename _base::iterator>       iterator;
-	typedef ft::map_iterator<typename _base::const_iterator> const_iterator;
-	typedef ft::reverse_iterator<iterator>                   reverse_iterator;
+	typedef ft::map_iterator<typename _base::iterator> iterator;
+	typedef ft::map_iterator<typename _base::iterator> const_iterator;
+	// typedef ft::map_iterator<typename _base::const_iterator> const_iterator;
+	typedef ft::reverse_iterator<iterator>       reverse_iterator;
 	typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
 	// construct/copy/destroy:
