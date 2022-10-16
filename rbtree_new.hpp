@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/16 23:55:21 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/17 02:59:54 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,11 @@
 #ifndef __RBTREE_H__
 #define __RBTREE_H__
 
-#include <iterator>
+// #include <iterator>
 // #include <__tree>
 #include <memory>
 #include "pair.hpp"
+#include "iterator.hpp"
 
 // 1. Every node is either red or black.
 // 2. Root node is black.
@@ -40,7 +41,8 @@ class rbtree_node_base {
 	pointer    left;
 	color_type color;
 
-	rbtree_node_base() : color( RED ), right( NULL ), parent( NULL ) {
+	rbtree_node_base()
+		: parent( NULL ), right( NULL ), left( NULL ), color( RED ) {
 	}
 	~rbtree_node_base() {
 	}
@@ -58,41 +60,36 @@ class rbtree_node_base {
 		}
 		return x;
 	}
-
-   private:
-	rbtree_node_base( const rbtree_node_base& ref );
-	rbtree_node_base& operator=( const rbtree_node_base& ref );
 };
 
 template <class T>
 class rbtree_node : public rbtree_node_base {
    public:
-	typedef T node_value_type;
+	typedef T value_type;
 
-	node_value_type value;
+	value_type value;
 
-   private:
-	rbtree_node& operator=( const rbtree_node& ref );
+	rbtree_node( const value_type& x ) : value( x ) {
+	}
 };
 
-template <class T, class NodePtr, class DiffType>
+template <class T, class Ref, class Ptr>
 class rbtree_iterator {
    private:
-	typedef rbtree_node_types<NodePtr>            NodeTypes;
-	typedef NodePtr                               node_pointer;
-	typedef typename NodeTypes::node_base_pointer node_base_pointer;
-	typedef typename NodeTypes::end_node_pointer  end_node_pointer;
-	typedef node_pointer                          iter_pointer;
-	// typedef typename NodeTypes::iter_pointer      iter_pointer;
+	typedef typename rbtree_node_base::pointer node_base_pointer;
+	typedef node_base_pointer                  iter_pointer;
 
 	iter_pointer node;
 
    public:
-	typedef std::bidirectional_iterator_tag             iterator_category;
-	typedef T                                           value_type;
-	typedef DiffType                                    difference_type;
-	typedef value_type&                                 reference;
-	typedef typename NodeTypes::node_value_type_pointer pointer;
+	typedef std::bidirectional_iterator_tag                 iterator_category;
+	typedef T                                               value_type;
+	typedef Ref                                             reference;
+	typedef Ptr                                             pointer;
+	typedef ptrdiff_t                                       difference_type;
+	typedef rbtree_iterator<value_type, T&, T*>             iterator;
+	typedef rbtree_iterator<value_type, const T&, const T*> const_iterator;
+	typedef rbtree_node<T>*                                 node_pointer;
 
    public:
 	rbtree_iterator() : node( NULL ) {
@@ -106,7 +103,7 @@ class rbtree_iterator {
 	}
 
 	pointer operator->() const {
-		return &( static_cast<node_pointer>( node )->value );
+		return &( operator*() );
 	}
 
 	void incremet() {
@@ -140,47 +137,40 @@ class rbtree_iterator {
 			if ( node->left != tmp ) node = tmp;
 		}
 	}
-	// template <class, class, class>
-	// friend class rbtree;
 };
 
-template <class Key, class Value, class Compare, class Allocator>
+template <class Key, class Value, class GetKey, class Compare,
+		  class Allocator = std::allocator<Value> >
 class rbtree {
    public:
-	typedef value_type;
-	typedef Compare   value_compare;
-	typedef Allocator allocator_type;
-
-   public:
-	typedef typename NodeTypes::node_value_type      node_value_type;
-	typedef typename NodeTypes::container_value_type container_value_type;
-
-	typedef typename allocator_type::pointer         pointer;
-	typedef typename allocator_type::const_pointer   const_pointer;
+	typedef Key                                      key_type;
+	typedef Value                                    value_type;
+	typedef value_type*                              pointer;
+	typedef const value_type*                        const_pointer;
+	typedef value_type&                              reference;
+	typedef const value_type&                        const_reference;
+	typedef Allocator                                allocator_type;
 	typedef typename allocator_type::size_type       size_type;
 	typedef typename allocator_type::difference_type difference_type;
-
-   public:
-	typedef typename NodeTypes::void_pointer void_pointer;
-
-	typedef typename NodeTypes::node_type    node;
-	typedef typename NodeTypes::node_pointer node_pointer;
-
-	typedef typename NodeTypes::node_base_type    node_base;
-	typedef typename NodeTypes::node_base_pointer node_base_pointer;
-
-	typedef typename NodeTypes::end_node_type    end_node_t;
-	typedef typename NodeTypes::end_node_pointer end_node_ptr;
+	typedef rbtree_node<Value>                       node;
+	typedef node*                                    node_pointer;
+	typedef rbtree_node_base                         node_base;
+	typedef rbtree_node_base*                        node_base_pointer;
+	typedef Compare                                  value_compare;
 
 	// typedef end_node_ptr iter_pointer;
 
 	typedef
 		typename allocator_type::template rebind<node>::other node_allocator;
 
-	typedef rbtree_iterator<value_type, node_pointer, difference_type> iterator;
+	typedef rbtree_iterator<value_type, reference, pointer> iterator;
+	typedef rbtree_iterator<value_type, const_reference, const_pointer>
+		const_iterator;
+	// typedef reverse_iterator<iterator>       reverse_iterator;
+	// typedef reverse_iterator<const_iterator> const_reverse_iterator;
 
    private:
-	end_node_t        __end_node;
+	node_base         __end_node;
 	node_base_pointer _root_node;
 	node_base_pointer _begin_node;
 	value_compare     _comp;
@@ -427,7 +417,7 @@ class rbtree {
 	// // case 2 : grand parent - black, parent - red, other side child - red.
 	// // case 3 : grand parent - black, parent - red, same side child - red.
 	// // case 4 : root - red.
-	ft::pair<iterator, bool> insert( const node_value_type& val ) {
+	ft::pair<iterator, bool> insert( const value_type& val ) {
 		if ( this->_size == 0 ) {
 			node              __new_node( val );
 			node_base_pointer new_node = _alloc.allocate( 1 );
@@ -443,75 +433,13 @@ class rbtree {
 				iterator( static_cast<node_pointer>( new_node ) ), true );
 		}
 
-		ft::pair<node_base_pointer, bool> result =
-			find_node( NodeTypes::_get_key( val ) );
+		ft::pair<node_base_pointer, bool> result = find_node( GetKey()( val ) );
 		if ( result.second == true ) {
 			return ft::make_pair(
 				iterator( static_cast<node_pointer>( result.first ) ), false );
 		}
 
 		node              __new_node( val );
-		node_base_pointer new_node = _alloc.allocate( 1 );
-		_alloc.construct( static_cast<node_pointer>( new_node ), __new_node );
-
-		if ( _comp( get_node_value( get_end() ), val ) ) {
-			__end_node.left->right = new_node;
-			__new_node.right = end_ptr();
-			__end_node.left = new_node;
-		} else if ( _comp( val, get_node_value( _begin_node ) ) ) {
-			_begin_node = new_node;
-		}
-		++_size;
-
-		node_base_pointer parent_node = result.first;
-
-		if ( _comp( get_node_value( parent_node ), val ) ) {
-			parent_node->right = new_node;
-		} else {
-			parent_node->left = new_node;
-		}
-		new_node->parent = parent_node;
-		if ( parent_node->color == BLACK ) {
-			return ft::make_pair(
-				iterator( static_cast<node_pointer>( new_node ) ), true );
-		}
-		node_base_pointer g_parent = parent_node->parent;
-
-		// Unbalanced state. Check case1 to make balance.
-		if ( check_uncle_is_red_and_make_balance( g_parent, parent_node ) ) {
-			return ft::make_pair(
-				iterator( static_cast<node_pointer>( new_node ) ), true );
-		}
-		// Check case2 or case3 and rotate to make balance.
-		check_rotation_dir_and_make_balance( g_parent, parent_node, new_node );
-		return ft::make_pair( iterator( static_cast<node_pointer>( new_node ) ),
-							  true );
-	}
-
-	ft::pair<iterator, bool> insert( const container_value_type& val ) {
-		if ( this->_size == 0 ) {
-			node              __new_node( value_type( val ) );
-			node_base_pointer new_node = _alloc.allocate( 1 );
-			__new_node.color = BLACK;
-			_alloc.construct( static_cast<node_pointer>( new_node ),
-							  __new_node );
-
-			_root_node = new_node;
-			__end_node.left = _root_node;
-			_begin_node = _root_node;
-			++_size;
-			return ft::make_pair(
-				iterator( static_cast<node_pointer>( new_node ) ), true );
-		}
-
-		ft::pair<node_base_pointer, bool> result =
-			find_node( NodeTypes::_get_key( val ) );
-		if ( result.second == true ) {
-			return ft::make_pair(
-				iterator( static_cast<node_pointer>( result.first ) ), false );
-		}
-
-		node              __new_node( value_type( val ) );
 		node_base_pointer new_node = _alloc.allocate( 1 );
 		_alloc.construct( static_cast<node_pointer>( new_node ), __new_node );
 

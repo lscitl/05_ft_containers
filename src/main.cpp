@@ -51,20 +51,64 @@ class Base {
 
 #include <map>
 #include <chrono>
-#include "../map.hpp"
-// #include "../rbtree_node_test.hpp"
+// #include "../map.hpp"
+#include "../rbtree_new.hpp"
 // #include "../map_value_compare.hpp"
+
+template <class Pair>
+struct GetKey {
+	typedef Pair                      argument_type;
+	typedef typename Pair::first_type result_type;
+
+	const result_type &operator()( const argument_type &x ) const {
+		return x.first;
+	}
+	result_type &operator()( argument_type &x ) const {
+		return x.first;
+	}
+};
+
+template <class Pair, class Compare>
+class PairComp {
+   private:
+	typedef Pair                      argument_type;
+	typedef typename Pair::first_type key_type;
+	typedef Compare                   key_compare;
+
+	key_compare comp;
+
+   public:
+	PairComp() : comp() {
+	}
+	PairComp( Compare c ) : comp( c ) {
+	}
+
+	bool operator()( const argument_type &a, const argument_type &b ) {
+		return comp( a.first, b.first );
+	}
+
+	bool operator()( const key_type &a, const argument_type &b ) {
+		return comp( a, b.first );
+	}
+
+	bool operator()( const argument_type &a, const key_type &b ) {
+		return comp( a.first, b );
+	}
+};
 
 int main() {
 	// ft::rbtree<ft::pair<int, Base> > a;
-	// ft::rbtree<int, std::less<int>, std::allocator<int> > a;
+	ft::rbtree<int, ft::pair<const int, Base>,
+			   GetKey<ft::pair<const int, Base> >,
+			   PairComp<ft::pair<const int, Base>, std::less<int> > >
+		a;
 	// ft::rbtree<
 	// 	ft::_value_type<int, Base>,
 	// 	ft::map_value_compare<int, ft::_value_type<int, Base>, std::less<int> >,
 	// 	std::allocator<int> >
 	// 	a;
 	// std::map<int, Base> a;
-	ft::map<int, Base> a;
+	// ft::map<int, Base> a;
 	// Base               b( "A" );
 	Base b( "A" );
 
@@ -79,11 +123,14 @@ int main() {
 
 	// std::cout << a.begin() << std::endl;
 	// printf( "%p\n", &a.begin() );
+
 	std::cout << "erase" << std::endl;
+
 	for ( int i = 0; i < 20; i++ ) {
 		std::cout << i << ": " << std::endl;
 		a.insert( ft::make_pair( i, b ) );
 	}
+
 	// std::pair<int, Base>( 1, b );
 	// std::make_pair( 1, b );
 	// ft::pair<int, Base>( 1, b );
@@ -95,7 +142,7 @@ int main() {
 	// }
 	// a.print_tree();
 
-	a.erase( 1 );
+	// a.erase( 1 );
 	// a.print_tree();
 
 	// std::cout << ( a.insert(
