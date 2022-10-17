@@ -51,131 +51,91 @@ class Base {
 
 #include <map>
 #include <chrono>
-// #include "../map.hpp"
-#include "../rbtree_new.hpp"
-// #include "../map_value_compare.hpp"
+#include "../map.hpp"
 
-template <class Pair>
-struct GetKey {
-	typedef Pair                      argument_type;
-	typedef typename Pair::first_type result_type;
+// #define ft std;
 
-	const result_type &operator()( const argument_type &x ) const {
-		return x.first;
+// #define ft::pair ft::pair
+
+template <typename T>
+std::string printPair( const T &iterator, bool nl = true,
+					   std::ostream &o = std::cout ) {
+	o << "key: " << iterator->first << " | value: " << iterator->second;
+	if ( nl ) o << std::endl;
+	return ( "" );
+}
+
+template <typename T_MAP>
+void printSize( T_MAP const &mp, bool print_content = 1 ) {
+	std::cout << "size: " << mp.size() << std::endl;
+	std::cout << "max_size: " << mp.max_size() << std::endl;
+	if ( print_content ) {
+		typename T_MAP::const_iterator it = mp.begin(), ite = mp.end();
+		std::cout << std::endl << "Content is:" << std::endl;
+		for ( ; it != ite; ++it )
+			std::cout << "- " << printPair( it, false ) << std::endl;
 	}
-	result_type &operator()( argument_type &x ) const {
-		return x.first;
+	std::cout << "###############################################" << std::endl;
+}
+
+template <typename T1, typename T2>
+void printReverse( ft::map<T1, T2> &mp ) {
+	typename ft::map<T1, T2>::iterator it = mp.end(), ite = mp.begin();
+
+	std::cout << "printReverse:" << std::endl;
+	while ( it != ite ) {
+		it--;
+		std::cout << "-> " << printPair( it, false ) << std::endl;
 	}
-};
+	std::cout << "_______________________________________________" << std::endl;
+}
 
-template <class Pair, class Compare>
-class PairComp {
-   private:
-	typedef Pair                      argument_type;
-	typedef typename Pair::first_type key_type;
-	typedef Compare                   key_compare;
+#define T1 int
+#define T2 std::string
+typedef ft::map<T1, T2>::value_type T3;
+typedef ft::map<T1, T2>::iterator   iterator;
 
-	key_compare comp;
+static int iter = 0;
 
-   public:
-	PairComp() : comp() {
-	}
-	PairComp( Compare c ) : comp( c ) {
-	}
+template <typename MAP, typename U>
+void ft_insert( MAP &mp, U param ) {
+	ft::pair<iterator, bool> tmp;
 
-	bool operator()( const argument_type &a, const argument_type &b ) {
-		return comp( a.first, b.first );
-	}
+	std::cout << "\t-- [" << iter++ << "] --" << std::endl;
+	tmp = mp.insert( param );
+	std::cout << "insert return: " << printPair( tmp.first );
+	std::cout << "Created new node: " << tmp.second << std::endl;
+	printSize( mp );
+}
 
-	bool operator()( const key_type &a, const argument_type &b ) {
-		return comp( a, b.first );
-	}
+template <typename MAP, typename U, typename V>
+void ft_insert( MAP &mp, U param, V param2 ) {
+	iterator tmp;
 
-	bool operator()( const argument_type &a, const key_type &b ) {
-		return comp( a.first, b );
-	}
-};
+	std::cout << "\t-- [" << iter++ << "] --" << std::endl;
+	tmp = mp.insert( param, param2 );
+	std::cout << "insert return: " << printPair( tmp );
+	printSize( mp );
+}
 
-int main() {
-	// ft::rbtree<ft::pair<int, Base> > a;
-	ft::rbtree<int, ft::pair<const int, Base>,
-			   GetKey<ft::pair<const int, Base> >,
-			   PairComp<ft::pair<const int, Base>, std::less<int> > >
-		a;
-	// ft::rbtree<
-	// 	ft::_value_type<int, Base>,
-	// 	ft::map_value_compare<int, ft::_value_type<int, Base>, std::less<int> >,
-	// 	std::allocator<int> >
-	// 	a;
-	// std::map<int, Base> a;
-	// ft::map<int, Base> a;
-	// Base               b( "A" );
-	Base b( "A" );
+int main( void ) {
+	ft::map<T1, T2> mp, mp2;
 
-	// a.begin();
-	// for ( int i = 0; i < 21; i++ ) {
-	// 	// a.insert( i );
-	// 	std::cout << i << ": " << std::endl;
-	// 	// a.insert( ft::make_pair( i, 'a' ) );
-	// 	a.insert( std::make_pair( i, b ) );
-	// 	std::cout << std::endl;
-	// }
+	ft_insert( mp, T3( 42, "lol" ) );
+	// ft_insert( mp, T3( 42, "mdr" ) );
 
-	// std::cout << a.begin() << std::endl;
-	// printf( "%p\n", &a.begin() );
+	// ft_insert( mp, T3( 50, "mdr" ) );
+	// ft_insert( mp, T3( 35, "funny" ) );
 
-	std::cout << "erase" << std::endl;
+	// ft_insert( mp, T3( 45, "bunny" ) );
+	// ft_insert( mp, T3( 21, "fizz" ) );
+	// ft_insert( mp, T3( 38, "buzz" ) );
 
-	for ( int i = 0; i < 20; i++ ) {
-		std::cout << i << ": " << std::endl;
-		a.insert( ft::make_pair( i, b ) );
-	}
+	// ft_insert( mp, mp.begin(), T3( 55, "fuzzy" ) );
 
-	// std::pair<int, Base>( 1, b );
-	// std::make_pair( 1, b );
-	// ft::pair<int, Base>( 1, b );
-	// ft::make_pair( 1, b );
-	// a.insert()
-	// a.insert( std::make_pair( 1, b ) );
-	// for ( int i = 0; i < 10; i++ ) {
-	// 	a.insert( ft::_value_type<int, Base>( ft::make_pair( i, b ) ) );
-	// }
-	// a.print_tree();
+	// ft_insert( mp2, mp2.begin(), T3( 1337, "beauty" ) );
+	// ft_insert( mp2, mp2.end(), T3( 1000, "Hello" ) );
+	// ft_insert( mp2, mp2.end(), T3( 1500, "World" ) );
 
-	// a.erase( 1 );
-	// a.print_tree();
-
-	// std::cout << ( a.insert(
-	// 					ft::_value_type<int, Base>( ft::make_pair( 1, b ) )
-	// ) 				   .first )
-	// 				 ->first
-	// 		  << std::endl;
-	// a.print_tree();
-	std::cout << "done!" << std::endl;
-
-	// std::cout << &( a.find( 2 )->second ) << std::endl;
-
-	// a.erase( 3 );
-	// std::cout << &( a.find( 3 )->second ) << std::endl;
-
-	// std::map<int, char>::iterator tmp;
-
-	// tmp = a.find( 50 );
-
-	// auto startTime = std::chrono::system_clock::now();
-	// // a.insert( tmp, std::make_pair( 600000, 'b' ) );
-	// // a.insert( std::make_pair( 600000, 'b' ) );
-
-	// auto endTime = std::chrono::system_clock::now();
-
-	// auto sec = std::chrono::duration_cast<std::chrono::nanoseconds>(
-	// 	endTime - startTime );
-
-	// std::cout << sec.count() << std::endl;
-
-	// for ( tmp = a.begin(); tmp != a.end(); tmp++ ) {
-	// 	std::cout << tmp->second << std::endl;
-	// }
-
-	return 0;
+	return ( 0 );
 }
