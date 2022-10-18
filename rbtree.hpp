@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/17 22:01:21 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/19 00:26:53 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,24 +84,18 @@ class rbtree_node : public rbtree_node_base {
 	rbtree_node();
 };
 
-template <class T, class Ref, class Ptr>
+template <class T>
 class rbtree_iterator {
    public:
-	typedef std::bidirectional_iterator_tag                 iterator_category;
-	typedef T                                               value_type;
-	typedef Ref                                             reference;
-	typedef Ptr                                             pointer;
-	typedef ptrdiff_t                                       difference_type;
-	typedef rbtree_iterator<value_type, T&, T*>             iterator;
-	typedef rbtree_iterator<value_type, const T&, const T*> const_iterator;
-	typedef rbtree_iterator<value_type, reference, pointer> _self;
-	typedef rbtree_node<T>*                                 node_pointer;
-	typedef typename rbtree_node_base::pointer              node_base_pointer;
+	typedef std::bidirectional_iterator_tag iterator_category;
+	typedef T                               value_type;
+	typedef value_type&                     reference;
+	typedef value_type*                     pointer;
+	typedef ptrdiff_t                       difference_type;
+	typedef rbtree_node<T>*                 node_pointer;
+	typedef rbtree_node_base*               node_base_pointer;
 
-   private:
-	typedef node_base_pointer iter_pointer;
-
-	iter_pointer node;
+	node_base_pointer node;
 
    public:
 	rbtree_iterator() : node( NULL ) {
@@ -110,7 +104,7 @@ class rbtree_iterator {
 	rbtree_iterator( const rbtree_iterator& x ) : node( x.node ) {
 	}
 
-	rbtree_iterator( iter_pointer node ) : node( node ) {
+	rbtree_iterator( const node_base_pointer node ) : node( node ) {
 	}
 
 	reference operator*() const {
@@ -121,31 +115,32 @@ class rbtree_iterator {
 		return &( operator*() );
 	}
 
-	_self& operator++() {
+	rbtree_iterator& operator++() {
 		this->increment();
 		return *this;
 	}
 
-	_self operator++( int ) {
-		_self ret( *this );
+	rbtree_iterator operator++( int ) {
+		rbtree_iterator ret( *this );
 		++( *this );
 		return ret;
 	}
 
-	_self& operator--() {
+	rbtree_iterator& operator--() {
 		this->decrement();
 		return *this;
 	}
 
-	_self operator--( int ) {
-		_self ret( *this );
+	rbtree_iterator operator--( int ) {
+		rbtree_iterator ret( *this );
 		--( *this );
 		return ret;
 	}
 
+   private:
 	void increment() {
 		if ( node->right != NULL ) {
-			iter_pointer begin = node;
+			node_base_pointer begin = node;
 			node = node->right;
 			while ( node->left != NULL ) {
 				node = node->left;
@@ -154,7 +149,7 @@ class rbtree_iterator {
 				node = node->right;
 			}
 		} else {
-			iter_pointer tmp = node->parent;
+			node_base_pointer tmp = node->parent;
 			while ( node == tmp->right ) {
 				node = tmp;
 				tmp = tmp->parent;
@@ -167,7 +162,7 @@ class rbtree_iterator {
 
 	void decrement() {
 		if ( node->left != NULL ) {
-			iter_pointer begin = node;
+			node_base_pointer begin = node;
 			node = node->left;
 			while ( node->right != NULL ) {
 				node = node->right;
@@ -176,7 +171,7 @@ class rbtree_iterator {
 				node = node->left;
 			}
 		} else {
-			iter_pointer tmp = node->parent;
+			node_base_pointer tmp = node->parent;
 			while ( node == tmp->left ) {
 				node = tmp;
 				tmp = tmp->parent;
@@ -193,6 +188,108 @@ class rbtree_iterator {
 	}
 	friend bool operator!=( const rbtree_iterator& left,
 							const rbtree_iterator& right ) {
+		return left.node != right.node;
+	}
+};
+
+template <class T>
+class rbtree_const_iterator {
+   public:
+	typedef std::bidirectional_iterator_tag iterator_category;
+	typedef T                               value_type;
+	typedef const value_type&               reference;
+	typedef const value_type*               pointer;
+	typedef ptrdiff_t                       difference_type;
+	typedef rbtree_node<T>*                 node_pointer;
+	typedef rbtree_node_base*               node_base_pointer;
+
+	node_base_pointer node;
+
+   public:
+	rbtree_const_iterator() : node( NULL ) {
+	}
+
+	rbtree_const_iterator( const rbtree_const_iterator& x ) : node( x.node ) {
+	}
+
+	rbtree_const_iterator( const node_base_pointer node ) : node( node ) {
+	}
+
+	reference operator*() const {
+		return static_cast<node_pointer>( node )->value;
+	}
+
+	pointer operator->() const {
+		return &( operator*() );
+	}
+
+	rbtree_const_iterator& operator++() {
+		this->increment();
+		return *this;
+	}
+
+	rbtree_const_iterator operator++( int ) {
+		rbtree_const_iterator ret( *this );
+		++( *this );
+		return ret;
+	}
+
+	rbtree_const_iterator& operator--() {
+		this->decrement();
+		return *this;
+	}
+
+	rbtree_const_iterator operator--( int ) {
+		rbtree_const_iterator ret( *this );
+		--( *this );
+		return ret;
+	}
+
+   private:
+	void increment() {
+		if ( node->right != NULL ) {
+			node_base_pointer begin = node;
+			node = node->right;
+			while ( node->left != NULL && node->left != begin ) {
+				node = node->left;
+			}
+		} else {
+			node_base_pointer tmp = node->parent;
+			while ( node == tmp->right ) {
+				node = tmp;
+				tmp = tmp->parent;
+			}
+			if ( node->right != tmp ) {
+				node = tmp;
+			}
+		}
+	}
+
+	void decrement() {
+		if ( node->left != NULL ) {
+			node_base_pointer begin = node;
+			node = node->left;
+			while ( node->right != NULL && node->right != begin ) {
+				node = node->right;
+			}
+		} else {
+			node_base_pointer tmp = node->parent;
+			while ( node == tmp->left ) {
+				node = tmp;
+				tmp = tmp->parent;
+			}
+			if ( node->left != tmp ) {
+				node = tmp;
+			}
+		}
+	}
+
+	friend bool operator==( const rbtree_const_iterator& left,
+							const rbtree_const_iterator& right ) {
+		return left.node == right.node;
+	}
+	friend bool operator!=( const rbtree_const_iterator& left,
+							const rbtree_const_iterator& right ) {
 		return left.node != right.node;
 	}
 };
@@ -221,9 +318,8 @@ class rbtree {
 	typedef
 		typename allocator_type::template rebind<node>::other node_allocator;
 
-	typedef rbtree_iterator<value_type, reference, pointer> iterator;
-	typedef rbtree_iterator<value_type, const_reference, const_pointer>
-		const_iterator;
+	typedef rbtree_iterator<value_type>       iterator;
+	typedef rbtree_const_iterator<value_type> const_iterator;
 	// typedef reverse_iterator<iterator>       reverse_iterator;
 	// typedef reverse_iterator<const_iterator> const_reverse_iterator;
 
@@ -319,7 +415,7 @@ class rbtree {
 		__end_node.left = end_node_ptr();
 		iterator x_begin = x.begin();
 		for ( ; x_begin != x.end(); ++x_begin ) {
-			insert( *x_begin );
+			insert_unique( *x_begin );
 		}
 	}
 
@@ -338,7 +434,15 @@ class rbtree {
 	}
 
 	iterator end() {
-		return iterator( end_node_ptr() );
+		return iterator( &__end_node );
+	}
+
+	const_iterator begin() const {
+		return const_iterator( _begin_node );
+	}
+
+	const_iterator end() const {
+		return const_iterator( const_cast<node_base*>( &__end_node ) );
 	}
 
 	size_type size() const {
@@ -358,6 +462,10 @@ class rbtree {
 		return &__end_node;
 	}
 
+	node_base_pointer end_node_ptr() const {
+		return &( __end_node );
+	}
+
 	reference get_node_value( const node_base_pointer& node ) {
 		return static_cast<node_pointer>( node )->value;
 	}
@@ -375,6 +483,62 @@ class rbtree {
 			}
 		}
 		while ( cur != NULL && cur != end_node_ptr() ) {
+			if ( _comp( key, get_node_value( cur ) ) ) {
+				parent = cur;
+				cur = cur->left;
+			} else {
+				if ( _comp( get_node_value( cur ), key ) ) {
+					parent = cur;
+					cur = cur->right;
+				} else {
+					return ft::pair<node_base_pointer, bool>( cur, true );
+				}
+			}
+		}
+		return ft::pair<node_base_pointer, bool>( parent, false );
+	}
+
+	ft::pair<node_base_pointer, bool> find_node( iterator        position,
+												 const key_type& key ) {
+		node_base_pointer cur = position.node;
+		node_base_pointer parent = position.node;
+		if ( position.node != NULL ) {
+			if ( _comp( key, get_node_value( cur ) ) ) {
+				cur = cur->left;
+			} else {
+				if ( _comp( get_node_value( cur ), key ) ) {
+					cur = cur->right;
+				} else {
+					return ft::pair<node_base_pointer, bool>( cur, true );
+				}
+			}
+			while ( cur != NULL && cur != end_node_ptr() ) {
+				if ( _comp( key, get_node_value( cur ) ) ) {
+					parent = cur;
+					cur = cur->left;
+				} else {
+					if ( _comp( get_node_value( cur ), key ) ) {
+						parent = cur;
+						cur = cur->right;
+					} else {
+						return ft::pair<node_base_pointer, bool>( cur, true );
+					}
+				}
+			}
+		}
+		cur = _root_node;
+		parent = _root_node;
+
+		if ( _comp( key, get_node_value( cur ) ) ) {
+			cur = cur->left;
+		} else {
+			if ( _comp( get_node_value( cur ), key ) ) {
+				cur = cur->right;
+			} else {
+				return ft::pair<node_base_pointer, bool>( cur, true );
+			}
+		}
+		while ( cur != NULL && cur != end_node_ptr() && cur != position.node ) {
 			if ( _comp( key, get_node_value( cur ) ) ) {
 				parent = cur;
 				cur = cur->left;
@@ -458,7 +622,7 @@ class rbtree {
 	// // case 2 : grand parent - black, parent - red, other side child - red.
 	// // case 3 : grand parent - black, parent - red, same side child - red.
 	// // case 4 : root - red.
-	ft::pair<iterator, bool> insert( const value_type& val ) {
+	ft::pair<iterator, bool> insert_unique( const value_type& val ) {
 		if ( this->_size == 0 ) {
 			node              __new_node( val );
 			node_base_pointer new_node = _alloc.allocate( 1 );
@@ -486,8 +650,6 @@ class rbtree {
 		_alloc.construct( static_cast<node_pointer>( new_node ), __new_node );
 
 		if ( _comp( get_node_value( last_node_ptr() ), val ) ) {
-			std::cout << "update" << std::endl;
-			// __end_node.left->right = new_node;
 			new_node->right = end_node_ptr();
 			__end_node.left = new_node;
 		} else if ( _comp( val, get_node_value( _begin_node ) ) ) {
@@ -496,6 +658,45 @@ class rbtree {
 		++_size;
 
 		node_base_pointer parent_node = result.first;
+
+		if ( _comp( get_node_value( parent_node ), val ) ) {
+			parent_node->right = new_node;
+		} else {
+			parent_node->left = new_node;
+		}
+		new_node->parent = parent_node;
+		if ( parent_node->color == BLACK ) {
+			return ft::make_pair(
+				iterator( static_cast<node_pointer>( new_node ) ), true );
+		}
+		node_base_pointer g_parent = parent_node->parent;
+
+		// Unbalanced state. Check case1 to make balance.
+		if ( check_uncle_is_red_and_make_balance( g_parent, parent_node ) ) {
+			return ft::make_pair(
+				iterator( static_cast<node_pointer>( new_node ) ), true );
+		}
+		// Check case2 or case3, and rotate to make balance.
+		check_rotation_dir_and_make_balance( g_parent, parent_node, new_node );
+		return ft::make_pair( iterator( static_cast<node_pointer>( new_node ) ),
+							  true );
+	}
+
+	ft::pair<iterator, bool> insert_unique_with_parent(
+		iterator parent_node_iter, const value_type& val ) {
+		node              __new_node( val );
+		node_base_pointer new_node = _alloc.allocate( 1 );
+		_alloc.construct( static_cast<node_pointer>( new_node ), __new_node );
+
+		if ( _comp( get_node_value( last_node_ptr() ), val ) ) {
+			new_node->right = end_node_ptr();
+			__end_node.left = new_node;
+		} else if ( _comp( val, get_node_value( _begin_node ) ) ) {
+			_begin_node = new_node;
+		}
+		++_size;
+
+		node_base_pointer parent_node = parent_node_iter.node;
 
 		if ( _comp( get_node_value( parent_node ), val ) ) {
 			parent_node->right = new_node;
@@ -624,12 +825,16 @@ class rbtree {
 		if ( tmp.second == false ) {
 			return 0;
 		}
+		return erase_from_node_ptr( tmp.first );
+	}
+
+	size_type erase_from_node_ptr( const node_base_pointer& node_ptr ) {
 		node_base_pointer extra_black_parent = NULL;
 		node_base_pointer extra_black = NULL;
 		// bool      extra_black_is_right_child;
 		bool              del_node_color_is_black;
 		node_base_pointer swap_node = NULL;
-		node_base_pointer del_node = tmp.first;
+		node_base_pointer del_node = node_ptr;
 		node_base_pointer parent = del_node->parent;
 		node_base_pointer left = del_node->left;
 		node_base_pointer right = del_node->right;
@@ -744,6 +949,45 @@ class rbtree {
 		this->clear();
 	}
 
+	void clear() {
+		if ( _root_node == end_node_ptr() ) {
+			return;
+		}
+		del_node( _root_node );
+		_size = 0;
+		_root_node = end_node_ptr();
+		_begin_node = end_node_ptr();
+		__end_node.left = end_node_ptr();
+	}
+
+	void del_node( node_base_pointer node ) {
+		if ( node == NULL || node == end_node_ptr() ) {
+			return;
+		}
+		del_node( node->left );
+		del_node( node->right );
+		_alloc.destroy( static_cast<node_pointer>( node ) );
+		_alloc.deallocate( static_cast<node_pointer>( node ), 1 );
+	}
+
+	void swap( const rbtree& x ) {
+		node_base_pointer tmp_begin = x._begin_node;
+		node_base_pointer tmp_root = x._root_node;
+		node_base_pointer tmp_size = x._size;
+		node_base_pointer tmp_end_left = x.__end_node.left;
+		node_base_pointer tmp_end_left_right = x.__end_node.left->right;
+
+		x._begin_node = _begin_node;
+		x._root_node = _root_node;
+		x._size = _size;
+		x.__end_node.left = __end_node.left;
+
+		// x.__end_node.left->right =
+	}
+	// reference end_check() {
+	// 	return get_node_value( last_node_ptr() );
+	// }
+
 	// print
 	void print_tree() {
 		printTree( _root_node, NULL, false );
@@ -855,31 +1099,6 @@ class rbtree {
 		printTree_map( root->left, trunk, false );
 		delete trunk;
 	}
-
-	void clear() {
-		if ( _root_node == end_node_ptr() ) {
-			return;
-		}
-		del_node( _root_node );
-		_size = 0;
-		_root_node = end_node_ptr();
-		_begin_node = end_node_ptr();
-		__end_node.left = end_node_ptr();
-	}
-
-	void del_node( node_base_pointer node ) {
-		if ( node == NULL || node == end_node_ptr() ) {
-			return;
-		}
-		del_node( node->left );
-		del_node( node->right );
-		_alloc.destroy( static_cast<node_pointer>( node ) );
-		_alloc.deallocate( static_cast<node_pointer>( node ), 1 );
-	}
-
-	// reference end_check() {
-	// 	return get_node_value( last_node_ptr() );
-	// }
 };
 
 }  // namespace ft

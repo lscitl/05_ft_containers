@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/17 22:55:56 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/19 00:17:50 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ class map_iterator {
 	TreeIterator _current;
 
    public:
-	map_iterator() : _current( NULL ) {
+	map_iterator() : _current() {
 	}
 
 	explicit map_iterator( const TreeIterator& x ) : _current( x ) {
@@ -132,6 +132,8 @@ class map_iterator {
 							const map_iterator& right ) {
 		return left._current != right._current;
 	}
+	template <class, class, class, class>
+	friend class map;
 };
 
 template <class Key, class T, class Compare = std::less<Key>,
@@ -177,8 +179,10 @@ class map {
 	_base _tree;
 
    public:
-	typedef ft::map_iterator<typename _base::iterator> iterator;
-	typedef ft::map_iterator<typename _base::iterator> const_iterator;
+	// typedef ft::map_iterator<typename _base::iterator>       iterator;
+	// typedef ft::map_iterator<typename _base::const_iterator> const_iterator;
+	typedef typename _base::iterator       iterator;
+	typedef typename _base::const_iterator const_iterator;
 	// typedef ft::map_iterator<typename _base::const_iterator> const_iterator;
 	// typedef ft::reverse_iterator<iterator>       reverse_iterator;
 	// typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
@@ -202,7 +206,7 @@ class map {
 	}
 
 	~map() {
-		_tree.clear();
+		clear();
 	}
 
 	map& operator=( const map& m );
@@ -214,8 +218,12 @@ class map {
 	iterator end() {
 		return iterator( _tree.end() );
 	}
-	const_iterator begin() const;
-	const_iterator end() const;
+	const_iterator begin() const {
+		return const_iterator( _tree.begin() );
+	}
+	const_iterator end() const {
+		return const_iterator( _tree.end() );
+	}
 
 	// reverse_iterator       rbegin();
 	// const_reverse_iterator rbegin() const;
@@ -238,23 +246,46 @@ class map {
 
 	// modifiers:
 	ft::pair<iterator, bool> insert( const value_type& val ) {
-		ft::pair<typename _base::iterator, bool> ret = _tree.insert( val );
-		return ft::make_pair( ret.first, ret.second );
+		return _tree.insert_unique( val );
 	}
 
 	iterator insert( iterator position, const value_type& val ) {
-		if ( _tree.insert( val )->second ) {
+		ft::pair<typename _base::node_base_pointer, bool> ret =
+			_tree.find_node( position, _get_key()( val ) );
+
+		if ( ret.second == true ) {
+			return ret.first;
 		}
+		if ( size() == 0 ) {
+			return _tree.insert_unique( val ).first;
+		}
+		return _tree.insert_unique_with_parent( ret.first, val ).first;
 	}
 
 	template <class InputIterator>
-	void insert( InputIterator first, InputIterator last );
+	void insert( InputIterator first, InputIterator last ) {
+		for ( ; first != last; ++first ) {
+			_tree.insert_unique( *first );
+		}
+	}
 
-	void      erase( iterator position );
-	size_type erase( const key_type& k );
-	void      erase( iterator first, iterator last );
+	void erase( iterator position ) {
+		_tree.erase_from_node_ptr( position.node );
+	}
 
-	void clear();
+	size_type erase( const key_type& k ) {
+		return _tree.erase( k );
+	}
+
+	void erase( iterator first, iterator last ) {
+		for ( ; first != last; ++first ) {
+			_tree.erase_from_node_ptr( first.node );
+		}
+	}
+
+	void clear() {
+		_tree.clear();
+	}
 
 	// observers:
 	allocator_type get_allocator() const;
@@ -262,8 +293,13 @@ class map {
 	value_compare  value_comp() const;
 
 	// map operations:
-	iterator       find( const key_type& k );
-	const_iterator find( const key_type& k ) const;
+	iterator find( const key_type& k ) {
+		return _tree.find( k ).first;
+	}
+
+	const_iterator find( const key_type& k ) const {
+		return _tree.find( k ).first;
+	}
 
 	iterator       lower_bound( const key_type& k );
 	const_iterator lower_bound( const key_type& k ) const;
@@ -274,42 +310,53 @@ class map {
 	pair<iterator, iterator>             equal_range( const key_type& k );
 	pair<const_iterator, const_iterator> equal_range( const key_type& k ) const;
 
-	// void end_check() {
-	// 	std::cout << _tree.end_check().first << std::endl;
-	// }
-	void print_tree() {
-		_tree.print_tree_map();
+	void swap( map& x ) {
+		_tree.swap( x._tree );
 	}
 };
 
 template <class Key, class T, class Compare, class Allocator>
 bool operator==( const map<Key, T, Compare, Allocator>& x,
-				 const map<Key, T, Compare, Allocator>& y );
+				 const map<Key, T, Compare, Allocator>& y ) {
+	return equal( x.begin(), x.last(), y.begin() );
+}
 
 template <class Key, class T, class Compare, class Allocator>
 bool operator<( const map<Key, T, Compare, Allocator>& x,
-				const map<Key, T, Compare, Allocator>& y );
+				const map<Key, T, Compare, Allocator>& y ) {
+	return lexicographical_compare( x.begin(), x.end(), y.begin(), y.end() );
+}
 
 template <class Key, class T, class Compare, class Allocator>
 bool operator!=( const map<Key, T, Compare, Allocator>& x,
-				 const map<Key, T, Compare, Allocator>& y );
+				 const map<Key, T, Compare, Allocator>& y ) {
+	return !( x == y );
+}
 
 template <class Key, class T, class Compare, class Allocator>
 bool operator>( const map<Key, T, Compare, Allocator>& x,
-				const map<Key, T, Compare, Allocator>& y );
+				const map<Key, T, Compare, Allocator>& y ) {
+	return y < x;
+}
 
 template <class Key, class T, class Compare, class Allocator>
 bool operator>=( const map<Key, T, Compare, Allocator>& x,
-				 const map<Key, T, Compare, Allocator>& y );
+				 const map<Key, T, Compare, Allocator>& y ) {
+	return !( x < y );
+}
 
 template <class Key, class T, class Compare, class Allocator>
 bool operator<=( const map<Key, T, Compare, Allocator>& x,
-				 const map<Key, T, Compare, Allocator>& y );
+				 const map<Key, T, Compare, Allocator>& y ) {
+	return !( y < x );
+}
 
 // specialized algorithms:
 template <class Key, class T, class Compare, class Allocator>
 void swap( map<Key, T, Compare, Allocator>& x,
-		   map<Key, T, Compare, Allocator>& y );
+		   map<Key, T, Compare, Allocator>& y ) {
+	x.swap( y );
+}
 
 }  // namespace ft
 
