@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/20 00:34:32 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/20 02:39:41 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 // #include <map>
 // #include <set>
+#include <limits>  // for numeric_limits
 #include <functional>
 #include "iterator.hpp"
 #include "type_traits.hpp"
@@ -113,10 +114,10 @@ class map {
 	_base _tree;
 
    public:
-	typedef typename _base::iterator             iterator;
-	typedef typename _base::const_iterator       const_iterator;
-	typedef ft::reverse_iterator<iterator>       reverse_iterator;
-	typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
+	typedef typename _base::iterator               iterator;
+	typedef typename _base::const_iterator         const_iterator;
+	typedef typename _base::reverse_iterator       reverse_iterator;
+	typedef typename _base::const_reverse_iterator const_reverse_iterator;
 
 	// construct/copy/destroy:
 	explicit map( const key_compare&    comp = key_compare(),
@@ -292,6 +293,10 @@ class map {
 
 	void swap( map& x ) {
 		_tree.swap( x._tree );
+	}
+
+	void print_tree() {
+		_tree.print_tree_map();
 	}
 };
 
