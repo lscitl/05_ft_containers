@@ -38,10 +38,10 @@ class Base {
 	}
 
    public:
-	Base( const std::string &tmp ) : a( tmp ) {
+	Base( const std::string& tmp ) : a( tmp ) {
 		std::cout << "Base str constructor called!" << std::endl;
 	}
-	Base( const Base &ref ) : a( ref.a ) {
+	Base( const Base& ref ) : a( ref.a ) {
 		std::cout << "Base copy contstructor called!" << std::endl;
 	}
 	~Base() {
@@ -49,109 +49,121 @@ class Base {
 	}
 };
 
+#define NAMESPACE std
 #include <map>
 #include <chrono>
 #include "../map.hpp"
+#include "map_prelude.hpp"
 
 int main( void ) {
-	std::map<int, Base> a;
-	Base                b( "b" );
-	// Base                 c( "c" );
-	std::pair<int, Base> tmp( 0, b );
+	// ft::map<int, char> a;
+	// // ft::map<int, Base> a;
+	// // Base               b( "b" );
+	// // Base                 c( "c" );
+	// // ft::pair<int, Base> tmp( 0, b );
+	// ft::pair<int, char> tmp( 0, 'b' );
 
-	// std::cout << "start" << std::endl;
-	for ( int i = 0; i < 1; i++ ) {
-		tmp.first = i;
-		a.insert( tmp );
+	// // std::cout << "start" << std::endl;
+	// for ( int i = 0; i < 1; i++ ) {
+	// 	tmp.first = i;
+	// 	a.insert( tmp );
+	// }
+	// // const std::map<int, Base> e( a );
+	// // e.find( 0 )->second = c;
+	// // std::cout << "end" << std::endl;
+
+	// a.at( 1 );
+
+	SETUP_ARRAYS();
+
+	{
+		strmap m( strstr_arr, strstr_arr + 16 );
+
+		strmap::iterator it = m.find( "Hello" );
+
+		if ( it != m.end() ) {
+			PRINT_PAIR_REF( *it );
+		}
+
+		try {
+			std::string& ref = m.at( "World!" );
+
+			PRINT_LINE( "Val:", ref );
+		} catch ( std::out_of_range& e ) {
+			PRINT_MSG( "Exception" );
+		}
+		CATCH_UNHANDLED_EX();
+
+		PRINT_ALL( m );
+
+		m.insert( strstr_arr, strstr_arr + strstr_size );
+
+		PRINT_ALL( m );
+
+		m.erase( m.begin() );
+
+		PRINT_ALL( m );
+
+		it = m.begin();
+		std::advance( it, 10 );
+
+		m.erase( it, m.end() );
+
+		PRINT_ALL( m );
+
+		strmap::size_type s = m.erase( "1234" );
+
+		PRINT_ALL( m );
+		PRINT_LINE( "S:", s );
+
+		m.clear();
+
+		PRINT_ALL( m );
+
+		it = m.insert( m.begin(), NAMESPACE::make_pair( "", "test" ) );
+
+		PRINT_LINE( "Count:", m.count( "" ) );
+
+		PRINT_PAIR_REF( *it );
+		PRINT_ALL( m );
+
+		m.insert( strstr_arr, strstr_arr + strstr_size );
+
+		strmap n( strstr_arr, strstr_arr + 10 );
+
+		m.swap( n );
+
+		PRINT_ALL( m );
+		PRINT_ALL( n );
+
+		PRINT_EQ_RANGE( m.equal_range( "abcd" ), m.end() );
+		// PRINT_BOUND( m.lower_bound( "123" ), m.end() );
+		// PRINT_BOUND( m.upper_bound( "jhg456" ), m.end() );
+
+		// PRINT_LINE( "Find:", m.find( "hello" ) != m.end()
+		// 						 ? m.find( "hello" )->first
+		// 						 : "End" );
+
+		// m["hello"] = "world";
+
+		// PRINT_LINE( "Find:", m.find( "hello" ) != m.end()
+		// 						 ? m.find( "hello" )->first
+		// 						 : "End" );
 	}
-	// const std::map<int, Base> e( a );
-	// e.find( 0 )->second = c;
-	// std::cout << "end" << std::endl;
 
-	std::cout << a.lower_bound( 0 )->first << std::endl;
+	// {
+	// 	NAMESPACE::map<int, int, std::less<int>,
+	// 				   track_allocator<NAMESPACE::pair<const int, int> > >
+	// 		m;
 
-	// a[19];
+	// 	for ( int i = 0; i < 50000; ++i ) {
+	// 		m.insert( NAMESPACE::make_pair( rand(), rand() ) );
+	// 	}
+
+	// 	PRINT_ALL( m );
+
+	// 	m.erase( m.begin(), m.end() );
+
+	// 	PRINT_ALL( m );
+	// }
 }
-
-// template <typename T>
-// std::string printPair( const T &iterator, bool nl = true,
-// 					   std::ostream &o = std::cout ) {
-// 	o << "key: " << iterator->first << " | value: " << iterator->second;
-// 	if ( nl ) o << std::endl;
-// 	return ( "" );
-// }
-
-// template <typename T_MAP>
-// void printSize( T_MAP const &mp, bool print_content = 1 ) {
-// 	std::cout << "size: " << mp.size() << std::endl;
-// 	std::cout << "max_size: " << mp.max_size() << std::endl;
-// 	if ( print_content ) {
-// 		typename T_MAP::const_iterator it = mp.begin(), ite = mp.end();
-// 		std::cout << std::endl << "Content is:" << std::endl;
-// 		for ( ; it != ite; ++it )
-// 			std::cout << "- " << printPair( it, false ) << std::endl;
-// 	}
-// 	std::cout << "###############################################" << std::endl;
-// }
-
-// template <typename T1, typename T2>
-// void printReverse( ft::map<T1, T2> &mp ) {
-// 	typename ft::map<T1, T2>::iterator it = mp.end(), ite = mp.begin();
-
-// 	std::cout << "printReverse:" << std::endl;
-// 	while ( it != ite ) {
-// 		it--;
-// 		std::cout << "-> " << printPair( it, false ) << std::endl;
-// 	}
-// 	std::cout << "_______________________________________________" << std::endl;
-// }
-
-// #define T1 int
-// #define T2 std::string
-// typedef ft::map<T1, T2>::value_type T3;
-// typedef ft::map<T1, T2>::iterator   iterator;
-
-// static int iter = 0;
-
-// template <typename MAP, typename U>
-// void ft_insert( MAP &mp, U param ) {
-// 	ft::pair<iterator, bool> tmp;
-
-// 	std::cout << "\t-- [" << iter++ << "] --" << std::endl;
-// 	tmp = mp.insert( param );
-// 	std::cout << "insert return: " << printPair( tmp.first );
-// 	std::cout << "Created new node: " << tmp.second << std::endl;
-// 	printSize( mp );
-// }
-
-// template <typename MAP, typename U, typename V>
-// void ft_insert( MAP &mp, U param, V param2 ) {
-// 	iterator tmp;
-
-// 	std::cout << "\t-- [" << iter++ << "] --" << std::endl;
-// 	tmp = mp.insert( param, param2 );
-// 	std::cout << "insert return: " << printPair( tmp );
-// 	printSize( mp );
-// }
-
-// int main( void ) {
-// 	ft::map<T1, T2> mp, mp2;
-
-// 	ft_insert( mp, T3( 42, "lol" ) );
-// 	ft_insert( mp, T3( 42, "mdr" ) );
-
-// 	ft_insert( mp, T3( 50, "mdr" ) );
-// 	ft_insert( mp, T3( 35, "funny" ) );
-
-// 	ft_insert( mp, T3( 45, "bunny" ) );
-// 	ft_insert( mp, T3( 21, "fizz" ) );
-// 	ft_insert( mp, T3( 38, "buzz" ) );
-
-// 	ft_insert( mp, mp.begin(), T3( 55, "fuzzy" ) );
-
-// 	ft_insert( mp2, mp2.begin(), T3( 1337, "beauty" ) );
-// 	ft_insert( mp2, mp2.end(), T3( 1000, "Hello" ) );
-// 	ft_insert( mp2, mp2.end(), T3( 1500, "World" ) );
-
-// 	return ( 0 );
-// }
