@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/20 02:39:41 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/21 00:07:55 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 // #include <map>
 // #include <set>
 #include <limits>  // for numeric_limits
+#include <stdexcept>
 #include <functional>
 #include "iterator.hpp"
 #include "type_traits.hpp"
@@ -129,8 +130,8 @@ class map {
 		 const key_compare&    comp = key_compare(),
 		 const allocator_type& alloc = allocator_type() )
 		: _tree( comp, alloc ) {
-		for ( ; first != last; ++first ) {
-			_tree.insert_unique( *first );
+		while ( first != last ) {
+			_tree.insert_unique( *first++ );
 		}
 	}
 
@@ -146,8 +147,10 @@ class map {
 			this->clear();
 			const_iterator m_begin = m.begin();
 
-			for ( ; m_begin != m.end(); ++m_begin ) {
-				this->insert( *m_begin );
+			while ( m_begin != m.end() ) {
+				// print_tree();
+				// std::cout << "insert: " << ( *m_begin ).first << std::endl;
+				_tree.insert_unique( *m_begin++ );
 			}
 		}
 		return *this;
@@ -203,6 +206,24 @@ class map {
 		}
 	}
 
+	mapped_type& at( const key_type& k ) {
+		ft::pair<iterator, bool> ret = _tree.find_node( k );
+		if ( ret.second == false ) {
+			throw std::out_of_range( "map::at:  key not found" );
+		} else {
+			return ( *( ret.first ) ).second;
+		}
+	}
+
+	const mapped_type& at( const key_type& k ) const {
+		ft::pair<iterator, bool> ret = _tree.find_node( k );
+		if ( ret.second == false ) {
+			throw std::out_of_range( "map::at:  key not found" );
+		} else {
+			return ( *( ret.first ) ).second;
+		}
+	}
+
 	// modifiers:
 	ft::pair<iterator, bool> insert( const value_type& val ) {
 		return _tree.insert_unique( val );
@@ -250,7 +271,7 @@ class map {
 
 	// observers:
 	allocator_type get_allocator() const {
-		return _tree._alloc;
+		return _tree.get_allocator();
 	}
 	key_compare key_comp() const {
 		return _tree.value_comp().key_comp();
@@ -261,11 +282,25 @@ class map {
 
 	// map operations:
 	iterator find( const key_type& k ) {
-		return _tree.find( k ).first;
+		ft::pair<iterator, bool> ret = _tree.find_node( k );
+		if ( ret.second ) {
+			return ret.first;
+		} else {
+			return _tree.end();
+		}
 	}
 
 	const_iterator find( const key_type& k ) const {
-		return _tree.find( k ).first;
+		ft::pair<const_iterator, bool> ret = _tree.find_node( k );
+		if ( ret.second ) {
+			return ret.first;
+		} else {
+			return _tree.end();
+		}
+	}
+
+	size_type count( const key_type& k ) const {
+		return _tree.find_node( k ).second == true;
 	}
 
 	iterator lower_bound( const key_type& k ) {
@@ -283,12 +318,12 @@ class map {
 	}
 
 	pair<iterator, iterator> equal_range( const key_type& k ) {
-		return make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
+		return ft::make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
 	}
 
 	pair<const_iterator, const_iterator> equal_range(
 		const key_type& k ) const {
-		return make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
+		return ft::make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
 	}
 
 	void swap( map& x ) {
@@ -303,13 +338,17 @@ class map {
 template <class Key, class T, class Compare, class Allocator>
 bool operator==( const map<Key, T, Compare, Allocator>& x,
 				 const map<Key, T, Compare, Allocator>& y ) {
-	return equal( x.begin(), x.last(), y.begin() );
+	if ( x.size() == y.size() ) {
+		return ft::equal( x.begin(), x.end(), y.begin() );
+	}
+	return false;
 }
 
 template <class Key, class T, class Compare, class Allocator>
 bool operator<( const map<Key, T, Compare, Allocator>& x,
 				const map<Key, T, Compare, Allocator>& y ) {
-	return lexicographical_compare( x.begin(), x.end(), y.begin(), y.end() );
+	return ft::lexicographical_compare( x.begin(), x.end(), y.begin(),
+										y.end() );
 }
 
 template <class Key, class T, class Compare, class Allocator>
@@ -344,5 +383,12 @@ void swap( map<Key, T, Compare, Allocator>& x,
 }
 
 }  // namespace ft
+
+// // specialized algorithms:
+// template <class Key, class T, class Compare, class Allocator>
+// void swap( ft::map<Key, T, Compare, Allocator>& x,
+// 		   ft::map<Key, T, Compare, Allocator>& y ) {
+// 	x.swap( y );
+// }
 
 #endif

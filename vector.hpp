@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/30 23:38:39 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/20 19:39:25 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,11 +163,9 @@ template <class T, class Allocator>
 typename vector<T, Allocator>::size_type vector<T, Allocator>::recommand_size(
 	size_type n ) const {
 	const size_type max_size = this->max_size();
-	if ( max_size < n )
-		throw std::length_error( "vector: length error" );
+	if ( max_size < n ) throw std::length_error( "vector: length error" );
 	const size_type cap = this->capacity();
-	if ( cap > max_size / 2 )
-		return max_size;
+	if ( cap > max_size / 2 ) return max_size;
 	return std::max<size_type>( cap * 2, n );
 }
 
@@ -276,16 +274,14 @@ typename vector<T, Allocator>::const_reference vector<T, Allocator>::operator[](
 template <class T, class Allocator>
 typename vector<T, Allocator>::reference vector<T, Allocator>::at(
 	size_type n ) {
-	if ( n >= this->size() )
-		throw std::out_of_range( "vector: out of range" );
+	if ( n >= this->size() ) throw std::out_of_range( "vector: out of range" );
 	return _begin[n];
 }
 
 template <class T, class Allocator>
 typename vector<T, Allocator>::const_reference vector<T, Allocator>::at(
 	size_type n ) const {
-	if ( n >= this->size() )
-		throw std::out_of_range( "vector: out of range" );
+	if ( n >= this->size() ) throw std::out_of_range( "vector: out of range" );
 	return _begin[n];
 }
 
@@ -968,8 +964,7 @@ vector<T, Allocator>::rend() const {
 // Comparison operator
 template <class T, class Alloc>
 bool operator==( const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs ) {
-	if ( lhs.size() != rhs.size() )
-		return false;
+	if ( lhs.size() != rhs.size() ) return false;
 	return ft::equal( lhs.begin(), lhs.end(), rhs.begin() );
 }
 
@@ -1002,6 +997,12 @@ template <class T, class Allocator>
 void swap( vector<T, Allocator>& x, vector<T, Allocator>& y ) {
 	x.swap( y );
 }
+
 }  // namespace ft
+
+// template <class T, class Allocator>
+// void swap( ft::vector<T, Allocator>& x, ft::vector<T, Allocator>& y ) {
+// 	x.swap( y );
+// }
 
 #endif

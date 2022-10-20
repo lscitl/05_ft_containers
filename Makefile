@@ -6,11 +6,14 @@
 #    By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/08/15 20:27:06 by seseo             #+#    #+#              #
-#    Updated: 2022/10/18 19:05:32 by seseo            ###   ########.fr        #
+#    Updated: 2022/10/21 00:25:18 by seseo            ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-SRCS			:=	src/main.cpp
+SRCS			:=	src/main.cpp \
+					src/timer/timer.cpp \
+					src/track/leak_checker.cpp \
+					src/track/memory_tracker.cpp
 
 OBJS			:=	$(SRCS:.cpp=.o)
 
