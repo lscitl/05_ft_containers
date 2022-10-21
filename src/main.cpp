@@ -77,152 +77,53 @@ int main( void ) {
 	SETUP_ARRAYS();
 
 	{
-		intmap m( intstr_arr, intstr_arr + intstr_size );
+		intmap m1( intstr_arr, intstr_arr + 32 );
+		intmap m2;
 
-		m.insert( NAMESPACE::make_pair( 34, "kljd9834iuhwet" ) );
-		m.insert( NAMESPACE::make_pair( 3468, "dfghe45sywu4hsr" ) );
-		m.insert( NAMESPACE::make_pair( 96533, "sdfghthrdfg5456ik" ) );
-		m.insert( NAMESPACE::make_pair( 1954894589, "jtt5454wujtjse" ) );
-		m.insert( NAMESPACE::make_pair( 7754322, "w4wt5u4wjhstrhj" ) );
-		m.insert( NAMESPACE::make_pair( 3632, "dfgjjkuy56ue5uwyhry5yeh" ) );
-		m.insert( NAMESPACE::make_pair( 3, "rtjey5w4u4u5e6kjwj5w4" ) );
-		m.insert( NAMESPACE::make_pair( 4, "asdfhfjgh54w3ag" ) );
-		m.insert( NAMESPACE::make_pair( -873487, "jw56jw45jsryjsrt5u4w5" ) );
-		m.insert( NAMESPACE::make_pair( -95763433, "ws45uhsrtjnsrths54yh" ) );
-		m.insert( NAMESPACE::make_pair( 453834782, "juytje54yaerdrj" ) );
-		m.insert( NAMESPACE::make_pair( 19458942, "j567uysdts56y6uj5r" ) );
-		m.insert( NAMESPACE::make_pair( 1245689793,
-										"jr67e5674574668679789ruyerdtadh" ) );
+		std::cout << "1" << std::endl;
+		m1.print_tree();
+		std::cout << "2" << std::endl;
+		m2.print_tree();
 
-		NAMESPACE::pair<intmap::iterator, intmap::iterator> eq =
-			m.equal_range( 98583944 );
+		NAMESPACE::swap( m1, m2 );
+		std::cout << "1" << std::endl;
+		m1.print_tree();
+		std::cout << "2" << std::endl;
+		m2.print_tree();
 
-		PRINT_EQ_RANGE( eq, m.end() );
+		PRINT_ALL( m1 );
+		PRINT_ALL( m2 );
 
-		eq = m.equal_range( 209485948 );
+		m1.clear();
+		m1.swap( m2 );
 
-		PRINT_EQ_RANGE( eq, m.end() );
+		PRINT_ALL( m1 );
+		PRINT_ALL( m2 );
 
-		eq = m.equal_range( 19458942 );
+		m1.clear();
+		m2.swap( m1 );
 
-		PRINT_EQ_RANGE( eq, m.end() );
+		PRINT_ALL( m1 );
+		PRINT_ALL( m2 );
 
-		eq = m.equal_range( 19458941 );
+		m1.insert( NAMESPACE::make_pair( 64, "N64" ) );
+		NAMESPACE::swap( m1, m2 );
 
-		PRINT_EQ_RANGE( eq, m.end() );
+		PRINT_ALL( m1 );
+		PRINT_ALL( m2 );
 
-		eq = m.equal_range( 19458943 );
+		m2.insert( intstr_arr, intstr_arr + intstr_size );
+		m1.swap( m2 );
 
-		PRINT_EQ_RANGE( eq, m.end() );
+		PRINT_ALL( m1 );
+		PRINT_ALL( m2 );
 
-		eq = m.equal_range( -1 );
+		m1.clear();
+		m1.swap( m2 );
+		m1.clear();
+		m1.swap( m2 );
 
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 3 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 4 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 5 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 0 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( std::numeric_limits<int>::max() );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		m.insert(
-			NAMESPACE::make_pair( std::numeric_limits<int>::max(), "max" ) );
-
-		eq = m.equal_range( std::numeric_limits<int>::max() );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-	}
-
-	{
-		intmap temp( intstr_arr, intstr_arr + intstr_size );
-
-		temp.insert( NAMESPACE::make_pair( 34, "kljd9834iuhwet" ) );
-		temp.insert( NAMESPACE::make_pair( 3468, "dfghe45sywu4hsr" ) );
-		temp.insert( NAMESPACE::make_pair( 96533, "sdfghthrdfg5456ik" ) );
-		temp.insert( NAMESPACE::make_pair( 1954894589, "jtt5454wujtjse" ) );
-		temp.insert( NAMESPACE::make_pair( 7754322, "w4wt5u4wjhstrhj" ) );
-		temp.insert( NAMESPACE::make_pair( 3632, "dfgjjkuy56ue5uwyhry5yeh" ) );
-		temp.insert( NAMESPACE::make_pair( 3, "rtjey5w4u4u5e6kjwj5w4" ) );
-		temp.insert( NAMESPACE::make_pair( 4, "asdfhfjgh54w3ag" ) );
-		temp.insert( NAMESPACE::make_pair( -873487, "jw56jw45jsryjsrt5u4w5" ) );
-		temp.insert(
-			NAMESPACE::make_pair( -95763433, "ws45uhsrtjnsrths54yh" ) );
-		temp.insert( NAMESPACE::make_pair( 453834782, "juytje54yaerdrj" ) );
-		temp.insert( NAMESPACE::make_pair( 19458942, "j567uysdts56y6uj5r" ) );
-		temp.insert( NAMESPACE::make_pair(
-			1245689793, "jr67e5674574668679789ruyerdtadh" ) );
-
-		const intmap m( temp );
-
-		NAMESPACE::pair<intmap::const_iterator, intmap::const_iterator> eq =
-			m.equal_range( 98583944 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 209485948 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 19458942 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 19458941 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 19458943 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( -1 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 3 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 4 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 5 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( 0 );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		eq = m.equal_range( std::numeric_limits<int>::max() );
-
-		PRINT_EQ_RANGE( eq, m.end() );
-
-		// m.print_tree();
-		// m.tree_debug();
-	}
-
-	{
-		const intmap m;
-
-		NAMESPACE::pair<intmap::const_iterator, intmap::const_iterator> eq =
-			m.equal_range( std::numeric_limits<int>::max() );
-
-		PRINT_EQ_RANGE( eq, m.end() );
+		PRINT_ALL( m1 );
+		PRINT_ALL( m2 );
 	}
 }

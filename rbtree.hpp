@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/21 21:40:26 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/22 01:35:06 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -506,23 +506,25 @@ class rbtree {
 	void do_erase_sibling_is_black( node_base_pointer parent,
 									node_base_pointer sibling,
 									node_base_pointer extra_black ) {
-		if ( parent->right == extra_black ) {
-			if ( sibling->left && sibling->left->color == RED ) {
-				return erase_case_sibling_same_side_child_red( parent, sibling,
-															   false );
-			} else if ( sibling->right && sibling->right->color == RED ) {
-				return erase_case_sibling_other_side_child_red( parent, sibling,
-																false );
-			}
-		} else {
-			if ( sibling->right && sibling->right != end_node_ptr() &&
-				 sibling->right->color == RED ) {
-				return erase_case_sibling_same_side_child_red( parent, sibling,
-															   true );
-			} else if ( sibling->right && sibling->right != end_node_ptr() &&
-						sibling->right->color == RED ) {
+		if ( parent->left == extra_black ) {
+			if ( sibling->left != NULL && sibling->left->color == RED ) {
 				return erase_case_sibling_other_side_child_red( parent, sibling,
 																true );
+			} else if ( sibling->right != NULL &&
+						sibling->right != end_node_ptr() &&
+						sibling->right->color == RED ) {
+				return erase_case_sibling_same_side_child_red( parent, sibling,
+															   true );
+			}
+		} else {
+			if ( sibling->left != NULL && sibling->left->color == RED ) {
+				return erase_case_sibling_same_side_child_red( parent, sibling,
+															   false );
+			} else if ( sibling->right != NULL &&
+						sibling->right != end_node_ptr() &&
+						sibling->right->color == RED ) {
+				return erase_case_sibling_other_side_child_red( parent, sibling,
+																false );
 			}
 		}
 		sibling->color = RED;
@@ -550,11 +552,13 @@ class rbtree {
 		if ( sibling_is_right_child ) {
 			sibling_child = sibling->left;
 			sibling_child->color = parent->color;
+			parent->color = BLACK;
 			rotate_right( sibling );
 			rotate_left( parent );
 		} else {
 			sibling_child = sibling->right;
 			sibling_child->color = parent->color;
+			parent->color = BLACK;
 			rotate_left( sibling );
 			rotate_right( parent );
 		}
@@ -599,8 +603,47 @@ class rbtree {
 		// std::cout << "begin" << std::endl;
 		// print_tree_map();
 
+		// Two children node.
+		if ( del_node->left && del_node->right != NULL &&
+			 del_node->right != end_node_ptr() ) {
+			// std::cout << "erase two children" << std::endl;
+			swap_node = node_base::maximum( left );
+			extra_black = swap_node->left;
+			if ( left != swap_node ) {
+				extra_black_parent = swap_node->parent;
+				swap_node->parent->right = swap_node->left;
+				if ( swap_node->left ) {
+					swap_node->left->parent = swap_node->parent;
+				}
+				swap_node->left = left;
+				left->parent = swap_node;
+			} else {
+				extra_black_parent = swap_node;
+			}
+			swap_node->parent = parent;
+			swap_node->right = right;
+			right->parent = swap_node;
+			if ( del_node == _root_node ) {
+				_root_node = swap_node;
+			} else {
+				if ( is_right_child( del_node ) ) {
+					parent->right = swap_node;
+				} else {
+					parent->left = swap_node;
+				}
+			}
+			right->parent = swap_node;
+			del_node_color_is_black = ( swap_node->color == BLACK );
+			swap_node->color = del_node->color;
+			if ( del_node_color_is_black ) {
+				if ( swap_node == left ) {
+					extra_black = swap_node->left;
+					extra_black_parent = swap_node;
+				}
+			}
+		}
 		// One or zero child node.
-		if ( left == NULL || right == NULL || right == end_node_ptr() ) {
+		else {
 			// std::cout << "erase one/zero child" << std::endl;
 			// One right child node.
 			if ( left == NULL && right != NULL && right != end_node_ptr() ) {
@@ -623,7 +666,8 @@ class rbtree {
 				swap_node = right;
 			}
 			// One left child node.
-			else if ( ( right == NULL || right == end_node_ptr() ) && left ) {
+			else if ( ( right == NULL || right == end_node_ptr() ) &&
+					  left != NULL ) {
 				if ( del_node == _root_node ) {
 					_root_node = left;
 					__end_node.left = left;
@@ -673,44 +717,7 @@ class rbtree {
 				}
 			}
 		}
-		// Two children node.
-		else {
-			// std::cout << "erase two children" << std::endl;
-			swap_node = node_base::maximum( left );
-			extra_black = swap_node->left;
-			if ( left != swap_node ) {
-				extra_black_parent = swap_node->parent;
-				swap_node->parent->right = swap_node->left;
-				if ( swap_node->left ) {
-					swap_node->left->parent = swap_node->parent;
-				}
-				swap_node->left = left;
-				left->parent = swap_node;
-			} else {
-				extra_black_parent = swap_node;
-			}
-			swap_node->parent = parent;
-			swap_node->right = right;
-			right->parent = swap_node;
-			if ( del_node == _root_node ) {
-				_root_node = swap_node;
-			} else {
-				if ( is_right_child( del_node ) ) {
-					parent->right = swap_node;
-				} else {
-					parent->left = swap_node;
-				}
-			}
-			right->parent = swap_node;
-			del_node_color_is_black = ( swap_node->color == BLACK );
-			swap_node->color = del_node->color;
-			if ( del_node_color_is_black ) {
-				if ( swap_node == left ) {
-					extra_black = swap_node->left;
-					extra_black_parent = swap_node;
-				}
-			}
-		}
+
 		--_size;
 		_alloc.destroy( static_cast<node_pointer>( del_node ) );
 		_alloc.deallocate( static_cast<node_pointer>( del_node ), 1 );
@@ -778,7 +785,7 @@ class rbtree {
 			x._root_node = NULL;
 			x._begin_node = x.end_node_ptr();
 			x._size = 0;
-			x.__end_node.left = NULL;
+			x.__end_node.left = x.end_node_ptr();
 		}
 		if ( tmp_size != 0 ) {
 			_root_node = tmp_root;
@@ -788,9 +795,9 @@ class rbtree {
 			__end_node.left->right = this->end_node_ptr();
 		} else {
 			this->_root_node = NULL;
-			this->_begin_node = x.end_node_ptr();
+			this->_begin_node = end_node_ptr();
 			this->_size = 0;
-			this->__end_node.left = NULL;
+			this->__end_node.left = end_node_ptr();
 		}
 	}
 	// reference end_check() {
@@ -800,42 +807,42 @@ class rbtree {
 	iterator lower_bound( const key_type& k ) {
 		ft::pair<node_base_pointer, bool> ret = find_node( k );
 
-		if ( ret.second == true ) {
-			return iterator( ret.first );
-		} else if ( ret.first == end_node_ptr() ) {
+		if ( ret.second == true || ret.first == end_node_ptr() ) {
 			return iterator( ret.first );
 		} else {
 			if ( _comp( get_node_value( ret.first ), k ) ) {
-				if ( ret.first == end_node_ptr()->left ) {
-					return iterator( end_node_ptr() );
-				}
-				return iterator( ret.first );
+				return ++iterator( ret.first );
 			}
-			if ( ret.first == _begin_node ) {
-				return iterator( _begin_node );
-			}
-			return --iterator( ret.first );
+			return iterator( ret.first );
 		}
 	}
 
 	const_iterator lower_bound( const key_type& k ) const {
 		ft::pair<node_base_pointer, bool> ret = find_node( k );
 
-		if ( ret.second == true ) {
-			return iterator( ret.first );
-		} else if ( ret.first == end_node_ptr() ) {
-			return iterator( ret.first );
+		// if ( ret.second == true ) {
+		// 	return iterator( ret.first );
+		// } else if ( ret.first == end_node_ptr() ) {
+		// 	return iterator( ret.first );
+		// } else {
+		// 	if ( _comp( get_node_value( ret.first ), k ) ) {
+		// 		if ( ret.first == end_node_ptr()->left ) {
+		// 			return iterator( end_node_ptr() );
+		// 		}
+		// 		return iterator( ret.first );
+		// 	}
+		// 	if ( ret.first == _begin_node ) {
+		// 		return iterator( _begin_node );
+		// 	}
+		// 	return --iterator( ret.first );
+		// }
+		if ( ret.second == true || ret.first == end_node_ptr() ) {
+			return const_iterator( ret.first );
 		} else {
 			if ( _comp( get_node_value( ret.first ), k ) ) {
-				if ( ret.first == end_node_ptr()->left ) {
-					return iterator( end_node_ptr() );
-				}
-				return iterator( ret.first );
+				return ++iterator( ret.first );
 			}
-			if ( ret.first == _begin_node ) {
-				return iterator( _begin_node );
-			}
-			return --iterator( ret.first );
+			return const_iterator( ret.first );
 		}
 		// if ( ret.second == true || ret.first != end_node_ptr()->left ) {
 		// 	return const_iterator( ret.first );
@@ -1028,7 +1035,7 @@ class rbtree {
 		tree_debug( root->left );
 		tree_debug( root->right );
 	}
-};
+};  // namespace ft
 
 }  // namespace ft
 

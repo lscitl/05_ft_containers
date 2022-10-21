@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/21 19:20:48 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/22 01:28:38 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -379,20 +379,20 @@ bool operator<=( const map<Key, T, Compare, Allocator>& x,
 	return !( y < x );
 }
 
-// // specialized algorithms:
-// template <class Key, class T, class Compare, class Allocator>
-// void swap( map<Key, T, Compare, Allocator>& x,
-// 		   map<Key, T, Compare, Allocator>& y ) {
-// 	x.swap( y );
-// }
+// specialized algorithms:
+template <class Key, class T, class Compare, class Allocator>
+void swap( map<Key, T, Compare, Allocator>& x,
+		   map<Key, T, Compare, Allocator>& y ) {
+	x.swap( y );
+}
 
 }  // namespace ft
 
-// specialized algorithms:
-template <class Key, class T, class Compare, class Allocator>
-void swap( ft::map<Key, T, Compare, Allocator>& x,
-		   ft::map<Key, T, Compare, Allocator>& y ) {
-	x.swap( y );
-}
+// // specialized algorithms:
+// template <class Key, class T, class Compare, class Allocator>
+// void swap( ft::map<Key, T, Compare, Allocator>& x,
+// 		   ft::map<Key, T, Compare, Allocator>& y ) {
+// 	x.swap( y );
+// }
 
 #endif
