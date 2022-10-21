@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/21 00:08:52 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/21 21:40:26 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -235,14 +235,14 @@ class rbtree {
 			}
 			return ft::pair<node_base_pointer, bool>( parent, false );
 		}
-		return ft::pair<node_base_pointer, bool>( NULL, false );
+		return ft::pair<node_base_pointer, bool>( end_node_ptr(), false );
 	}
 
 	ft::pair<node_base_pointer, bool> find_node( iterator        position,
 												 const key_type& key ) const {
 		node_base_pointer cur = position.node;
 		node_base_pointer parent = position.node;
-		if ( position.node != NULL ) {
+		if ( position.node != NULL && position.node != end_node_ptr() ) {
 			if ( _comp( key, get_node_value( cur ) ) ) {
 				cur = cur->left;
 			} else {
@@ -269,6 +269,9 @@ class rbtree {
 		cur = _root_node;
 		parent = _root_node;
 
+		if ( cur == end_node_ptr() ) {
+			return ft::pair<node_base_pointer, bool>( end_node_ptr(), false );
+		}
 		if ( _comp( key, get_node_value( cur ) ) ) {
 			cur = cur->left;
 		} else {
@@ -278,7 +281,7 @@ class rbtree {
 				return ft::pair<node_base_pointer, bool>( cur, true );
 			}
 		}
-		while ( cur != NULL && cur != end_node_ptr() && cur != position.node ) {
+		while ( cur != NULL && cur != end_node_ptr() ) {
 			if ( _comp( key, get_node_value( cur ) ) ) {
 				parent = cur;
 				cur = cur->left;
@@ -426,15 +429,29 @@ class rbtree {
 		iterator parent_node_iter, const value_type& val ) {
 		node              __new_node( val );
 		node_base_pointer new_node = _alloc.allocate( 1 );
+		if ( this->_size == 0 ) {
+			__new_node.color = BLACK;
+			__new_node.right = end_node_ptr();
+			_alloc.construct( static_cast<node_pointer>( new_node ),
+							  __new_node );
+
+			_root_node = new_node;
+			_begin_node = new_node;
+			__end_node.left = new_node;
+			++_size;
+			return ft::make_pair(
+				iterator( static_cast<node_pointer>( new_node ) ), true );
+		}
+
 		_alloc.construct( static_cast<node_pointer>( new_node ), __new_node );
 
+		++_size;
 		if ( _comp( get_node_value( last_node_ptr() ), val ) ) {
 			new_node->right = end_node_ptr();
 			__end_node.left = new_node;
 		} else if ( _comp( val, get_node_value( _begin_node ) ) ) {
 			_begin_node = new_node;
 		}
-		++_size;
 
 		node_base_pointer parent_node = parent_node_iter.node;
 
@@ -725,12 +742,12 @@ class rbtree {
 	}
 
 	void clear() {
-		if ( _root_node == end_node_ptr() ) {
+		if ( _root_node == NULL ) {
 			return;
 		}
 		del_node( _root_node );
 		_size = 0;
-		_root_node = end_node_ptr();
+		_root_node = NULL;
 		_begin_node = end_node_ptr();
 		__end_node.left = end_node_ptr();
 	}
@@ -783,45 +800,85 @@ class rbtree {
 	iterator lower_bound( const key_type& k ) {
 		ft::pair<node_base_pointer, bool> ret = find_node( k );
 
-		if ( ret.second == true || ret.first != end_node_ptr()->left ) {
+		if ( ret.second == true ) {
+			return iterator( ret.first );
+		} else if ( ret.first == end_node_ptr() ) {
 			return iterator( ret.first );
 		} else {
-			return iterator( end_node_ptr() );
+			if ( _comp( get_node_value( ret.first ), k ) ) {
+				if ( ret.first == end_node_ptr()->left ) {
+					return iterator( end_node_ptr() );
+				}
+				return iterator( ret.first );
+			}
+			if ( ret.first == _begin_node ) {
+				return iterator( _begin_node );
+			}
+			return --iterator( ret.first );
 		}
 	}
 
 	const_iterator lower_bound( const key_type& k ) const {
 		ft::pair<node_base_pointer, bool> ret = find_node( k );
 
-		if ( ret.second == true || ret.first != end_node_ptr()->left ) {
-			return const_iterator( ret.first );
+		if ( ret.second == true ) {
+			return iterator( ret.first );
+		} else if ( ret.first == end_node_ptr() ) {
+			return iterator( ret.first );
 		} else {
-			return const_iterator( end_node_ptr() );
+			if ( _comp( get_node_value( ret.first ), k ) ) {
+				if ( ret.first == end_node_ptr()->left ) {
+					return iterator( end_node_ptr() );
+				}
+				return iterator( ret.first );
+			}
+			if ( ret.first == _begin_node ) {
+				return iterator( _begin_node );
+			}
+			return --iterator( ret.first );
 		}
+		// if ( ret.second == true || ret.first != end_node_ptr()->left ) {
+		// 	return const_iterator( ret.first );
+		// } else {
+		// 	return const_iterator( end_node_ptr() );
+		// }
 	}
 
 	iterator upper_bound( const key_type& k ) {
 		ft::pair<node_base_pointer, bool> ret = find_node( k );
 
-		if ( ret.second == true || ret.first != _begin_node ) {
+		if ( ret.second == true ) {
 			return ++iterator( ret.first );
-		} else if ( ret.first == _begin_node ) {
+		} else if ( ret.first == end_node_ptr() ) {
 			return iterator( ret.first );
 		} else {
-			return iterator( end_node_ptr() );
+			if ( _comp( get_node_value( ret.first ), k ) ) {
+				return ++iterator( ret.first );
+			}
+			return iterator( ret.first );
 		}
 	}
 
 	const_iterator upper_bound( const key_type& k ) const {
 		ft::pair<node_base_pointer, bool> ret = find_node( k );
 
-		if ( ret.second == true || ret.first != _begin_node ) {
-			return ++const_iterator( ret.first );
-		} else if ( ret.first != NULL ) {
-			return const_iterator( ret.first );
+		if ( ret.second == true ) {
+			return ++iterator( ret.first );
+		} else if ( ret.first == end_node_ptr() ) {
+			return iterator( ret.first );
 		} else {
-			return const_iterator( end_node_ptr() );
+			if ( _comp( get_node_value( ret.first ), k ) ) {
+				return ++iterator( ret.first );
+			}
+			return iterator( ret.first );
 		}
+		// if ( ret.second == true ) {
+		// 	return ++const_iterator( ret.first );
+		// } else if ( ret.first == _begin_node ) {
+		// 	return const_iterator( ret.first );
+		// } else {
+		// 	return const_iterator( end_node_ptr() );
+		// }
 	}
 
 	allocator_type get_allocator() const {
@@ -833,11 +890,11 @@ class rbtree {
 	}
 
 	// print
-	void print_tree() {
+	void print_tree() const {
 		printTree( _root_node, NULL, false );
 	}
 
-	void print_tree_map() {
+	void print_tree_map() const {
 		printTree_map( _root_node, NULL, false );
 	}
 
@@ -851,7 +908,7 @@ class rbtree {
 		}
 	};
 
-	void showTrunks( Trunk* p ) {
+	void showTrunks( Trunk* p ) const {
 		if ( p == NULL ) {
 			return;
 		}
@@ -860,7 +917,7 @@ class rbtree {
 		std::cout << p->str;
 	}
 
-	void printTree( node_base_pointer root, Trunk* prev, bool isLeft ) {
+	void printTree( node_base_pointer root, Trunk* prev, bool isLeft ) const {
 		if ( root == NULL ) {
 			return;
 		}
@@ -902,7 +959,8 @@ class rbtree {
 		delete trunk;
 	}
 
-	void printTree_map( node_base_pointer root, Trunk* prev, bool isLeft ) {
+	void printTree_map( node_base_pointer root, Trunk* prev,
+						bool isLeft ) const {
 		if ( root == NULL ) {
 			return;
 		}
@@ -941,7 +999,34 @@ class rbtree {
 		}
 
 		printTree_map( root->left, trunk, false );
+
 		delete trunk;
+	}
+
+	void do_tree_debug( void ) const {
+		tree_debug( _root_node );
+	}
+
+	void tree_debug( node_base_pointer root ) const {
+		if ( root == NULL || root == end_node_ptr() ) {
+			return;
+		}
+		if ( root->left ) {
+			if ( root != root->left->parent ) {
+				std::cout << "Check connection. Parent node key is "
+						  << static_cast<node_pointer>( root )->value.first
+						  << std::endl;
+			}
+		}
+		if ( root->right && root->right != end_node_ptr() ) {
+			if ( root != root->right->parent ) {
+				std::cout << "Check connection. Parent node key is "
+						  << static_cast<node_pointer>( root )->value.first
+						  << std::endl;
+			}
+		}
+		tree_debug( root->left );
+		tree_debug( root->right );
 	}
 };
 
