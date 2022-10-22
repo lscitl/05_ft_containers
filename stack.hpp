@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/22 17:58:10 by seseo             #+#    #+#             */
-/*   Updated: 2022/09/23 00:14:46 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/23 00:54:25 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,6 @@ class stack {
 	container_type c;
 
    public:
-	// stack();
 	explicit stack( const container_type& ctnr = container_type() );
 	stack( const stack& other );
 	~stack();
@@ -123,10 +122,6 @@ const typename stack<T, Container>::value_type& stack<T, Container>::top()
 }
 
 // Constructor, Destructor, Copy Assignment
-// template <class T, class Container>
-// stack<T, Container>::stack() : c() {
-// }
-
 template <class T, class Container>
 stack<T, Container>::stack(
 	const typename stack<T, Container>::container_type& ctnr )
@@ -143,8 +138,9 @@ stack<T, Container>::~stack() {
 
 template <class T, class Container>
 stack<T, Container>& stack<T, Container>::operator=( const stack& other ) {
-	if ( this != &other )
+	if ( this != &other ) {
 		this->c = other.c;
+	}
 	return *this;
 }
 
