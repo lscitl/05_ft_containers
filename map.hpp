@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/22 01:28:38 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/22 23:34:25 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 #ifndef __MAP_H__
 #define __MAP_H__
 
-// #include <map>
-// #include <set>
 #include <limits>  // for numeric_limits
 #include <stdexcept>
 #include <functional>
@@ -86,7 +84,7 @@ class map {
 
 	class value_compare
 		: public std::binary_function<value_type, value_type, bool> {
-		friend class map;
+		// friend class map;
 
 	   protected:
 		key_compare comp;
@@ -111,6 +109,7 @@ class map {
 	typedef
 		typename Allocator::template rebind<value_type>::other _node_allocator;
 	typedef rbtree<key_type, value_type, _get_key, _vc, _node_allocator> _base;
+	typedef typename _base::node_base_p node_base_p;
 
 	_base _tree;
 
@@ -230,7 +229,7 @@ class map {
 	}
 
 	iterator insert( iterator position, const value_type& val ) {
-		ft::pair<typename _base::node_base_pointer, bool> ret;
+		ft::pair<node_base_p, bool> ret;
 		if ( size() != 0 ) {
 			ret = _tree.find_node( position, _get_key()( val ) );
 			if ( ret.second == true ) {
@@ -238,8 +237,7 @@ class map {
 			}
 			return _tree.insert_unique_with_parent( ret.first, val ).first;
 		} else {
-			ret = ft::pair<typename _base::node_base_pointer, bool>( NULL,
-																	 false );
+			ret = ft::pair<node_base_p, bool>( NULL, false );
 			return _tree.insert_unique( val ).first;
 		}
 	}

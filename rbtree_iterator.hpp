@@ -1,3 +1,16 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   rbtree_iterator.hpp                                :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/10/22 20:20:49 by seseo             #+#    #+#             */
+/*   Updated: 2022/10/22 23:23:08 by seseo            ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#pragma once
 #ifndef __RBTREE_ITERATOR_H__
 #define __RBTREE_ITERATOR_H__
 
@@ -8,13 +21,14 @@ namespace ft {
 template <class T, class Ref, class Ptr>
 class rbtree_iterator {
    public:
-	typedef std::bidirectional_iterator_tag iterator_category;
-	typedef T                               value_type;
-	typedef Ref                             reference;
-	typedef Ptr                             pointer;
-	typedef ptrdiff_t                       difference_type;
-	typedef rbtree_node<T>*                 node_pointer;
-	typedef rbtree_node_base*               node_base_pointer;
+	typedef std::bidirectional_iterator_tag          iterator_category;
+	typedef T                                        value_type;
+	typedef Ref                                      reference;
+	typedef Ptr                                      pointer;
+	typedef rbtree_iterator<T, const Ref, const Ptr> const_iterator;
+	typedef ptrdiff_t                                difference_type;
+	typedef rbtree_node<T>*                          node_pointer;
+	typedef rbtree_node_base*                        node_base_pointer;
 
 	node_base_pointer node;
 
@@ -101,16 +115,19 @@ class rbtree_iterator {
 			}
 		}
 	}
-
-	friend bool operator==( const rbtree_iterator& left,
-							const rbtree_iterator& right ) {
-		return left.node == right.node;
-	}
-	friend bool operator!=( const rbtree_iterator& left,
-							const rbtree_iterator& right ) {
-		return left.node != right.node;
-	}
 };
+
+template <class T, class R, class P>
+bool operator==( const rbtree_iterator<T, R, P>& left,
+				 const rbtree_iterator<T, R, P>& right ) {
+	return left.node == right.node;
+}
+
+template <class T, class R, class P>
+bool operator!=( const rbtree_iterator<T, R, P>& left,
+				 const rbtree_iterator<T, R, P>& right ) {
+	return left.node != right.node;
+}
 
 template <class T, class Ref, class Ptr>
 class rbtree_const_iterator {
@@ -217,16 +234,19 @@ class rbtree_const_iterator {
 			}
 		}
 	}
-
-	friend bool operator==( const rbtree_const_iterator& left,
-							const rbtree_const_iterator& right ) {
-		return left.node == right.node;
-	}
-	friend bool operator!=( const rbtree_const_iterator& left,
-							const rbtree_const_iterator& right ) {
-		return left.node != right.node;
-	}
 };
+
+template <class T, class R, class P>
+bool operator==( const rbtree_const_iterator<T, R, P>& left,
+				 const rbtree_const_iterator<T, R, P>& right ) {
+	return left.node == right.node;
+}
+
+template <class T, class R, class P>
+bool operator!=( const rbtree_const_iterator<T, R, P>& left,
+				 const rbtree_const_iterator<T, R, P>& right ) {
+	return left.node != right.node;
+}
 
 }  // namespace ft
 
