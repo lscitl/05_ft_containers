@@ -1,17 +1,17 @@
 #include <iostream>
 #include <string>
 #include <deque>
-#if 1  // CREATE A REAL STL EXAMPLE
+#if 0  // CREATE A REAL STL EXAMPLE
 #include <map>
 #include <set>
 #include <stack>
 #include <vector>
 namespace ft = std;
 #else
-#include "../vector.hpp"
-#include "../stack.hpp"
-#include "../map.hpp"
-#include "../set.hpp"
+#include "vector.hpp"
+#include "stack.hpp"
+#include "map.hpp"
+#include "set.hpp"
 #endif
 
 #include <functional>
