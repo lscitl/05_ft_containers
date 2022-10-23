@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/23 19:09:29 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/23 19:14:15 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,7 @@
 
 namespace ft {
 
-template <class Key, class Value, class GetKey, class Compare,
-		  class Allocator = std::allocator<Value> >
+template <class Key, class Value, class GetKey, class Compare, class Allocator>
 class rbtree {
    public:
 	typedef Key                                      key_type;
@@ -821,146 +820,7 @@ class rbtree {
 	value_compare value_comp() const {
 		return _comp;
 	}
-
-	// // print
-	// void print_tree() const {
-	// 	printTree( _root_node, NULL, false );
-	// }
-
-	// void print_tree_map() const {
-	// 	printTree_map( _root_node, NULL, false );
-	// }
-
-	// struct Trunk {
-	// 	Trunk*      prev;
-	// 	std::string str;
-
-	// 	Trunk( Trunk* prev, std::string str ) {
-	// 		this->prev = prev;
-	// 		this->str = str;
-	// 	}
-	// };
-
-	// void showTrunks( Trunk* p ) const {
-	// 	if ( p == NULL ) {
-	// 		return;
-	// 	}
-
-	// 	showTrunks( p->prev );
-	// 	std::cout << p->str;
-	// }
-
-	// void printTree( node_base_p root, Trunk* prev, bool isLeft ) const
-	// { 	if ( root == NULL ) { 		return;
-	// 	}
-
-	// 	std::string prev_str = "    ";
-	// 	Trunk*      trunk = new Trunk( prev, prev_str );
-
-	// 	printTree_map( root->right, trunk, true );
-
-	// 	if ( !prev ) {
-	// 		trunk->str = "---";
-	// 	} else if ( isLeft ) {
-	// 		trunk->str = ".---";
-	// 		prev_str = "   |";
-	// 	} else {
-	// 		trunk->str = "`---";
-	// 		prev->str = prev_str;
-	// 	}
-
-	// 	showTrunks( trunk );
-	// 	if ( root == end_node_ptr() ) {
-	// 		std::cout << " end_node!" << std::endl;
-	// 		delete trunk;
-	// 		return;
-	// 	} else {
-	// 		if ( root->color == RED ) {
-	// 			std::cout << "\033[0;31m" << get_node_value( root )
-	// 					  << "\033[0;49m" << std::endl;
-	// 		} else {
-	// 			std::cout << get_node_value( root ) << std::endl;
-	// 		}
-	// 		if ( prev ) {
-	// 			prev->str = prev_str;
-	// 		}
-	// 		trunk->str = "   |";
-	// 	}
-
-	// 	printTree( root->left, trunk, false );
-	// 	delete trunk;
-	// }
-
-	// void printTree_map( node_base_p root, Trunk* prev,
-	// 					bool isLeft ) const {
-	// 	if ( root == NULL ) {
-	// 		return;
-	// 	}
-
-	// 	std::string prev_str = "    ";
-	// 	Trunk*      trunk = new Trunk( prev, prev_str );
-
-	// 	printTree_map( root->right, trunk, true );
-
-	// 	if ( !prev ) {
-	// 		trunk->str = "---";
-	// 	} else if ( isLeft ) {
-	// 		trunk->str = ".---";
-	// 		prev_str = "   |";
-	// 	} else {
-	// 		trunk->str = "`---";
-	// 		prev->str = prev_str;
-	// 	}
-
-	// 	showTrunks( trunk );
-	// 	if ( root == end_node_ptr() ) {
-	// 		std::cout << " end_node!" << std::endl;
-	// 		delete trunk;
-	// 		return;
-	// 	} else {
-	// 		if ( root->color == RED ) {
-	// 			std::cout << "\033[0;31m" << get_node_value( root ).first
-	// 					  << "\033[0;49m" << std::endl;
-	// 		} else {
-	// 			std::cout << get_node_value( root ).first << std::endl;
-	// 		}
-	// 		if ( prev ) {
-	// 			prev->str = prev_str;
-	// 		}
-	// 		trunk->str = "   |";
-	// 	}
-
-	// 	printTree_map( root->left, trunk, false );
-
-	// 	delete trunk;
-	// }
-
-	// void do_tree_debug( void ) const {
-	// 	tree_debug( _root_node );
-	// }
-
-	// void tree_debug( node_base_p root ) const {
-	// 	if ( root == NULL || root == end_node_ptr() ) {
-	// 		return;
-	// 	}
-	// 	if ( root->left ) {
-	// 		if ( root != root->left->parent ) {
-	// 			std::cout << "Check connection. Parent node key is "
-	// 					  << static_cast<node_p>( root )->value.first
-	// 					  << std::endl;
-	// 		}
-	// 	}
-	// 	if ( root->right && root->right != end_node_ptr() ) {
-	// 		if ( root != root->right->parent ) {
-	// 			std::cout << "Check connection. Parent node key is "
-	// 					  << static_cast<node_p>( root )->value.first
-	// 					  << std::endl;
-	// 		}
-	// 	}
-	// 	tree_debug( root->left );
-	// 	tree_debug( root->right );
-	// }
-};  // namespace ft
+};
 
 }  // namespace ft
 

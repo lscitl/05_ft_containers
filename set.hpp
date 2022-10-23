@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/22 23:33:22 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/23 19:19:48 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,14 +113,7 @@ class set {
 		clear();
 	}
 	set& operator=( const set& m ) {
-		if ( this != &m ) {
-			this->clear();
-			const_iterator m_begin = m.begin();
-
-			while ( m_begin != m.end() ) {
-				_tree.insert_unique( *m_begin++ );
-			}
-		}
+		this->_tree = m._tree;
 		return *this;
 	}
 
@@ -137,6 +130,7 @@ class set {
 	const_iterator end() const {
 		return const_iterator( _tree.end() );
 	}
+
 	reverse_iterator rbegin() {
 		return reverse_iterator( end() );
 	}
@@ -165,7 +159,6 @@ class set {
 	ft::pair<iterator, bool> insert( const value_type& val ) {
 		return _tree.insert_unique( val );
 	}
-
 	iterator insert( iterator position, const value_type& val ) {
 		ft::pair<node_base_p, bool> ret;
 		if ( size() != 0 ) {
@@ -179,7 +172,6 @@ class set {
 			return _tree.insert_unique( val ).first;
 		}
 	}
-
 	template <class InputIterator>
 	void insert( InputIterator first, InputIterator last ) {
 		for ( ; first != last; ++first ) {
@@ -194,13 +186,11 @@ class set {
 	size_type erase( const key_type& k ) {
 		return _tree.erase( k );
 	}
-
 	void erase( iterator first, iterator last ) {
 		while ( first != last ) {
 			_tree.erase_from_node_ptr( ( first++ ).node );
 		}
 	}
-
 	void clear() {
 		_tree.clear();
 	}
@@ -225,7 +215,6 @@ class set {
 			return _tree.end();
 		}
 	}
-
 	const_iterator find( const key_type& k ) const {
 		ft::pair<const_iterator, bool> ret = _tree.find_node( k );
 		if ( ret.second ) {
@@ -238,7 +227,6 @@ class set {
 	size_type count( const key_type& k ) const {
 		return _tree.find_node( k ).second == true;
 	}
-
 	iterator lower_bound( const key_type& k ) {
 		return _tree.lower_bound( k );
 	}
@@ -256,7 +244,6 @@ class set {
 	pair<iterator, iterator> equal_range( const key_type& k ) {
 		return ft::make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
 	}
-
 	pair<const_iterator, const_iterator> equal_range(
 		const key_type& k ) const {
 		return ft::make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
@@ -264,14 +251,6 @@ class set {
 
 	void swap( set& x ) {
 		_tree.swap( x._tree );
-	}
-
-	void print_tree() const {
-		_tree.print_tree_map();
-	}
-
-	void tree_debug( void ) const {
-		_tree.do_tree_debug();
 	}
 };
 

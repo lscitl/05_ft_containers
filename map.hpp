@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/23 18:29:03 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/23 19:17:09 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,14 +133,11 @@ class map {
 			_tree.insert_unique( *first++ );
 		}
 	}
-
 	map( const map& x ) : _tree( x._tree ) {
 	}
-
 	~map() {
 		clear();
 	}
-
 	map& operator=( const map& m ) {
 		this->_tree = m._tree;
 		return *this;
@@ -195,7 +192,6 @@ class map {
 			return ( *( ret.first ) ).second;
 		}
 	}
-
 	mapped_type& at( const key_type& k ) {
 		ft::pair<iterator, bool> ret = _tree.find_node( k );
 		if ( ret.second == false ) {
@@ -204,7 +200,6 @@ class map {
 			return ( *( ret.first ) ).second;
 		}
 	}
-
 	const mapped_type& at( const key_type& k ) const {
 		ft::pair<iterator, bool> ret = _tree.find_node( k );
 		if ( ret.second == false ) {
@@ -218,7 +213,6 @@ class map {
 	ft::pair<iterator, bool> insert( const value_type& val ) {
 		return _tree.insert_unique( val );
 	}
-
 	iterator insert( iterator position, const value_type& val ) {
 		ft::pair<node_base_p, bool> ret;
 		if ( size() != 0 ) {
@@ -232,28 +226,23 @@ class map {
 			return _tree.insert_unique( val ).first;
 		}
 	}
-
 	template <class InputIterator>
 	void insert( InputIterator first, InputIterator last ) {
 		for ( ; first != last; ++first ) {
 			_tree.insert_unique( *first );
 		}
 	}
-
 	void erase( iterator position ) {
 		_tree.erase_from_node_ptr( position.node );
 	}
-
 	size_type erase( const key_type& k ) {
 		return _tree.erase( k );
 	}
-
 	void erase( iterator first, iterator last ) {
 		while ( first != last ) {
 			_tree.erase_from_node_ptr( ( first++ ).node );
 		}
 	}
-
 	void clear() {
 		_tree.clear();
 	}
@@ -278,7 +267,6 @@ class map {
 			return _tree.end();
 		}
 	}
-
 	const_iterator find( const key_type& k ) const {
 		ft::pair<const_iterator, bool> ret = _tree.find_node( k );
 		if ( ret.second ) {
@@ -309,7 +297,6 @@ class map {
 	pair<iterator, iterator> equal_range( const key_type& k ) {
 		return ft::make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
 	}
-
 	pair<const_iterator, const_iterator> equal_range(
 		const key_type& k ) const {
 		return ft::make_pair( _tree.lower_bound( k ), _tree.upper_bound( k ) );
@@ -317,14 +304,6 @@ class map {
 
 	void swap( map& x ) {
 		_tree.swap( x._tree );
-	}
-
-	void print_tree() const {
-		_tree.print_tree_map();
-	}
-
-	void tree_debug( void ) const {
-		_tree.do_tree_debug();
 	}
 };
 
