@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/23 15:11:07 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/22 23:34:25 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/23 18:29:03 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ class map {
 
 	class value_compare
 		: public std::binary_function<value_type, value_type, bool> {
-		// friend class map;
+		friend class map;
 
 	   protected:
 		key_compare comp;
@@ -142,16 +142,7 @@ class map {
 	}
 
 	map& operator=( const map& m ) {
-		if ( this != &m ) {
-			this->clear();
-			const_iterator m_begin = m.begin();
-
-			while ( m_begin != m.end() ) {
-				// print_tree();
-				// std::cout << "insert: " << ( *m_begin ).first << std::endl;
-				_tree.insert_unique( *m_begin++ );
-			}
-		}
+		this->_tree = m._tree;
 		return *this;
 	}
 

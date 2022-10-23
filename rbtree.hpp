@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/22 20:37:09 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/23 19:09:29 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,7 @@
 #ifndef __RBTREE_H__
 #define __RBTREE_H__
 
-// #include <iterator>
-// #include <__tree>
-#include <iostream>  // for test
+// #include <iostream>  // for test
 #include <memory>
 #include <algorithm>
 #include "iterator.hpp"
@@ -51,13 +49,11 @@ class rbtree {
 	typedef rbtree_node_base*                        node_base_p;
 	typedef Compare                                  value_compare;
 
-	// typedef end_node_ptr iter_pointer;
-
 	typedef
 		typename allocator_type::template rebind<node>::other node_allocator;
 
 	typedef rbtree_iterator<value_type, reference, pointer> iterator;
-	typedef rbtree_const_iterator<value_type, reference, pointer>
+	typedef rbtree_iterator<value_type, const_reference, const_pointer>
 												 const_iterator;
 	typedef ft::reverse_iterator<iterator>       reverse_iterator;
 	typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
@@ -76,7 +72,7 @@ class rbtree {
 	}
 
 	void rotate_left( node_base_p target_node ) {
-		if ( target_node == NULL || target_node == end_node_ptr() ) {
+		if ( is_null_node( target_node ) == true ) {
 			return;
 		}
 		node_base_p r_child_node = target_node->right;
@@ -105,7 +101,7 @@ class rbtree {
 	}
 
 	void rotate_right( node_base_p target_node ) {
-		if ( target_node == NULL || target_node == end_node_ptr() ) {
+		if ( is_null_node( target_node ) == true ) {
 			return;
 		}
 		node_base_p l_child_node = target_node->left;
@@ -290,99 +286,7 @@ class rbtree {
 				}
 			}
 		}
-		cur = _root_node;
-		parent = _root_node;
-
-		if ( cur == end_node_ptr() ) {
-			return ft::pair<node_base_p, bool>( end_node_ptr(), false );
-		}
-		if ( _comp( key, get_node_value( cur ) ) ) {
-			cur = cur->left;
-		} else {
-			if ( _comp( get_node_value( cur ), key ) ) {
-				cur = cur->right;
-			} else {
-				return ft::pair<node_base_p, bool>( cur, true );
-			}
-		}
-		while ( is_null_node( cur ) == false ) {
-			if ( _comp( key, get_node_value( cur ) ) ) {
-				parent = cur;
-				cur = cur->left;
-			} else {
-				if ( _comp( get_node_value( cur ), key ) ) {
-					parent = cur;
-					cur = cur->right;
-				} else {
-					return ft::pair<node_base_p, bool>( cur, true );
-				}
-			}
-		}
-		return ft::pair<node_base_p, bool>( parent, false );
-	}
-
-	bool check_uncle_is_red_and_make_balance( node_base_p grand_parent,
-											  node_base_p parent ) {
-		bool        parent_is_right = is_right_child( parent );
-		node_base_p uncle;
-
-		if ( parent_is_right ) {
-			uncle = grand_parent->left;
-		} else {
-			uncle = grand_parent->right;
-		}
-		// check case1
-		if ( is_null_node( uncle ) == false && uncle->color == RED ) {
-			if ( grand_parent != _root_node ) {
-				grand_parent->color = RED;
-			}
-			uncle->color = BLACK;
-			parent->color = BLACK;
-			node_base_p gg_parent = grand_parent->parent;
-			if ( gg_parent == NULL || gg_parent->color == BLACK ) {
-				return true;
-			}
-			node_base_p ggg_parent = gg_parent->parent;
-			if ( check_uncle_is_red_and_make_balance( ggg_parent,
-													  gg_parent ) ) {
-				return true;
-			} else {
-				check_rotation_dir_and_make_balance( ggg_parent, gg_parent,
-													 grand_parent );
-				return true;
-			}
-		}
-		return false;
-	}
-
-	void check_rotation_dir_and_make_balance( node_base_p grand_parent,
-											  node_base_p parent,
-											  node_base_p child ) {
-		bool child_is_right = is_right_child( child );
-		bool parent_is_right = is_right_child( parent );
-
-		// case 2
-		if ( child_is_right ^ parent_is_right ) {
-			grand_parent->color = RED;
-			child->color = BLACK;
-			if ( child_is_right ) {
-				rotate_left( parent );
-				rotate_right( grand_parent );
-			} else {
-				rotate_right( parent );
-				rotate_left( grand_parent );
-			}
-		}
-		// case 3
-		else {
-			grand_parent->color = RED;
-			parent->color = BLACK;
-			if ( parent_is_right ) {
-				rotate_left( grand_parent );
-			} else {
-				rotate_right( grand_parent );
-			}
-		}
+		return find_node( key );
 	}
 
 	// case 1 : grand parent - black, uncle and parent - red, child - red.
@@ -500,102 +404,67 @@ class rbtree {
 							  true );
 	}
 
-	// erase node function.
-	void do_erase_cases( node_base_p parent, node_base_p sibling,
-						 node_base_p extra_black ) {
-		if ( extra_black ) {
-			if ( extra_black->color == RED ) {
-				extra_black->color = BLACK;
-				return;
-			}
+	bool check_uncle_is_red_and_make_balance( node_base_p grand_parent,
+											  node_base_p parent ) {
+		bool        parent_is_right = is_right_child( parent );
+		node_base_p uncle;
+
+		if ( parent_is_right ) {
+			uncle = grand_parent->left;
+		} else {
+			uncle = grand_parent->right;
 		}
 		// check case1
-		if ( sibling->color == RED ) {
-			sibling->color = BLACK;
-			parent->color = RED;
-			if ( parent->right == sibling ) {
-				sibling = sibling->left;
-				rotate_left( parent );
+		if ( is_null_node( uncle ) == false && uncle->color == RED ) {
+			if ( grand_parent != _root_node ) {
+				grand_parent->color = RED;
+			}
+			uncle->color = BLACK;
+			parent->color = BLACK;
+			node_base_p gg_parent = grand_parent->parent;
+			if ( gg_parent == NULL || gg_parent->color == BLACK ) {
+				return true;
+			}
+			node_base_p ggg_parent = gg_parent->parent;
+			if ( check_uncle_is_red_and_make_balance( ggg_parent,
+													  gg_parent ) ) {
+				return true;
 			} else {
-				sibling = sibling->right;
+				check_rotation_dir_and_make_balance( ggg_parent, gg_parent,
+													 grand_parent );
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void check_rotation_dir_and_make_balance( node_base_p grand_parent,
+											  node_base_p parent,
+											  node_base_p child ) {
+		bool child_is_right = is_right_child( child );
+		bool parent_is_right = is_right_child( parent );
+
+		// case 2
+		if ( child_is_right ^ parent_is_right ) {
+			grand_parent->color = RED;
+			child->color = BLACK;
+			if ( child_is_right ) {
+				rotate_left( parent );
+				rotate_right( grand_parent );
+			} else {
 				rotate_right( parent );
+				rotate_left( grand_parent );
 			}
 		}
-		do_erase_sibling_is_black( parent, sibling, extra_black );
-	}
-
-	// case 2
-	void do_erase_sibling_is_black( node_base_p parent, node_base_p sibling,
-									node_base_p extra_black ) {
-		if ( parent->left == extra_black ) {
-			if ( sibling->left != NULL && sibling->left->color == RED ) {
-				return erase_case_sibling_other_side_child_red( parent, sibling,
-																true );
-			} else if ( sibling->right != NULL &&
-						sibling->right != end_node_ptr() &&
-						sibling->right->color == RED ) {
-				return erase_case_sibling_same_side_child_red( parent, sibling,
-															   true );
+		// case 3
+		else {
+			grand_parent->color = RED;
+			parent->color = BLACK;
+			if ( parent_is_right ) {
+				rotate_left( grand_parent );
+			} else {
+				rotate_right( grand_parent );
 			}
-		} else {
-			if ( sibling->left != NULL && sibling->left->color == RED ) {
-				return erase_case_sibling_same_side_child_red( parent, sibling,
-															   false );
-			} else if ( sibling->right != NULL &&
-						sibling->right != end_node_ptr() &&
-						sibling->right->color == RED ) {
-				return erase_case_sibling_other_side_child_red( parent, sibling,
-																false );
-			}
-		}
-		sibling->color = RED;
-		if ( parent->color == RED ) {
-			parent->color = BLACK;
-			return;
-		}
-		if ( parent == _root_node ) {
-			return;
-		}
-		node_base_p new_parent = parent->parent;
-		if ( is_right_child( parent ) ) {
-			do_erase_cases( new_parent, new_parent->left, parent );
-		} else {
-			do_erase_cases( new_parent, new_parent->right, parent );
-		}
-	}
-
-	// erase case3
-	void erase_case_sibling_other_side_child_red(
-		node_base_p parent, node_base_p sibling, bool sibling_is_right_child ) {
-		node_base_p sibling_child;
-		sibling->color = BLACK;
-		if ( sibling_is_right_child ) {
-			sibling_child = sibling->left;
-			sibling_child->color = parent->color;
-			parent->color = BLACK;
-			rotate_right( sibling );
-			rotate_left( parent );
-		} else {
-			sibling_child = sibling->right;
-			sibling_child->color = parent->color;
-			parent->color = BLACK;
-			rotate_left( sibling );
-			rotate_right( parent );
-		}
-	}
-
-	// erase case4
-	void erase_case_sibling_same_side_child_red( node_base_p parent,
-												 node_base_p sibling,
-												 bool sibling_is_right_child ) {
-		sibling->color = parent->color;
-		parent->color = BLACK;
-		if ( sibling_is_right_child ) {
-			sibling->right->color = BLACK;
-			rotate_left( parent );
-		} else {
-			sibling->left->color = BLACK;
-			rotate_right( parent );
 		}
 	}
 
@@ -746,6 +615,104 @@ class rbtree {
 			}
 		}
 		return 1;
+	}
+
+	// erase node function.
+	void do_erase_cases( node_base_p parent, node_base_p sibling,
+						 node_base_p extra_black ) {
+		if ( extra_black ) {
+			if ( extra_black->color == RED ) {
+				extra_black->color = BLACK;
+				return;
+			}
+		}
+		// check case1
+		if ( sibling->color == RED ) {
+			sibling->color = BLACK;
+			parent->color = RED;
+			if ( parent->right == sibling ) {
+				sibling = sibling->left;
+				rotate_left( parent );
+			} else {
+				sibling = sibling->right;
+				rotate_right( parent );
+			}
+		}
+		// case 2, 3, 4
+		do_erase_sibling_is_black( parent, sibling, extra_black );
+	}
+
+	// case 2
+	void do_erase_sibling_is_black( node_base_p parent, node_base_p sibling,
+									node_base_p extra_black ) {
+		if ( parent->left == extra_black ) {
+			if ( sibling->left != NULL && sibling->left->color == RED ) {
+				return erase_case_sibling_other_side_child_red( parent, sibling,
+																true );
+			} else if ( is_null_node( sibling->right ) == false &&
+						sibling->right->color == RED ) {
+				return erase_case_sibling_same_side_child_red( parent, sibling,
+															   true );
+			}
+		} else {
+			if ( sibling->left != NULL && sibling->left->color == RED ) {
+				return erase_case_sibling_same_side_child_red( parent, sibling,
+															   false );
+			} else if ( is_null_node( sibling->right ) == false &&
+						sibling->right->color == RED ) {
+				return erase_case_sibling_other_side_child_red( parent, sibling,
+																false );
+			}
+		}
+		sibling->color = RED;
+		if ( parent->color == RED ) {
+			parent->color = BLACK;
+			return;
+		}
+		if ( parent == _root_node ) {
+			return;
+		}
+		node_base_p new_parent = parent->parent;
+		if ( is_right_child( parent ) ) {
+			do_erase_cases( new_parent, new_parent->left, parent );
+		} else {
+			do_erase_cases( new_parent, new_parent->right, parent );
+		}
+	}
+
+	// erase case3
+	void erase_case_sibling_other_side_child_red(
+		node_base_p parent, node_base_p sibling, bool sibling_is_right_child ) {
+		node_base_p sibling_child;
+		sibling->color = BLACK;
+		if ( sibling_is_right_child ) {
+			sibling_child = sibling->left;
+			sibling_child->color = parent->color;
+			parent->color = BLACK;
+			rotate_right( sibling );
+			rotate_left( parent );
+		} else {
+			sibling_child = sibling->right;
+			sibling_child->color = parent->color;
+			parent->color = BLACK;
+			rotate_left( sibling );
+			rotate_right( parent );
+		}
+	}
+
+	// erase case4
+	void erase_case_sibling_same_side_child_red( node_base_p parent,
+												 node_base_p sibling,
+												 bool sibling_is_right_child ) {
+		sibling->color = parent->color;
+		parent->color = BLACK;
+		if ( sibling_is_right_child ) {
+			sibling->right->color = BLACK;
+			rotate_left( parent );
+		} else {
+			sibling->left->color = BLACK;
+			rotate_right( parent );
+		}
 	}
 
 	void clear() {

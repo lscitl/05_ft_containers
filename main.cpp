@@ -14,6 +14,7 @@ namespace ft = std;
 #include "set.hpp"
 #endif
 
+#include <stdlib.h>
 #include <functional>
 
 #define MAX_RAM 4294967296
@@ -24,63 +25,6 @@ struct Buffer {
 };
 
 #define COUNT ( MAX_RAM / (int)sizeof( Buffer ) )
-
-// #define NAMESPACE ft
-// #include <map>
-// #include <set>
-// #include <chrono>
-// #include "../map.hpp"
-// #include "map_prelude.hpp"
-
-#define _make_pair ft::make_pair
-#define _map ft::map
-
-template <class T, class V, class C>
-void fillMap( ft::map<T, V, C>& mp, int num ) {
-	mp.insert( ft::make_pair( num + 16, 3 ) );
-	mp.insert( ft::make_pair( num + 8, 1 ) );
-	mp.insert( ft::make_pair( num + 23, 6 ) );
-	mp.insert( ft::make_pair( num + 7, 4 ) );
-	mp.insert( ft::make_pair( num + 19, 5 ) );
-	mp.insert( ft::make_pair( num + 29, 7 ) );
-	mp.insert( ft::make_pair( num + 41, 2 ) );
-	mp.insert( ft::make_pair( num + 4, 9 ) );
-	mp.insert( ft::make_pair( num + 11, 8 ) );
-}
-
-// void leak_check() {
-// 	system( "leaks containers" );
-// }
-
-#include <vector>
-
-// int main( void ) {
-// 	// atexit( &leak_check );
-// 	_map<int, int>   mp;
-// 	std::vector<int> v;
-// 	fillMap( mp );
-// 	for ( _map<int, int>::iterator it = mp.begin(); it != mp.end(); it++ ) {
-// 		v.push_back( it->first );
-// 	}
-// 	for ( _map<int, int>::iterator it = --mp.end(); it != mp.begin(); it-- ) {
-// 		v.push_back( it->first );
-// 	}
-// 	_map<int, int, std::greater<int> > mp1;
-// 	fillMap( mp1 );
-// 	v.push_back( mp1.begin()->first );
-// 	mp1.erase( 41 );
-// 	v.push_back( mp1.begin()->first );
-// 	mp1.erase( 29 );
-// 	v.push_back( mp1.begin()->first );
-// 	_map<int, int, std::greater<int> > mp2;
-// 	mp2.insert( _make_pair( 3, 3 ) );
-// 	v.push_back( mp2.begin()->first );
-// 	mp2.erase( 3 );
-// 	if ( mp2.begin() == mp2.end() ) v.push_back( 1 );
-// 	_map<int, int, std::plus<int> > mp3;
-// }
-
-// #define COUNT (MAX_RAM / (int)sizeof(Buffer))
 
 template <typename T>
 class MutantStack : public ft::stack<T> {
@@ -109,8 +53,10 @@ class MutantStack : public ft::stack<T> {
 
 #include <sys/time.h>
 #include <fstream>
-void map_test( ft::vector<size_t>& v, char* file_name );
+
 void vector_test( ft::vector<size_t>& v );
+void map_test( ft::vector<size_t>& v, char* file_name );
+void set_test( ft::vector<size_t>& v, char* file_name );
 
 int main( int argc, char** argv ) {
 	if ( argc != 3 ) {
@@ -179,6 +125,8 @@ int main( int argc, char** argv ) {
 	vector_test( time_recoder );
 	std::cout << "map test!" << std::endl;
 	map_test( time_recoder, argv[2] );
+	std::cout << "set test!" << std::endl;
+	set_test( time_recoder, argv[2] );
 
 	std::ofstream outfile( argv[2], std::ios_base::app );
 	if ( outfile.is_open() ) {
@@ -197,7 +145,7 @@ size_t get_time_diff( struct timeval& t1, struct timeval& t2 ) {
 		   ( t1.tv_sec * 1000 + t1.tv_usec / 1000 );
 }
 
-#define TEST_NUM 1000000
+#define TEST_NUM 5000000
 
 void vector_test( ft::vector<size_t>& v ) {
 	ft::vector<int> int_vec;
@@ -247,6 +195,32 @@ void vector_test( ft::vector<size_t>& v ) {
 	std::cout << "vector test 3 done!" << std::endl;
 }
 
+template <class T, class V, class C>
+void fillMap( ft::map<T, V, C>& mp, int num ) {
+	mp.insert( ft::make_pair( num + 16, 3 ) );
+	mp.insert( ft::make_pair( num + 8, 1 ) );
+	mp.insert( ft::make_pair( num + 23, 6 ) );
+	mp.insert( ft::make_pair( num + 7, 4 ) );
+	mp.insert( ft::make_pair( num + 19, 5 ) );
+	mp.insert( ft::make_pair( num + 29, 7 ) );
+	mp.insert( ft::make_pair( num + 41, 2 ) );
+	mp.insert( ft::make_pair( num + 4, 9 ) );
+	mp.insert( ft::make_pair( num + 11, 8 ) );
+}
+
+template <class T, class C>
+void fillSet( ft::set<T, C>& mp, int num ) {
+	mp.insert( num + 16 );
+	mp.insert( num + 8 );
+	mp.insert( num + 23 );
+	mp.insert( num + 7 );
+	mp.insert( num + 19 );
+	mp.insert( num + 29 );
+	mp.insert( num + 41 );
+	mp.insert( num + 4 );
+	mp.insert( num + 11 );
+}
+
 void map_test( ft::vector<size_t>& v, char* file_name ) {
 	ft::map<int, int>  int_map;
 	ft::pair<int, int> elem;
@@ -258,10 +232,6 @@ void map_test( ft::vector<size_t>& v, char* file_name ) {
 	gettimeofday( &t1, NULL );
 	for ( int i = 0; i < 5000; i++ ) {
 		fillMap( int_map, i * 50 );
-		// for ( ft::map<int, int>::iterator i = int_map.begin();
-		// 	  i != int_map.end(); ++i ) {
-		// 	int_map.erase( i->first );
-		// }
 		int_map.clear();
 	}
 	gettimeofday( &t2, NULL );
@@ -298,4 +268,51 @@ void map_test( ft::vector<size_t>& v, char* file_name ) {
 	gettimeofday( &t2, NULL );
 	v.push_back( get_time_diff( t1, t2 ) );
 	std::cout << "map test 3 done!" << std::endl;
+}
+
+void set_test( ft::vector<size_t>& v, char* file_name ) {
+	ft::set<int>       int_set;
+	ft::pair<int, int> elem;
+
+	struct timeval t1;
+	struct timeval t2;
+
+	int_set.clear();
+	gettimeofday( &t1, NULL );
+	for ( int i = 0; i < 50000; i++ ) {
+		fillSet( int_set, i * 50 );
+		int_set.clear();
+	}
+	gettimeofday( &t2, NULL );
+	v.push_back( get_time_diff( t1, t2 ) );
+	std::cout << "set test 1 done!" << std::endl;
+
+	int_set.clear();
+	gettimeofday( &t1, NULL );
+	for ( int i = 0; i < 50000; i++ ) {
+		fillSet( int_set, i * 50 );
+		int_set.erase( ++( ++int_set.begin() ), --( --int_set.end() ) );
+		int_set.clear();
+	}
+	gettimeofday( &t2, NULL );
+	v.push_back( get_time_diff( t1, t2 ) );
+	std::cout << "set test 2 done!" << std::endl;
+
+	int_set.clear();
+	gettimeofday( &t1, NULL );
+	for ( int i = 0; i < 20; i++ ) {
+		fillSet( int_set, i * 50 );
+	}
+
+	std::ofstream outfile( file_name, std::ios_base::app );
+	if ( outfile.is_open() ) {
+		for ( ft::set<int>::iterator it = int_set.begin(); it != int_set.end();
+			  ++it ) {
+			outfile << "key: " << *it << "\n";
+		}
+		outfile.close();
+	}
+	gettimeofday( &t2, NULL );
+	v.push_back( get_time_diff( t1, t2 ) );
+	std::cout << "set test 3 done!" << std::endl;
 }
