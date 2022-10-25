@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/25 11:42:17 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/25 12:51:29 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,7 @@ class rbtree {
 	}
 
 	void rotate_left( node_base_p target_node ) {
-		// if ( is_null_node( target_node ) == true ) {
-		// 	return;
-		// }
 		node_base_p r_child_node = target_node->right;
-		// if ( r_child_node == end_node_ptr() ) {
-		// 	return;
-		// }
 		node_base_p parent_node = target_node->parent;
 		node_base_p g_child_node = r_child_node->left;
 
@@ -100,13 +94,7 @@ class rbtree {
 	}
 
 	void rotate_right( node_base_p target_node ) {
-		// if ( is_null_node( target_node ) == true ) {
-		// 	return;
-		// }
 		node_base_p l_child_node = target_node->left;
-		// if ( l_child_node == end_node_ptr() ) {
-		// 	return;
-		// }
 		node_base_p parent_node = target_node->parent;
 		node_base_p g_child_node = l_child_node->right;
 

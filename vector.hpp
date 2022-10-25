@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/06 17:22:31 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/22 21:25:37 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/25 12:38:32 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class vector {
 	pointer        _end_cap;
 	allocator_type _alloc;
 
+   private:
 	void      vec_allocate( size_type n );
 	void      vec_reallocate( size_type n );
 	size_type recommand_size( size_type n ) const;
@@ -235,14 +236,18 @@ typename vector<T, Allocator>::const_reference vector<T, Allocator>::operator[](
 template <class T, class Allocator>
 typename vector<T, Allocator>::reference vector<T, Allocator>::at(
 	size_type n ) {
-	if ( n >= this->size() ) throw std::out_of_range( "vector: out of range" );
+	if ( n >= this->size() ) {
+		throw std::out_of_range( "vector: out of range" );
+	}
 	return _begin[n];
 }
 
 template <class T, class Allocator>
 typename vector<T, Allocator>::const_reference vector<T, Allocator>::at(
 	size_type n ) const {
-	if ( n >= this->size() ) throw std::out_of_range( "vector: out of range" );
+	if ( n >= this->size() ) {
+		throw std::out_of_range( "vector: out of range" );
+	}
 	return _begin[n];
 }
 
