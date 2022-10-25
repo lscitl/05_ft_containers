@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/22 20:20:49 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/23 18:41:17 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/25 11:59:03 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,17 +36,18 @@ class rbtree_iterator {
    public:
 	rbtree_iterator() : node( NULL ) {
 	}
-
 	rbtree_iterator( const iterator& x ) : node( x.node ) {
 	}
-
 	rbtree_iterator( const node_base_p node ) : node( node ) {
+	}
+	rbtree_iterator& operator=( const rbtree_iterator& iter ) {
+		this->node = iter.node;
+		return *this;
 	}
 
 	reference operator*() const {
 		return static_cast<node_p>( node )->value;
 	}
-
 	pointer operator->() const {
 		return &( operator*() );
 	}
@@ -55,18 +56,15 @@ class rbtree_iterator {
 		this->increment();
 		return *this;
 	}
-
 	rbtree_iterator operator++( int ) {
 		rbtree_iterator ret( *this );
 		++( *this );
 		return ret;
 	}
-
 	rbtree_iterator& operator--() {
 		this->decrement();
 		return *this;
 	}
-
 	rbtree_iterator operator--( int ) {
 		rbtree_iterator ret( *this );
 		--( *this );
@@ -84,35 +82,36 @@ class rbtree_iterator {
 				node = node->left;
 			}
 		} else {
-			node_base_p tmp = node->parent;
-			while ( node == tmp->right ) {
-				node = tmp;
-				tmp = tmp->parent;
+			node_base_p tmp_node = node->parent;
+			while ( node == tmp_node->right ) {
+				node = tmp_node;
+				tmp_node = tmp_node->parent;
 			}
-			if ( node->right != tmp ) {
-				node = tmp;
+			if ( node->right != tmp_node ) {
+				node = tmp_node;
 			}
 		}
 	}
 
 	void decrement() {
+		node_base_p tmp_node;
 		if ( node->left != NULL ) {
-			node_base_p begin = node;
+			tmp_node = node;
 			node = node->left;
 			while ( node->right != NULL ) {
 				node = node->right;
 			}
-			if ( begin == node ) {
-				node = begin->left;
+			if ( tmp_node == node ) {
+				node = tmp_node->left;
 			}
 		} else {
-			node_base_p tmp = node->parent;
-			while ( node == tmp->left ) {
-				node = tmp;
-				tmp = tmp->parent;
+			tmp_node = node->parent;
+			while ( node == tmp_node->left ) {
+				node = tmp_node;
+				tmp_node = tmp_node->parent;
 			}
-			if ( node->left != tmp ) {
-				node = tmp;
+			if ( node->left != tmp_node ) {
+				node = tmp_node;
 			}
 		}
 	}

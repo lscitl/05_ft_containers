@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/23 19:14:15 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/25 11:42:17 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,13 +71,13 @@ class rbtree {
 	}
 
 	void rotate_left( node_base_p target_node ) {
-		if ( is_null_node( target_node ) == true ) {
-			return;
-		}
+		// if ( is_null_node( target_node ) == true ) {
+		// 	return;
+		// }
 		node_base_p r_child_node = target_node->right;
-		if ( r_child_node == end_node_ptr() ) {
-			return;
-		}
+		// if ( r_child_node == end_node_ptr() ) {
+		// 	return;
+		// }
 		node_base_p parent_node = target_node->parent;
 		node_base_p g_child_node = r_child_node->left;
 
@@ -100,13 +100,13 @@ class rbtree {
 	}
 
 	void rotate_right( node_base_p target_node ) {
-		if ( is_null_node( target_node ) == true ) {
-			return;
-		}
+		// if ( is_null_node( target_node ) == true ) {
+		// 	return;
+		// }
 		node_base_p l_child_node = target_node->left;
-		if ( l_child_node == end_node_ptr() ) {
-			return;
-		}
+		// if ( l_child_node == end_node_ptr() ) {
+		// 	return;
+		// }
 		node_base_p parent_node = target_node->parent;
 		node_base_p g_child_node = l_child_node->right;
 
@@ -300,9 +300,7 @@ class rbtree {
 			__new_node.right = end_node_ptr();
 			_alloc.construct( static_cast<node_p>( new_node ), __new_node );
 
-			_root_node = new_node;
-			_begin_node = new_node;
-			__end_node.left = new_node;
+			_root_node = _begin_node = __end_node.left = new_node;
 			++_size;
 			return ft::make_pair( iterator( static_cast<node_p>( new_node ) ),
 								  true );
@@ -360,9 +358,7 @@ class rbtree {
 			__new_node.right = end_node_ptr();
 			_alloc.construct( static_cast<node_p>( new_node ), __new_node );
 
-			_root_node = new_node;
-			_begin_node = new_node;
-			__end_node.left = new_node;
+			_root_node = _begin_node = __end_node.left = new_node;
 			++_size;
 			return ft::make_pair( iterator( static_cast<node_p>( new_node ) ),
 								  true );
@@ -418,8 +414,7 @@ class rbtree {
 			if ( grand_parent != _root_node ) {
 				grand_parent->color = RED;
 			}
-			uncle->color = BLACK;
-			parent->color = BLACK;
+			uncle->color = parent->color = BLACK;
 			node_base_p gg_parent = grand_parent->parent;
 			if ( gg_parent == NULL || gg_parent->color == BLACK ) {
 				return true;
@@ -482,15 +477,14 @@ class rbtree {
 	size_type erase_from_node_ptr( const node_base_p& del_node ) {
 		node_base_p extra_black_parent = NULL;
 		node_base_p extra_black = NULL;
-		bool        del_node_color_is_black = del_node->color == BLACK;
 		node_base_p swap_node = NULL;
 		node_base_p parent = del_node->parent;
 		node_base_p left = del_node->left;
 		node_base_p right = del_node->right;
+		bool        del_node_color_is_black = ( del_node->color == BLACK );
 
 		// Two children node.
-		if ( del_node->left && del_node->right != NULL &&
-			 del_node->right != end_node_ptr() ) {
+		if ( left != NULL && is_null_node( right ) == false ) {
 			swap_node = node_base::maximum( left );
 			extra_black = swap_node->left;
 			if ( left != swap_node ) {
@@ -531,8 +525,7 @@ class rbtree {
 			// One right child node.
 			if ( left == NULL && is_null_node( right ) == false ) {
 				if ( del_node == _root_node ) {
-					_root_node = right;
-					_begin_node = right;
+					_root_node = _begin_node = right;
 					_root_node->color = BLACK;
 					del_node_color_is_black = false;
 				} else {
@@ -551,8 +544,7 @@ class rbtree {
 			// One left child node.
 			else if ( is_null_node( right ) == true && left != NULL ) {
 				if ( del_node == _root_node ) {
-					_root_node = left;
-					__end_node.left = left;
+					_root_node = __end_node.left = left;
 					left->right = end_node_ptr();
 					_root_node->color = BLACK;
 					del_node_color_is_black = false;
@@ -574,8 +566,7 @@ class rbtree {
 			else {
 				if ( del_node == _root_node ) {
 					_root_node = NULL;
-					_begin_node = end_node_ptr();
-					__end_node.left = end_node_ptr();
+					_begin_node = __end_node.left = end_node_ptr();
 					del_node_color_is_black = false;
 				} else if ( del_node == _begin_node ) {
 					_begin_node = parent;
@@ -721,8 +712,7 @@ class rbtree {
 		del_node( _root_node );
 		_size = 0;
 		_root_node = NULL;
-		_begin_node = end_node_ptr();
-		__end_node.left = end_node_ptr();
+		_begin_node = __end_node.left = end_node_ptr();
 	}
 
 	void swap( rbtree& x ) {
@@ -739,9 +729,8 @@ class rbtree {
 			x.__end_node.left->right = x.end_node_ptr();
 		} else {
 			x._root_node = NULL;
-			x._begin_node = x.end_node_ptr();
+			x._begin_node = x.__end_node.left = x.end_node_ptr();
 			x._size = 0;
-			x.__end_node.left = x.end_node_ptr();
 		}
 		if ( tmp_size != 0 ) {
 			_root_node = tmp_root;
@@ -751,9 +740,8 @@ class rbtree {
 			__end_node.left->right = this->end_node_ptr();
 		} else {
 			this->_root_node = NULL;
-			this->_begin_node = this->end_node_ptr();
+			this->_begin_node = this->__end_node.left = this->end_node_ptr();
 			this->_size = 0;
-			this->__end_node.left = this->end_node_ptr();
 		}
 	}
 

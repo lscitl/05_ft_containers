@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/22 20:20:43 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/22 20:20:46 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/25 11:23:24 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,19 +33,16 @@ class rbtree_node_base {
 	rbtree_node_base()
 		: parent( NULL ), right( NULL ), left( NULL ), color( RED ) {
 	}
-
 	rbtree_node_base( pointer parent, pointer right, pointer left,
 					  color_type color )
 		: parent( parent ), right( right ), left( left ), color( color ) {
 	}
-
 	rbtree_node_base( const rbtree_node_base& x )
 		: parent( x.parent ),
 		  right( x.right ),
 		  left( x.left ),
 		  color( x.color ) {
 	}
-
 	rbtree_node_base& operator=( const rbtree_node_base& x ) {
 		this->parent = x.parent;
 		this->right = x.right;
@@ -53,7 +50,6 @@ class rbtree_node_base {
 		this->color = x.color;
 		return *this;
 	}
-
 	~rbtree_node_base() {
 	}
 
@@ -63,7 +59,6 @@ class rbtree_node_base {
 		}
 		return x;
 	}
-
 	static pointer maximum( pointer x ) {
 		while ( x->right != NULL ) {
 			x = x->right;
@@ -84,6 +79,16 @@ class rbtree_node : public rbtree_node_base {
 	rbtree_node( const rbtree_node& node )
 		: rbtree_node_base( node.parent, node.right, node.left, node.color ),
 		  value( node.value ) {
+	}
+	rbtree_node& operator=( const rbtree_node& node ) {
+		this->parent = node.parent;
+		this->right = node.right;
+		this->left = node.left;
+		this->color = node.color;
+		this->value = node.value;
+		return *this;
+	}
+	~rbtree_node() {
 	}
 
    private:
