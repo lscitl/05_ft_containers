@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/25 12:51:29 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/25 12:57:11 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -598,7 +598,7 @@ class rbtree {
 	// erase node function.
 	void do_erase_cases( node_base_p parent, node_base_p sibling,
 						 node_base_p extra_black ) {
-		if ( extra_black ) {
+		if ( extra_black != NULL ) {
 			if ( extra_black->color == RED ) {
 				extra_black->color = BLACK;
 				return;
@@ -643,11 +643,8 @@ class rbtree {
 			}
 		}
 		sibling->color = RED;
-		if ( parent->color == RED ) {
+		if ( parent->color == RED || parent == _root_node ) {
 			parent->color = BLACK;
-			return;
-		}
-		if ( parent == _root_node ) {
 			return;
 		}
 		node_base_p new_parent = parent->parent;
