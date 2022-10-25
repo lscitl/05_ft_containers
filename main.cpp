@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <deque>
-#if 0  // CREATE A REAL STL EXAMPLE
+#if 1  // CREATE A REAL STL EXAMPLE
 #include <map>
 #include <set>
 #include <stack>
@@ -57,6 +57,19 @@ class MutantStack : public ft::stack<T> {
 void vector_test( ft::vector<size_t>& v );
 void map_test( ft::vector<size_t>& v, char* file_name );
 void set_test( ft::vector<size_t>& v, char* file_name );
+
+class Base {
+   public:
+	std::string str;
+	Base( std::string x ) {
+		this->str = x;
+	}
+	~Base() {
+	}
+
+   private:
+	Base();
+};
 
 int main( int argc, char** argv ) {
 	if ( argc != 3 ) {
@@ -136,6 +149,18 @@ int main( int argc, char** argv ) {
 			outfile << *it << "ms ";
 		}
 	}
+
+	ft::map<int, Base> base_map;
+	// Base               base;
+
+	base_map.insert( ft::make_pair( 1, Base( "test1" ) ) );
+	base_map.insert( ft::make_pair( 2, Base( "test2" ) ) );
+	base_map.insert( ft::make_pair( 3, Base( "test3" ) ) );
+	base_map.insert( ft::make_pair( 4, Base( "test4" ) ) );
+	std::cout << base_map.find( 1 )->second.str << std::endl;
+	std::cout << base_map.find( 2 )->second.str << std::endl;
+	std::cout << base_map.find( 3 )->second.str << std::endl;
+	std::cout << base_map.find( 4 )->second.str << std::endl;
 
 	return ( 0 );
 }
@@ -230,7 +255,7 @@ void map_test( ft::vector<size_t>& v, char* file_name ) {
 
 	int_map.clear();
 	gettimeofday( &t1, NULL );
-	for ( int i = 0; i < 5000; i++ ) {
+	for ( int i = 0; i < 50000; i++ ) {
 		fillMap( int_map, i * 50 );
 		int_map.clear();
 	}
@@ -240,7 +265,7 @@ void map_test( ft::vector<size_t>& v, char* file_name ) {
 
 	int_map.clear();
 	gettimeofday( &t1, NULL );
-	for ( int i = 0; i < 5000; i++ ) {
+	for ( int i = 0; i < 50000; i++ ) {
 		fillMap( int_map, i * 50 );
 		int_map.erase( ++( ++int_map.begin() ), --( --int_map.end() ) );
 		int_map.clear();
@@ -251,11 +276,9 @@ void map_test( ft::vector<size_t>& v, char* file_name ) {
 
 	int_map.clear();
 	gettimeofday( &t1, NULL );
-	fillMap( int_map, 0 );
-	fillMap( int_map, 50 );
-	fillMap( int_map, 100 );
-	fillMap( int_map, 150 );
-	fillMap( int_map, 200 );
+	for ( int i = 0; i < 20; i++ ) {
+		fillMap( int_map, i * 50 );
+	}
 
 	std::ofstream outfile( file_name, std::ios_base::app );
 	if ( outfile.is_open() ) {
