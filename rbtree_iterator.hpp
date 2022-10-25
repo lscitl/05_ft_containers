@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/22 20:20:49 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/25 11:59:03 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/26 00:10:45 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,9 +75,6 @@ class rbtree_iterator {
 	void increment() {
 		if ( node->right != NULL ) {
 			node = node->right;
-			if ( node->parent == NULL ) {
-				return;
-			}
 			while ( node->left != NULL ) {
 				node = node->left;
 			}
@@ -94,18 +91,13 @@ class rbtree_iterator {
 	}
 
 	void decrement() {
-		node_base_p tmp_node;
 		if ( node->left != NULL ) {
-			tmp_node = node;
 			node = node->left;
 			while ( node->right != NULL ) {
 				node = node->right;
 			}
-			if ( tmp_node == node ) {
-				node = tmp_node->left;
-			}
 		} else {
-			tmp_node = node->parent;
+			node_base_p tmp_node = node->parent;
 			while ( node == tmp_node->left ) {
 				node = tmp_node;
 				tmp_node = tmp_node->parent;
