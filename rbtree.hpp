@@ -6,7 +6,7 @@
 /*   By: seseo <seseo@student.42seoul.kr>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/26 16:51:25 by seseo             #+#    #+#             */
-/*   Updated: 2022/10/26 00:19:51 by seseo            ###   ########.fr       */
+/*   Updated: 2022/10/26 22:18:51 by seseo            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ class rbtree {
 		node_base_p parent_node = target_node->parent;
 		node_base_p g_child_node = r_child_node->left;
 
-		if ( parent_node != NULL ) {
+		if ( target_node != _root_node ) {
 			if ( is_right_child( target_node ) ) {
 				parent_node->right = r_child_node;
 			} else {
@@ -99,7 +99,7 @@ class rbtree {
 		node_base_p parent_node = target_node->parent;
 		node_base_p g_child_node = l_child_node->right;
 
-		if ( parent_node != NULL ) {
+		if ( target_node != _root_node ) {
 			if ( is_right_child( target_node ) ) {
 				parent_node->right = l_child_node;
 			} else {
@@ -243,7 +243,7 @@ class rbtree {
 										   const key_type& key ) const {
 		node_base_p cur = position.node;
 		node_base_p parent = position.node;
-		if ( position.node != NULL ) {
+		if ( position.node != NULL && position.node != end_node_ptr() ) {
 			if ( _comp( key, get_node_value( cur ) ) ) {
 				cur = cur->left;
 			} else {
@@ -307,10 +307,6 @@ class rbtree {
 			}
 			parent_node->left = new_node;
 		} else {
-			if ( parent_node->right == end_node_ptr() ) {
-				__end_node.left = new_node;
-				new_node->right = end_node_ptr();
-			}
 			parent_node->right = new_node;
 		}
 		new_node->parent = parent_node;
@@ -351,13 +347,13 @@ class rbtree {
 
 		node_base_p parent_node = parent_node_iter.node;
 
-		if ( _comp( get_node_value( parent_node ), val ) ) {
-			parent_node->right = new_node;
-		} else {
+		if ( _comp( val, get_node_value( parent_node ) ) ) {
 			if ( _begin_node == parent_node ) {
 				_begin_node = new_node;
 			}
 			parent_node->left = new_node;
+		} else {
+			parent_node->right = new_node;
 		}
 		new_node->parent = parent_node;
 		if ( parent_node->color == BLACK ) {
@@ -381,7 +377,6 @@ class rbtree {
 											  node_base_p parent ) {
 		bool        parent_is_right = is_right_child( parent );
 		node_base_p uncle;
-
 		if ( parent_is_right ) {
 			uncle = grand_parent->left;
 		} else {
@@ -394,7 +389,7 @@ class rbtree {
 			}
 			uncle->color = parent->color = BLACK;
 			node_base_p gg_parent = grand_parent->parent;
-			if ( gg_parent == NULL || gg_parent->color == BLACK ) {
+			if ( gg_parent == end_node_ptr() || gg_parent->color == BLACK ) {
 				return true;
 			}
 			node_base_p ggg_parent = gg_parent->parent;
@@ -605,16 +600,17 @@ class rbtree {
 		do_erase_sibling_is_black( parent, sibling, extra_black );
 	}
 
-	// case 2
+	// case 2, 3, 4
 	void do_erase_sibling_is_black( node_base_p parent, node_base_p sibling,
 									node_base_p extra_black ) {
+		// check case 3, 4
 		if ( parent->left == extra_black ) {
 			if ( sibling->right && sibling->right->color == RED ) {
-				return erase_case_sibling_other_side_child_red( parent, sibling,
-																true );
-			} else if ( sibling->left && sibling->left->color == RED ) {
 				return erase_case_sibling_same_side_child_red( parent, sibling,
 															   true );
+			} else if ( sibling->left && sibling->left->color == RED ) {
+				return erase_case_sibling_other_side_child_red( parent, sibling,
+																true );
 			}
 		} else {
 			if ( sibling->left && sibling->left->color == RED ) {
@@ -625,6 +621,7 @@ class rbtree {
 																false );
 			}
 		}
+		// case 2
 		sibling->color = RED;
 		if ( parent->color == RED || parent == _root_node ) {
 			parent->color = BLACK;
@@ -687,17 +684,23 @@ class rbtree {
 		node_base_p tmp_begin = x._begin_node;
 		size_type   tmp_size = x._size;
 
-		x._root_node = x.__end_node.left = _root_node;
-		x._begin_node = _begin_node;
 		x._size = _size;
 		if ( _size != 0 ) {
+			x._root_node = x.__end_node.left = _root_node;
+			x._begin_node = _begin_node;
 			x._root_node->parent = x.end_node_ptr();
+		} else {
+			x._root_node = NULL;
+			x._begin_node = x.__end_node.left = x.end_node_ptr();
 		}
-		_root_node = __end_node.left = tmp_root;
-		_begin_node = tmp_begin;
 		_size = tmp_size;
-		if ( _root_node ) {
+		if ( tmp_size != 0 ) {
+			_root_node = __end_node.left = tmp_root;
+			_begin_node = tmp_begin;
 			_root_node->parent = end_node_ptr();
+		} else {
+			_root_node = NULL;
+			_begin_node = __end_node.left = end_node_ptr();
 		}
 	}
 
